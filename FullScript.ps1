@@ -328,13 +328,13 @@ function RemoveBadDevices {
 
 function AppUpdate {
 	
-	$Script=invoke-webrequest -uri https://raw.githubusercontent.com/MicrosoftSavvy/Scripts/refs/heads/main/FullScript.ps1?token=GHSAT0AAAAAADE24724NRQPKLFV3FY2MSMI2B2QCYA
+	$Script=invoke-webrequest -uri https://raw.githubusercontent.com/MicrosoftSavvy/Released/refs/heads/main/FullScript.ps1
 	$DownloadScriptVer=(((($Script.rawcontent).split("`n") | Select-Object -skip 29) | Select-Object -first 1) -Replace '[^0-9.]','')
-	$ScriptRaw=($Script.rawcontent | Select-Object -skip 26)
+	$ScriptRaw=($Script.rawcontent).split("`n") | Select-Object -skip 26
 	if ($DownloadScriptVer -gt $CurrentScriptVer){
 		$CurrentStatus = "Downloading Update" 
 		if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
-		Out-File -FilePath $PSCommandPath -InputObject $ScriptRaw
+		Out-File -FilePath $PSCommandPath -InputObject $ScriptRaw -force -encoding utf8
 	}
 }
 
