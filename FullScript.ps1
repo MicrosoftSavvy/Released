@@ -1,7 +1,7 @@
 Set-ExecutionPolicy -executionpolicy bypass -scope Process -force
 $host.UI.RawUI.WindowTitle = "The Little Tech Helper Script"
 
-$CurrentScriptVer="1.1"
+$CurrentScriptVer="1.2"
 $Folder='c:\Repair'
 $MinutesBack=180
 $Time="03:00"
@@ -412,7 +412,7 @@ function PC-Rename {
 	if ($CBPCRST.checked -eq "True"){
 		Rename-Computer -ComputerName (Get-WmiObject win32_COMPUTERSYSTEM).Name -NewName (Get-WmiObject Win32_BIOS).serialnumber -force
 	} else {
-		Rename-Computer -ComputerName (Get-WmiObject win32_COMPUTERSYSTEM).Name -NewName $TXTPCR -Force
+		Rename-Computer -ComputerName (Get-WmiObject win32_COMPUTERSYSTEM).Name -NewName $TXTPCR.text -Force
 
 }
 }
