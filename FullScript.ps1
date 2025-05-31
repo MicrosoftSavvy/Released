@@ -65,7 +65,7 @@ $Spool="C:\Windows\System32\Spool"
 $Spooler="C:\Windows\System32\Spool\Printers"
 $Script=invoke-webrequest -uri https://raw.githubusercontent.com/MicrosoftSavvy/Released/refs/heads/main/FullScript.ps1
 $DownloadScriptVer=(((($Script.rawcontent).split("`n") | Select-Object -skip 29) | Select-Object -first 1) -Replace '[^0-9.]','')
-$ScriptRaw=($Script.rawcontent).split("`n") | Select-Object -skip 26
+$ScriptRaw=(($Script.rawcontent).split("`n")).replace("`r",'') | Select-Object -skip 26
 
 if(!(test-path $Folder)){New-Item -Path $Folder -ItemType "directory"}
 
@@ -777,4 +777,5 @@ GUI #
 Stop-Transcript
 
 #powershell -executionpolicy bypass -file d:\scripts\FullScript.ps1
+
 
