@@ -48,7 +48,6 @@ $ApplicationLog=$Folder+"\Application.log"
 $SecurityLog=$Folder+"\Security.log"
 $StartLogDate=(Get-date).addminutes(-$MinutesBack).tostring('yyyy-MM-dd HH:mm:ss')
 $CurrentDate=(Get-date).tostring('yyyy-MM-dd HH:mm:ss')
-#$Date=Get-date -format yyyy-MM-dd
 $hardwaretype=(Get-WmiObject -Class Win32_ComputerSystem -Property PCSystemType).PCSystemType
 $Users= get-childitem -directory -path "c:\users"; 
 $FUSFolders=@('c:\ESD','C:\Windows\SoftwareDistribution\Download','c:\ProgramData\Adobe\Temp','c:\$GetCurrent','c:\recovery','c:\windows10upgrade','C:\WINDOWS\SystemTemp\ScreenConnect') 
@@ -59,8 +58,6 @@ $NetworkLog=$Folder+"\Network.log"
 $TSTLog=$Folder+"\ScheduledTasks-Timed.log"
 $Network=(Get-NetConnectionProfile).Name
 $FormColors="Yellow","Blue","Red","Green","LightBlue"
-#$timer = New-Object System.Windows.Forms.Timer
-#$timer.Interval = 500  # Set interval to 500ms (0.5 seconds)
 $RunAfter=$Folder+"\Repair.ps1"
 $VSSLog=$Folder+"\VSS.log"
 $Global:VSSChangeLog = @()
@@ -743,11 +740,14 @@ function GUI {
 	if ($CBSpool.Checked) { Spooler }
 
 	$Status.items.add("Run Finished")
-	foreach ($FColor  in $FormColors) {	
-	$form.BackColor = [System.Drawing.Color]::$FColor 
-	Start-Sleep -Milliseconds 250
-	}
-	})
+	do{
+		$n=0
+		foreach ($FColor  in $FormColors) {	
+		$form.BackColor = [System.Drawing.Color]::$FColor 
+		Start-Sleep -Milliseconds 250
+		}
+	} while ($n -lt 1)
+		})
 
 	$form.Controls.Add($Run)
 	$form.Controls.Add($Clear)
