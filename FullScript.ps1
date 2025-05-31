@@ -740,13 +740,15 @@ function GUI {
 	if ($CBSpool.Checked) { Spooler }
 
 	$Status.items.add("Run Finished")
+	[System.Windows.Forms.Application]::DoEvents()
+	$n=0
 	do{
-		$n=0
+		$n=$n+1
 		foreach ($FColor  in $FormColors) {	
 		$form.BackColor = [System.Drawing.Color]::$FColor 
 		Start-Sleep -Milliseconds 250
 		}
-	} while ($n -lt 1)
+	} while ($n -lt 5)
 		})
 
 	$form.Controls.Add($Run)
