@@ -336,6 +336,9 @@ function AppUpdate {
 		if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 		$ScriptRaw | Out-File -FilePath $PSCommandPath -force -encoding utf8
 #		Out-File -FilePath $PSCommandPath -InputObject $ScriptRaw -force -encoding utf8
+		$form.close()
+
+		powershell -executionpolicy bypass -file $PSCommandPath
 
 	}
 }
