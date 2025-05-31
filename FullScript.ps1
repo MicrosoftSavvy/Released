@@ -1,5 +1,5 @@
 Set-ExecutionPolicy -executionpolicy bypass -scope Process -force
-$host.UI.RawUI.WindowTitle = "Windows Repair Tool for Tech Review"
+$host.UI.RawUI.WindowTitle = "The Little Tech Helper Script"
 
 $CurrentScriptVer="1.1"
 $Folder='c:\Repair'
@@ -335,11 +335,9 @@ function AppUpdate {
 		$CurrentStatus = "Downloading Update" 
 		if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 		$ScriptRaw | Out-File -FilePath $PSCommandPath -force -encoding utf8
-#		Out-File -FilePath $PSCommandPath -InputObject $ScriptRaw -force -encoding utf8
+		$form.dispose()
 		$form.close()
-
 		powershell -executionpolicy bypass -file $PSCommandPath
-
 	}
 }
 
@@ -546,7 +544,7 @@ function GUI {
 	$CBSpool = New-Object System.Windows.Forms.CheckBox
 	$TXTPCR = New-Object System.Windows.Forms.TextBox
 
-	$form.Text = "Little Tech Helper"
+	$form.Text = "The Little Tech Helper GUI"
 #	$form.Size = New-Object System.Drawing.Size(375, 225)
 	$form.Autosize = $True
 
