@@ -1,7 +1,7 @@
 Set-ExecutionPolicy -executionpolicy bypass -scope Process -force
-$host.UI.RawUI.WindowTitle = "The Little Tech Helper Script"
+$host.UI.RawUI.WindowTitle = "The Little Tech Helper Script $CurrentScriptVer"
 
-$CurrentScriptVer="1.2"
+$CurrentScriptVer="1.3"
 $Folder='c:\Repair'
 $MinutesBack=180
 $Time="03:00"
@@ -57,12 +57,16 @@ $Global:TimeScheduledTasks
 $NetworkLog=$Folder+"\Network.log"
 $TSTLog=$Folder+"\ScheduledTasks-Timed.log"
 $Network=(Get-NetConnectionProfile).Name
-$FormColors="Yellow","Blue","Red","Green","LightBlue"
+$FormColors="Yellow","Blue","Red","Green","LightBlue", "DarkRed","LightGreen"
 $RunAfter=$Folder+"\Repair.ps1"
 $VSSLog=$Folder+"\VSS.log"
-$Global:VSSChangeLog = @()
+$Global:VSSChangeLog 
 $Spool="C:\Windows\System32\Spool"
 $Spooler="C:\Windows\System32\Spool\Printers"
+$Script=invoke-webrequest -uri https://raw.githubusercontent.com/MicrosoftSavvy/Released/refs/heads/main/FullScript.ps1
+$DownloadScriptVer=(((($Script.rawcontent).split("`n") | Select-Object -skip 29) | Select-Object -first 1) -Replace '[^0-9.]','')
+$ScriptRaw=($Script.rawcontent).split("`n") | Select-Object -skip 26
+
 if(!(test-path $Folder)){New-Item -Path $Folder -ItemType "directory"}
 
 function PendingReboot {
@@ -87,11 +91,11 @@ function Pull-Logs {
 	$DISMContents=get-content "c:\Windows\Logs\DISM\DISM.log"  | Where-Object { $_ -GE $StartLogDate} 
 	$DISMErr=$DISMContents | Select-String 'Err'
 	$DISMErrors=$DISMContents | Select-String -SimpleMatch 'ERROR'
-	if(!$DISMErr -eq $null){Out-File -FilePath $DISMLog -InputObject $DISMErrors.line} else {Out-File -FilePath $DISMLog -InputObject $DISMErr.line}
+	if(!$DISMErrors -eq $null){Out-File -FilePath $DISMLog -InputObject $DISMErr.line} else {Out-File -FilePath $DISMLog -InputObject $DISMErrors.line}
 	$CBSContents=get-content "c:\Windows\Logs\CBS\CBS.log"  | Where-Object { $_ -GE $StartLogDate} 
 	$CBSErr=$CBSContents | Select-String 'Err'
 	$CBSErrors=$CBSContents | Select-String -SimpleMatch 'ERROR'
-	if(!$CBSErr -eq $null){Out-File -FilePath $CBSLog -InputObject $CBSErrors.line} else {Out-File -FilePath $CBSLog -InputObject $CBSErr.line}
+	if(!$CBSErrors -eq $null){Out-File -FilePath $CBSLog -InputObject $CBSErr.line} else {Out-File -FilePath $CBSLog -InputObject $CBSErrors.line}
 	if (!($Global:DLLLog -eq $null)){Out-File -FilePath $DLLRLog -InputObject $Global:DLLLog}
 	if (!($Global:WinGet -eq $null)){Out-File -FilePath $WinGetLog -InputObject $Global:WinGet}
 	if (!($Global:NetRuntime -eq $null)){Out-File -FilePath $NRTLog -InputObject $Global:NetRuntime}
@@ -325,9 +329,6 @@ function RemoveBadDevices {
 
 function AppUpdate {
 	
-	$Script=invoke-webrequest -uri https://raw.githubusercontent.com/MicrosoftSavvy/Released/refs/heads/main/FullScript.ps1
-	$DownloadScriptVer=(((($Script.rawcontent).split("`n") | Select-Object -skip 29) | Select-Object -first 1) -Replace '[^0-9.]','')
-	$ScriptRaw=($Script.rawcontent).split("`n") | Select-Object -skip 26
 	if ($DownloadScriptVer -gt $CurrentScriptVer){
 		$CurrentStatus = "Downloading Update" 
 		if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
@@ -755,7 +756,14 @@ function GUI {
 	$form.Controls.Add($Clear)
 	$form.Controls.Add($Update)
 	$form.Controls.Add($Exit)
+
+	if ($DownloadScriptVer -gt $CurrentScriptVer){
+		$CurrentStatus = "Update Available" 
+		if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
+	}
 	
+
+
 	$Status.Location = New-Object System.Drawing.Point(10, 220)
 	$Status.Size = New-Object System.Drawing.Size(315, 100)
 	$form.Controls.Add($Status)
