@@ -334,7 +334,9 @@ function AppUpdate {
 	if ($DownloadScriptVer -gt $CurrentScriptVer){
 		$CurrentStatus = "Downloading Update" 
 		if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
-		Out-File -FilePath $PSCommandPath -InputObject $ScriptRaw -force -encoding utf8
+		$ScriptRaw | Out-File -FilePath $PSCommandPath -force -encoding utf8
+#		Out-File -FilePath $PSCommandPath -InputObject $ScriptRaw -force -encoding utf8
+
 	}
 }
 
