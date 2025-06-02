@@ -1,7 +1,7 @@
 Set-ExecutionPolicy -executionpolicy bypass -scope Process -force
 $host.UI.RawUI.WindowTitle = "The Little Tech Helper Script $CurrentScriptVer"
 
-$CurrentScriptVer="1.4"
+$CurrentScriptVer="1.0.4"
 $Folder='c:\Repair'
 $MinutesBack=180
 $Time="03:00"
@@ -778,4 +778,5 @@ GUI #
 Stop-Transcript
 
 #powershell -executionpolicy bypass -file d:\scripts\FullScript.ps1
+
 
