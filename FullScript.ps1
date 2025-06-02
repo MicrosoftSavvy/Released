@@ -42,7 +42,7 @@ $Global:NetRuntime
 $NRTLog=$Folder+"\Runtime.log"
 $WinGetLog=$Folder+"\AppUpdate.log"
 #$RTLinks='https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170'
-$Runtimes='https://aka.ms/vs/17/release/vc_redist.x86.exe','https://aka.ms/vs/17/release/vc_redist.x64.exe','https://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/VSU_4/vcredist_x86.exe','https://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/VSU_4/vcredist_x64.exe'
+$Runtimes='https://aka.ms/vs/17/release/vc_redist.x86.exe','https://aka.ms/vs/17/release/vc_redist.x64.exe','https://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/VSU_4/vcredist_x86.exe','https://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/VSU_4/vcredist_x64.exe','https://download.microsoft.com/download/4/b/2/cd00d4ed-ebdd-49ee-8a33-eabc3d1030e3/NDP481-Web.exe'
 $SystemLog=$Folder+"\System.log"
 $ApplicationLog=$Folder+"\Application.log"
 $SecurityLog=$Folder+"\Security.log"
@@ -288,7 +288,7 @@ function Runtimes {
 		$RtFN = ($Folder + '\' + (($Rt.replace('/',' ')).split() | Where-Object {$_ -like "*.exe"}))
 		[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 		((New-Object System.Net.WebClient).DownloadFile($Rt,$RtFN))
-		start-process -filepath $RtFN -ArgumentList "-silent","-norestart"
+		start-process -filepath $RtFN -ArgumentList "-Quiet","-norestart"
 	}
 	$n=5
 	do {
@@ -777,5 +777,6 @@ GUI #
 Stop-Transcript
 
 #powershell -executionpolicy bypass -file d:\scripts\FullScript.ps1
+
 
 
