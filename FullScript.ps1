@@ -1,5 +1,5 @@
 Set-ExecutionPolicy -executionpolicy bypass -scope Process -force
-$host.UI.RawUI.WindowTitle = "The Little Tech Helper Script $CurrentScriptVer"
+$host.UI.RawUI.WindowTitle = "The Little Helper Script $CurrentScriptVer"
 
 $CurrentScriptVer="1.0.4"
 $Folder='c:\Repair'
@@ -542,7 +542,7 @@ function GUI {
 	$CBSpool = New-Object System.Windows.Forms.CheckBox
 	$TXTPCR = New-Object System.Windows.Forms.TextBox
 
-	$form.Text = "The Little Tech Helper GUI  $CurrentScriptVer"
+	$form.Text = "The Little Helper GUI $CurrentScriptVer"
 #	$form.Size = New-Object System.Drawing.Size(375, 225)
 	$form.Autosize = $True
 
@@ -778,5 +778,3 @@ GUI #
 Stop-Transcript
 
 #powershell -executionpolicy bypass -file d:\scripts\FullScript.ps1
-
-
