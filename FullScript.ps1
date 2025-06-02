@@ -288,7 +288,7 @@ function Runtimes {
 		$RtFN = ($Folder + '\' + (($Rt.replace('/',' ')).split() | Where-Object {$_ -like "*.exe"}))
 		[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 		((New-Object System.Net.WebClient).DownloadFile($Rt,$RtFN))
-		start-process -filepath $RtFN -ArgumentList "-silent","-norestart"
+		start-process -filepath $RtFN -ArgumentList "-quiet","-norestart"
 	}
 	$n=5
 	do {
@@ -778,6 +778,4 @@ GUI #
 Stop-Transcript
 
 #powershell -executionpolicy bypass -file d:\scripts\FullScript.ps1
-
-
 
