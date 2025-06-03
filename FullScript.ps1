@@ -1,7 +1,7 @@
 Set-ExecutionPolicy -executionpolicy bypass -scope Process -force
 $host.UI.RawUI.WindowTitle = "The Little Helper Script $CurrentScriptVer"
 
-$CurrentScriptVer="1.0.4"
+$CurrentScriptVer="1.0.6"
 $Folder='c:\Repair'
 $MinutesBack=180
 $Time="03:00"
@@ -195,7 +195,7 @@ function CleanUp {
 	$CurrentStatus = "Cleaning up downloaded system files" 
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 	[System.Windows.Forms.Application]::DoEvents()
-	Remove-Item -Path $Folder\*.esd, $Folder\*.wim, $Folder\*.exe, $Folder\*.ps1
+	Remove-Item -Path $Folder\*.esd, $Folder\*.wim, $Folder\*.exe, $Folder\*.ps1, $Folder\*.txt
 }
 
 function RunSFC {
@@ -407,12 +407,92 @@ function PrivateNetwork {
 }
 
 function PC-Rename {
+	$CurrentStatus = "Renaming PC" 
+	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
+	[System.Windows.Forms.Application]::DoEvents()
+
 	if ($CBPCRST.checked -eq "True"){
 		Rename-Computer -ComputerName (Get-WmiObject win32_COMPUTERSYSTEM).Name -NewName (Get-WmiObject Win32_BIOS).serialnumber -force
 	} else {
 		Rename-Computer -ComputerName (Get-WmiObject win32_COMPUTERSYSTEM).Name -NewName $TXTPCR.text -Force
 
 }
+}
+
+function RemoveDeviceGroup {
+
+	$CurrentStatus = "Removing All Drivers for " + $DDDevices.Text 
+	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
+	[System.Windows.Forms.Application]::DoEvents()
+	
+	$DeviceClass=$DDDevices.Text
+	$Directory=$Folder + "\DriverExport"
+	New-Item -Path $Directory -ItemType Directory
+	$OEMList = (gwmi win32_PnPSignedDriver | ? DeviceClass -eq $DeviceClass | Select InfName)
+	$MediaList = (gwmi win32_PnPSignedDriver | ? DeviceClass -eq $DeviceClass | Select DeviceID)
+	$MediaDevice = $Folder + "\MediaDevicesRemoved.log"
+	$MediaDeviceList = $Folder + "\MDL.txt"
+	$LIST = $Folder + "\RemovedFiles.log"
+	$LISTFULL = $Directory + "\listfull.txt"
+	PNPUTIL /export-driver * $Directory
+	write-output $MediaList > $MediaDevice
+	(Get-Content $MediaDevice | Select-Object -Skip 3) | Select-Object -SkipLast 2 | Set-Content $MediaDeviceList
+	(Get-Content -path $MediaDevice) -Replace(" ","") | out-file $MediaDeviceList
+
+	foreach($DEVID in [System.IO.File]::ReadLines($MediaDeviceList)){
+	PNPUTIL /disable-device "$DEVID"
+	pnputil /remove-device "$DEVID"
+	}
+
+	write-output $OEMList > $LISTFULL
+	(Get-Content $LISTFULL | Select-Object -Skip 3) | Select-Object -SkipLast 2 | Set-Content $LIST
+	(Get-Content -path $LIST) -Replace(" ","") | out-file $LIST
+
+	foreach($File in [System.IO.File]::ReadLines("$Folder\RemovedDevices.log")){
+	PNPUTIL /delete-driver $File
+	}
+}
+
+function EnablePowerOptions {
+
+	$powerSettingTable = Get-WmiObject -Namespace root\cimv2\power -Class Win32_PowerSetting
+	$powerSettingInSubgroubTable = Get-WmiObject -Namespace root\cimv2\power -Class Win32_PowerSettingInSubgroup
+
+	Get-WmiObject -Namespace root\cimv2\power -Class Win32_PowerSettingCapabilities | ForEach-Object {
+		$tmp = $_.ManagedElement
+		$tmp = $tmp.Remove(0, $tmp.LastIndexOf('{') + 1)
+		$tmp = $tmp.Remove($tmp.LastIndexOf('}'))
+		$guid = $tmp
+		$s = ($powerSettingInSubgroubTable | Where-Object PartComponent -Match "$guid")
+		if (!$s) {
+		return
+		}
+		$tmp = $s.GroupComponent
+		$tmp = $tmp.Remove(0, $tmp.LastIndexOf('{') + 1)
+		$tmp = $tmp.Remove($tmp.LastIndexOf('}'))
+		$groupguid = $tmp
+		$s = ($powerSettingTable | Where-Object InstanceID -Match "$guid")
+		$descr = [string]::Format("# {0} enabled", $s.ElementName)
+		Write-Output $descr
+		$keyPath = "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Power\PowerSettings\$groupguid\$guid"
+		$valueName = "Attributes"
+		$outFile = $Folder + '\OriginalPower.reg'
+		$tempFile = New-TemporaryFile
+		$null = reg.exe export $keyPath $tempFile /y
+		$null = (Get-Content -Raw $tempFile) -match '(?s)^(.+?\])\r\n(.+?)\r\n(?:\r\n|\z)'
+		Remove-Item $tempFile
+		$headerLinesBlock = $Matches[1]
+		$valueLinesBlock = $Matches[2]
+		if ($valueLinesBlock -notmatch "(?sm)^`"$valueName`"=.+?(?=(\r\n\S|\z))") {
+		#  throw "Value name not found: $valueName"
+	}
+	$valueDataPair = $Matches[0]
+	$headerLinesBlock, $valueDataPair | out-file -Encoding Unicode $outFile -append
+	Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Power\PowerSettings\$groupguid\$guid" -Name "Attributes" -Value 00000002 -Type DWORD
+  }
+
+	
+	
 }
 
 function FixTime {
@@ -540,7 +620,12 @@ function GUI {
 	$CBPCRST = New-Object System.Windows.Forms.CheckBox
 	$CBVSS = New-Object System.Windows.Forms.CheckBox
 	$CBSpool = New-Object System.Windows.Forms.CheckBox
+	$CBDevices = New-Object System.Windows.Forms.CheckBox
+	$CBEPO = New-Object System.Windows.Forms.CheckBox
+
+
 	$TXTPCR = New-Object System.Windows.Forms.TextBox
+	$DDDevices = New-Object System.Windows.Forms.ComboBox
 
 	$form.Text = "The Little Helper GUI $CurrentScriptVer"
 #	$form.Size = New-Object System.Drawing.Size(375, 225)
@@ -655,6 +740,25 @@ function GUI {
 	$form.Controls.Add($CBPCRST)	
 	$CBPCRST.Enabled=$False
 
+	$CBEPO.Text = "Enable All Power Options"
+	$CBEPO.Location = New-Object System.Drawing.Point(10, 190)
+	$CBEPO.Autosize = $True
+	$CBEPO.checked = $False
+	$form.Controls.Add($CBEPO)
+
+	$CBDevices.Text = "Remove All Devices Of"
+	$CBDevices.Location = New-Object System.Drawing.Point(10, 210)
+	$CBDevices.Autosize = $True
+	$CBDevices.checked = $False
+	$form.Controls.Add($CBDevices)	
+	
+	@('AUDIOENDPOINT','BATTERY','BIOMETRIC','BLUETOOTH','CAMERA','DISKDRIVE','DISPLAY','FIRMWARE','HIDCLASS','KEYBOARD','MEDIA','MONITOR','MOUSE','NET','PRINTER','PRINTQUEUE','PROCESSOR','PROSHIELDPLUSDEVICE','SCSIADAPTER','SECURITYDEVICES','SOFTWARECOMPONENT','SOFTWAREDEVICE','SYSTEM','UCM','USB','VOLUME','VOLUMESNAPSHOT') | ForEach-Object {[void] $DDDevices.Items.Add($_)}
+	$DDDevices.width=170
+	$DDDevices.autosize = $true
+	$DDDevices.location = New-Object System.Drawing.Point(160,210)
+	$DDDevices.Enabled=$False
+	$form.Controls.Add($DDDevices)
+
 	$TXTPCR.Location = New-Object System.Drawing.Point(160,170)
 	$TXTPCR.Size = New-Object System.Drawing.Size(75,20)
 	$TXTPCR.Multiline = $false
@@ -662,7 +766,6 @@ function GUI {
 	$form.Controls.Add($TXTPCR)        
 	$TXTPCR.Enabled=$False
 
-		
 	$CBPCR.Add_CheckedChanged({
     if ($CBPCR.Checked) {
 	$CBPCRST.Enabled=$True
@@ -681,8 +784,17 @@ function GUI {
 	}
 })
 
+	$CBDevices.Add_CheckedChanged({
+    if ($CBDevices.Checked) {
+	$DDDevices.Enabled=$True
+    } else {
+	$DDDevices.Enabled=$False
+	}
+})
+
+
 	$Clear.Text = "Clear"
-	$Clear.Location = New-Object System.Drawing.Point(90, 195)
+	$Clear.Location = New-Object System.Drawing.Point(90, 235)
 	$Clear.Add_Click({
 	($CBNetwork.Checked) = $false
 	($CBLogs.Checked) = $false
@@ -702,24 +814,27 @@ function GUI {
 	($CBPCR.Checked) = $false
 	($CBVSS.Checked) = $false
 	($CBSpool.checked) = $false
+	($CBDevices.Checked) = $false
+	($CBEPO.Checked) = $false
+
 	})
 
 
 	$Update.Text = "Update"
-	$Update.Location = New-Object System.Drawing.Point(170, 195)
+	$Update.Location = New-Object System.Drawing.Point(170, 235)
 	$Update.Add_Click({
     	AppUpdate
 	})
 
 
 	$Exit.Text = "Exit"
-	$Exit.Location = New-Object System.Drawing.Point(250, 195)
+	$Exit.Location = New-Object System.Drawing.Point(250, 235)
 	$Exit.Add_Click({
     	$form.Close()
 	})
 
 	$Run.Text = "Run"
-	$Run.Location = New-Object System.Drawing.Point(10, 195)
+	$Run.Location = New-Object System.Drawing.Point(10, 235)
 	$Run.Add_Click({
 	if ($CBNetwork.Checked) { PrivateNetwork }
 	if ($CBDLLs.Checked) { ReRegDLLs }
@@ -739,6 +854,8 @@ function GUI {
 	if ($CBPCR.Checked) { PC-Rename }
 	if ($CBVSS.Checked) { VSS }
 	if ($CBSpool.Checked) { Spooler }
+	if ($CBDevices.Checked) { RemoveDeviceGroup }
+	if ($CBEPO.Checked) { EnablePowerOptions }
 
 	$Status.items.add("Run Finished")
 	[System.Windows.Forms.Application]::DoEvents()
@@ -762,10 +879,8 @@ function GUI {
 		$CurrentStatus = "Update Available" 
 		if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 	}
-	
 
-
-	$Status.Location = New-Object System.Drawing.Point(10, 220)
+	$Status.Location = New-Object System.Drawing.Point(10, 270)
 	$Status.Size = New-Object System.Drawing.Size(315, 100)
 	$form.Controls.Add($Status)
 	[void]$form.ShowDialog()
@@ -778,3 +893,4 @@ GUI #
 Stop-Transcript
 
 #Written by MicrosoftSavvy
+
