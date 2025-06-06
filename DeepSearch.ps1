@@ -329,10 +329,3 @@ foreach ($CurrentIP in $IPList) {
 
 	} else {write-host $CurrentIP is not pingable}
 }
-
-
-
-
-
-
-#Register-PSRepository -Name 'myRepositoryName' -SourceLocation 'C:\MyExampleFolder'
