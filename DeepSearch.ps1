@@ -311,14 +311,14 @@ $IPList = foreach ($CurrentList in $FullList){Get-IpRange -Subnets $CurrentList}
 foreach ($CurrentIP in $IPList) {
 	if (Test-Connection $CurrentIP -count 1 -quiet){
 		$IPPath="\\$($CurrentIP)"
-		$Shares=(get-WmiObject -class Win32_Share -computer $CurrentIP -ErrorAction "SilentlyContinue").name 
+		$Shares=(net view \\$CurrentIP /all 2>&1 | select-object -Skip 7 |  ?{$_ -match 'disk*'} | %{$_ -match '^(.+?)\s+Disk*'|out-null;$matches[1]})  #get-WmiObject -class Win32_Share -computer $CurrentIP -ErrorAction "SilentlyContinue").name 
 		if ($Shares -ne $null){
 			foreach ($Share in $Shares) {
 			$NSearch=$IPPath + "\" + $Share + "\" + $FileName
 			$NetworkPath=$IPPath + "\" + $Share
 			#$NSearch
 			write-host Searching and Sorting $NetworkPath
-			if (test-path $NetworkPath){
+			if (test-path $NetworkPath -ErrorAction "SilentlyContinue"){
 				$List=get-childitem -path $NSearch -recurse -ErrorAction "SilentlyContinue"
 				$FullList = $List | Select-Object LastWriteTime, Length, FullName  | Sort-Object -Property LastWriteTime -Descending | format-table -autosize -wrap
 				$FullList | out-file $SearchFile -Append -force -encoding utf8
