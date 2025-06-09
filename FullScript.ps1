@@ -1106,7 +1106,7 @@ function GUI {
 		$n=$n+1
 		foreach ($FColor  in $FormColors) {	
 		$form.BackColor = [System.Drawing.Color]::$FColor 
-		Start-Sleep -Milliseconds 250
+		Start-Sleep -Milliseconds 50
 		}
 	} while ($n -lt 5)
 		})
