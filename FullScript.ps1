@@ -1,7 +1,7 @@
 Set-ExecutionPolicy -executionpolicy bypass -scope Process -force
 $host.UI.RawUI.WindowTitle = "The Little Helper Script $CurrentScriptVer"
 
-$CurrentScriptVer="1.0.6"
+$CurrentScriptVer="1.0.7"
 $Folder='c:\Repair'
 $MinutesBack=180
 $Time="03:00"
@@ -66,7 +66,6 @@ $Spooler="C:\Windows\System32\Spool\Printers"
 $Script=invoke-webrequest -uri https://raw.githubusercontent.com/MicrosoftSavvy/Released/refs/heads/main/FullScript.ps1
 $DownloadScriptVer=(((($Script.rawcontent).split("`n") | Select-Object -skip 29) | Select-Object -first 1) -Replace '[^0-9.]','')
 $ScriptRaw=(($Script.rawcontent).split("`n")).replace("`r",'') | Select-Object -skip 26
-
 if(!(test-path $Folder)){New-Item -Path $Folder -ItemType "directory"}
 
 function PendingReboot {
@@ -427,7 +426,7 @@ function RemoveDeviceGroup {
 	
 	$DeviceClass=$DDDevices.Text
 	$Directory=$Folder + "\DriverExport"
-	New-Item -Path $Directory -ItemType Directory
+	if(!(test-path $Directory)){New-Item -Path $Directory -ItemType "directory"}
 	$OEMList = (gwmi win32_PnPSignedDriver | ? DeviceClass -eq $DeviceClass | Select InfName)
 	$MediaList = (gwmi win32_PnPSignedDriver | ? DeviceClass -eq $DeviceClass | Select DeviceID)
 	$MediaDevice = $Folder + "\MediaDevicesRemoved.log"
@@ -446,9 +445,9 @@ function RemoveDeviceGroup {
 
 	write-output $OEMList > $LISTFULL
 	(Get-Content $LISTFULL | Select-Object -Skip 3) | Select-Object -SkipLast 2 | Set-Content $LIST
-	(Get-Content -path $LIST) -Replace(" ","") | out-file $LIST
+	(Get-Content -path $LIST) -Replace(" ","") | out-file $LIST  -force -encoding utf8
 
-	foreach($File in [System.IO.File]::ReadLines("$Folder\RemovedDevices.log")){
+	foreach($File in [System.IO.File]::ReadLines("$Folder\RemovedFiles.log")){
 	PNPUTIL /delete-driver $File
 	}
 }
@@ -588,6 +587,217 @@ function AfterStartUp {
 	CleanUp
 }
 
+function ServiceOwner {
+
+#$ServiceToChange="BrokerInfrastructure"
+$ServiceToChange=$ServiceList.text
+$Service = Get-Service -Name $ServiceToChange
+$acl = Get-Acl -Path "HKLM:\SYSTEM\CurrentControlSet\Services\$($service.Name)"
+$newOwner = New-Object System.Security.Principal.NTAccount("Administrators")
+$acl.SetOwner($newOwner)
+Set-Acl -Path "HKLM:\SYSTEM\CurrentControlSet\Services\$($service.Name)" -AclObject $acl
+
+ 
+
+$VarD=$null
+$VarS=$null
+$ResultsD=$null
+$ResultsS=$null
+#$Service=$ServiceList.text
+$AddPermissions="(A;;CCDCLCSWRPWPDTLORC;;;BA)"
+$VarAccount="BA"
+[string]$RawResults=sc.exe sdshow $Service
+$RegexPatternALL='(D:)(\(.*\))(S:)(\(.*\))|(S:)(\(.*\))|(D:)(\(.*\))'
+
+# Match 0 is the complete string
+# Match 1 is the D: label if both sections are present
+# Match 2 is the D: section permissions if both sections are present
+# Match 3 is the S: label if both sections are present
+# Match 4 is the S: section permissions if both sections are present
+# Match 5 is the S: label if only the S: section is present
+# Match 6 is the S: section permissions if only the S: section is present
+# Match 7 is the D: label if only the D: section is present
+# Match 8 is the D: section permissions if only the D: section is present
+
+$RawResults -match $RegexPatternALL | out-null
+#$Matches
+# Find the D: section
+if ($null -eq $matches[1]){
+    $VarD=$Matches[8]
+} else {
+    $VarD=$Matches[2]
+}
+
+#Find the S: section
+if ($null -eq $Matches[3]) {
+    $VarS=$Matches[6]
+} else {
+    $VarS=$Matches[4]
+}
+
+# Split the results into individual items then strip out the open and close parenthesis from all objects.
+if ($null -ne $VarD){
+    [array]$ResultsD=$VarD -split '\)\(' | foreach-object {$_ -replace "\(", ""} | foreach-object {$_ -replace "\)", ""}
+}
+if ($null -ne $VarS){
+    [array]$ResultsS=$VarS -split '\)\(' | foreach-object {$_ -replace "\(", ""} | foreach-object {$_ -replace "\)", ""}
+}
+
+write-output "`nD:"
+$ResultsD
+
+write-output "`nS:"
+$ResultsS
+
+# Build new SD permission string so to confirm if the values are parsed correctly.
+$ExistingPermissions=$null
+if ($null -ne $ResultsD){
+    # This is the first element in the array
+    $ExistingPermissions=$ExistingPermissions + "D:"
+    for ($i=0; $i -lt $ResultsD.count; $i++) {
+        $ExistingPermissions=$ExistingPermissions + "(" + $ResultsD[$i] + ")"
+    }
+}
+if ($null -ne $ResultsS){
+    $ExistingPermissions=$ExistingPermissions + "S:"
+    for ($i=0; $i -lt $ResultsS.count; $i++) {
+        $ExistingPermissions=$ExistingPermissions + "(" + $ResultsS[$i] + ")"
+    }
+}
+write-output "`nParsed permissions:"
+$ExistingPermissions
+write-output "`nOriginal permissions:"
+$RawResults.trim()
+# Compare the newly build results with the original results (trimming whitespace).
+# Only add the new permissions if we could properly build a string with the existing data which matched the original permission string.
+if ($ExistingPermissions -eq $RawResults.trim()) {
+    Write-Output "`nCorrectly identified existing permissions."
+    # Make sure that the permissions we are setting are not already in the existing permission string.
+#    if ($ExistingPermissions -notmatch $VarAccount){
+        write-output "`nBuilding new permissions string..."
+        $NewPermissions=$null
+        if ($null -ne $ResultsD){
+            # This is the first element in the array
+            $NewPermissions=$NewPermissions + "D:"
+            for ($i=0; $i -lt $ResultsD.count; $i++) {
+                $NewPermissions=$NewPermissions + "(" + $ResultsD[$i] + ")"
+            }
+            $NewPermissions=$NewPermissions + $AddPermissions
+        }
+        if ($null -ne $ResultsS){
+            $NewPermissions=$NewPermissions + "S:"
+            for ($i=0; $i -lt $ResultsS.count; $i++) {
+                $NewPermissions=$NewPermissions + "(" + $ResultsS[$i] + ")"
+            }
+        }
+        write-output "`nNew permissions string will be:"
+        $NewPermissions
+        $FixedService=sc.exe sdset $service $NewPermissions
+		
+$RawResults -match $RegexPatternALL | out-null
+#$Matches
+# Find the D: section
+if ($null -eq $matches[1]){
+    $VarD=$Matches[8]
+} else {
+    $VarD=$Matches[2]
+}
+
+#Find the S: section
+if ($null -eq $Matches[3]) {
+    $VarS=$Matches[6]
+} else {
+    $VarS=$Matches[4]
+}
+
+# Split the results into individual items then strip out the open and close parenthesis from all objects.
+if ($null -ne $VarD){
+    [array]$ResultsD=$VarD -split '\)\(' | foreach-object {$_ -replace "\(", ""} | foreach-object {$_ -replace "\)", ""}
+}
+if ($null -ne $VarS){
+    [array]$ResultsS=$VarS -split '\)\(' | foreach-object {$_ -replace "\(", ""} | foreach-object {$_ -replace "\)", ""}
+}
+
+write-output "`nD:"
+$ResultsD
+
+write-output "`nS:"
+$ResultsS
+
+# Build new SD permission string so to confirm if the values are parsed correctly.
+$ExistingPermissions=$null
+if ($null -ne $ResultsD){
+    # This is the first element in the array
+    $ExistingPermissions=$ExistingPermissions + "D:"
+    for ($i=0; $i -lt $ResultsD.count; $i++) {
+        $ExistingPermissions=$ExistingPermissions + "(" + $ResultsD[$i] + ")"
+    }
+}
+if ($null -ne $ResultsS){
+    $ExistingPermissions=$ExistingPermissions + "S:"
+    for ($i=0; $i -lt $ResultsS.count; $i++) {
+        $ExistingPermissions=$ExistingPermissions + "(" + $ResultsS[$i] + ")"
+    }
+}
+write-output "`nParsed permissions:"
+$ExistingPermissions
+write-output "`nOriginal permissions:"
+$RawResults.trim()
+# Compare the newly build results with the original results (trimming whitespace).
+# Only add the new permissions if we could properly build a string with the existing data which matched the original permission string.
+if ($ExistingPermissions -eq $RawResults.trim()) {
+    Write-Output "`nCorrectly identified existing permissions."
+    # Make sure that the permissions we are setting are not already in the existing permission string.
+#    if ($ExistingPermissions -notmatch $VarAccount){
+        write-output "`nBuilding new permissions string..."
+        $NewPermissions=$null
+        if ($null -ne $ResultsD){
+            # This is the first element in the array
+            $NewPermissions=$NewPermissions + "D:"
+            for ($i=0; $i -lt $ResultsD.count; $i++) {
+                $NewPermissions=$NewPermissions + "(" + $ResultsD[$i] + ")"
+            }
+            $NewPermissions=$NewPermissions + $AddPermissions
+        }
+        if ($null -ne $ResultsS){
+            $NewPermissions=$NewPermissions + "S:"
+            for ($i=0; $i -lt $ResultsS.count; $i++) {
+                $NewPermissions=$NewPermissions + "(" + $ResultsS[$i] + ")"
+            }
+        }
+        write-output "`nNew permissions string will be:"
+        $NewPermissions
+        $FixedService=sc.exe sdset $service $NewPermissions
+		if ($FixedService[2] -eq 'Access is Denied.'){
+			$PST2Download='https://download.sysinternals.com/files/PSTools.zip'
+			$PSTFiles=$env:temp + "\pstool.zip"
+			[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+			((New-Object System.Net.WebClient).DownloadFile($PST2Download,$PSTFiles))
+			Expand-Archive -Path $PSTFiles -DestinationPath $env:windir -ErrorAction SilentlyContinue
+			$ServiceFixedService=$env:windir + "\psexec.exe -s -h sc.exe sdset $service $NewPermissions"
+			$ServiceFixedService[5]
+		}
+#    } else {
+        write-output "Permissions for this account already exist. Please review."
+#    }
+
+} else {
+    write-output "`nUnable to properly parse the permission results. Please review."
+}
+
+#    } else {
+        write-output "Permissions for this account already exist. Please review."
+#    }
+
+} else {
+    write-output "`nUnable to properly parse the permission results. Please review."
+}
+}
+
+
+
+		
+		
 function GUI {
 	[reflection.assembly]::loadwithpartialname("System.Windows.Forms") | Out-Null
 	[reflection.assembly]::loadwithpartialname("System.Drawing") | Out-Null
@@ -622,14 +832,21 @@ function GUI {
 	$CBSpool = New-Object System.Windows.Forms.CheckBox
 	$CBDevices = New-Object System.Windows.Forms.CheckBox
 	$CBEPO = New-Object System.Windows.Forms.CheckBox
-
-
+	$CBServices = New-Object System.Windows.Forms.CheckBox
 	$TXTPCR = New-Object System.Windows.Forms.TextBox
 	$DDDevices = New-Object System.Windows.Forms.ComboBox
-
+	$ServiceList = New-Object System.Windows.Forms.ComboBox
+	
 	$form.Text = "The Little Helper GUI $CurrentScriptVer"
 #	$form.Size = New-Object System.Drawing.Size(375, 225)
 	$form.Autosize = $True
+
+	if ( -not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] 'Administrator')) {
+		$CurrentStatus = "Need to run with Administrator Rights" 
+		if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
+		[System.Windows.Forms.Application]::DoEvents()
+	} 
+
 
 	$CBCleanUp.Text = "Clean Up"
 	$CBCleanUp.Location = New-Object System.Drawing.Point(10, 10)
@@ -752,12 +969,26 @@ function GUI {
 	$CBDevices.checked = $False
 	$form.Controls.Add($CBDevices)	
 	
-	@('AUDIOENDPOINT','BATTERY','BIOMETRIC','BLUETOOTH','CAMERA','DISKDRIVE','DISPLAY','FIRMWARE','HIDCLASS','KEYBOARD','MEDIA','MONITOR','MOUSE','NET','PRINTER','PRINTQUEUE','PROCESSOR','PROSHIELDPLUSDEVICE','SCSIADAPTER','SECURITYDEVICES','SOFTWARECOMPONENT','SOFTWAREDEVICE','SYSTEM','UCM','USB','VOLUME','VOLUMESNAPSHOT') | ForEach-Object {[void] $DDDevices.Items.Add($_)}
+#	@('AUDIOENDPOINT','BATTERY','BIOMETRIC','BLUETOOTH','CAMERA','DISKDRIVE','DISPLAY','FIRMWARE','HIDCLASS','KEYBOARD','MEDIA','MONITOR','MOUSE','NET','PRINTER','PRINTQUEUE','PROCESSOR','PROSHIELDPLUSDEVICE','SCSIADAPTER','SECURITYDEVICES','SOFTWARECOMPONENT','SOFTWAREDEVICE','SYSTEM','UCM','USB','VOLUME','VOLUMESNAPSHOT') | ForEach-Object {[void] $DDDevices.Items.Add($_)}
+	@((gwmi win32_PnPSignedDriver).deviceclass | sort-object -unique) | ForEach-Object {[void] $DDDevices.Items.Add($_)}
 	$DDDevices.width=170
 	$DDDevices.autosize = $true
 	$DDDevices.location = New-Object System.Drawing.Point(160,210)
 	$DDDevices.Enabled=$False
 	$form.Controls.Add($DDDevices)
+
+	$CBServices.Text = "Reset Owner of Service"
+	$CBServices.Location = New-Object System.Drawing.Point(10, 230)
+	$CBServices.Autosize = $True
+	$CBServices.checked = $False
+	$form.Controls.Add($CBServices)	
+	
+	@((get-service).name) | ForEach-Object {[void] $ServiceList.Items.Add($_)}
+	$ServiceList.width=170
+	$ServiceList.autosize = $true
+	$ServiceList.location = New-Object System.Drawing.Point(160,230)
+	$ServiceList.Enabled=$False
+	$form.Controls.Add($ServiceList)
 
 	$TXTPCR.Location = New-Object System.Drawing.Point(160,170)
 	$TXTPCR.Size = New-Object System.Drawing.Size(75,20)
@@ -776,6 +1007,15 @@ function GUI {
 	}
 	})
 	
+	$CBServices.Add_CheckedChanged({
+    if ($CBServices.Checked) {
+	$ServiceList.Enabled=$True
+    } else {
+	$ServiceList.Enabled=$False
+	}
+	})
+
+
 	$CBPCRST.Add_CheckedChanged({
     if ($CBPCRST.Checked) {
 	$TXTPCR.Enabled=$False
@@ -794,7 +1034,7 @@ function GUI {
 
 
 	$Clear.Text = "Clear"
-	$Clear.Location = New-Object System.Drawing.Point(90, 235)
+	$Clear.Location = New-Object System.Drawing.Point(90, 255)
 	$Clear.Add_Click({
 	($CBNetwork.Checked) = $false
 	($CBLogs.Checked) = $false
@@ -816,25 +1056,26 @@ function GUI {
 	($CBSpool.checked) = $false
 	($CBDevices.Checked) = $false
 	($CBEPO.Checked) = $false
+	($CBServices.checked) = $false
 
 	})
 
 
 	$Update.Text = "Update"
-	$Update.Location = New-Object System.Drawing.Point(170, 235)
+	$Update.Location = New-Object System.Drawing.Point(170, 255)
 	$Update.Add_Click({
     	AppUpdate
 	})
 
 
 	$Exit.Text = "Exit"
-	$Exit.Location = New-Object System.Drawing.Point(250, 235)
+	$Exit.Location = New-Object System.Drawing.Point(250, 255)
 	$Exit.Add_Click({
     	$form.Close()
 	})
 
 	$Run.Text = "Run"
-	$Run.Location = New-Object System.Drawing.Point(10, 235)
+	$Run.Location = New-Object System.Drawing.Point(10, 255)
 	$Run.Add_Click({
 	if ($CBNetwork.Checked) { PrivateNetwork }
 	if ($CBDLLs.Checked) { ReRegDLLs }
@@ -856,6 +1097,9 @@ function GUI {
 	if ($CBSpool.Checked) { Spooler }
 	if ($CBDevices.Checked) { RemoveDeviceGroup }
 	if ($CBEPO.Checked) { EnablePowerOptions }
+	if ($CBServices.checked) { ServiceOwner }
+
+
 
 	$Status.items.add("Run Finished")
 	[System.Windows.Forms.Application]::DoEvents()
@@ -880,7 +1124,7 @@ function GUI {
 		if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 	}
 
-	$Status.Location = New-Object System.Drawing.Point(10, 270)
+	$Status.Location = New-Object System.Drawing.Point(10, 290)
 	$Status.Size = New-Object System.Drawing.Size(315, 100)
 	$form.Controls.Add($Status)
 	[void]$form.ShowDialog()
