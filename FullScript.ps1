@@ -432,7 +432,7 @@ function RemoveDeviceGroup {
 	$MediaDevice = $Folder + "\MediaDevicesRemoved.log"
 	$MediaDeviceList = $Folder + "\MDL.txt"
 	$LIST = $Folder + "\RemovedFiles.log"
-	$LISTFULL = $Directory + "\listfull.txt"
+	$LISTFULL = $Folder + "\listfull.txt"
 	PNPUTIL /export-driver * $Directory
 	write-output $MediaList > $MediaDevice
 	(Get-Content $MediaDevice | Select-Object -Skip 3) | Select-Object -SkipLast 2 | Set-Content $MediaDeviceList
@@ -475,7 +475,7 @@ function EnablePowerOptions {
 		Write-Output $descr
 		$keyPath = "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Power\PowerSettings\$groupguid\$guid"
 		$valueName = "Attributes"
-		$outFile = $Folder + '\OriginalPower.reg'
+		$outFile = $Folder + '\OriginalPower' + $Date + '.reg'
 		$tempFile = New-TemporaryFile
 		$null = reg.exe export $keyPath $tempFile /y
 		$null = (Get-Content -Raw $tempFile) -match '(?s)^(.+?\])\r\n(.+?)\r\n(?:\r\n|\z)'
@@ -489,9 +489,6 @@ function EnablePowerOptions {
 	$headerLinesBlock, $valueDataPair | out-file -Encoding Unicode $outFile -append
 	Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Power\PowerSettings\$groupguid\$guid" -Name "Attributes" -Value 00000002 -Type DWORD
   }
-
-	
-	
 }
 
 function FixTime {
@@ -1088,9 +1085,6 @@ function GUI {
 	if ($CBSV.Checked) { ShowVaribles }
 	if ($CBUpdate.Checked) { Update }
 	if ($CBTime.Checked) { FixTime }
-	if ($CBSpaceCleanUp.Checked) { FreeUpSpace }
-	if ($CBLogs.Checked) { Pull-Logs }
-	if ($CBCleanUp.Checked) { CleanUp } #
 	if ($CBSR.Checked) { ScheduleRestart }
 	if ($CBPCR.Checked) { PC-Rename }
 	if ($CBVSS.Checked) { VSS }
@@ -1098,6 +1092,9 @@ function GUI {
 	if ($CBDevices.Checked) { RemoveDeviceGroup }
 	if ($CBEPO.Checked) { EnablePowerOptions }
 	if ($CBServices.checked) { ServiceOwner }
+	if ($CBSpaceCleanUp.Checked) { FreeUpSpace }
+	if ($CBLogs.Checked) { Pull-Logs }
+	if ($CBCleanUp.Checked) { CleanUp } #
 
 
 
