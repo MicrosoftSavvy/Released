@@ -1,7 +1,7 @@
 Set-ExecutionPolicy -executionpolicy bypass -scope Process -force
+$CurrentScriptVer="1.0.8"
 $host.UI.RawUI.WindowTitle = "The Little Helper Script $CurrentScriptVer"
 
-$CurrentScriptVer="1.0.7"
 $Folder='c:\Repair'
 $MinutesBack=180
 $Time="03:00"
@@ -64,8 +64,10 @@ $Global:VSSChangeLog
 $Spool="C:\Windows\System32\Spool"
 $Spooler="C:\Windows\System32\Spool\Printers"
 $Script=invoke-webrequest -uri https://raw.githubusercontent.com/MicrosoftSavvy/Released/refs/heads/main/FullScript.ps1
-$DownloadScriptVer=(((($Script.rawcontent).split("`n") | Select-Object -skip 29) | Select-Object -first 1) -Replace '[^0-9.]','')
+#$DownloadScriptVer=(((($Script.rawcontent).split("`n") | Select-Object -skip 29) | Select-Object -first 1) -Replace '[^0-9.]','')
 $ScriptRaw=(($Script.rawcontent).split("`n")).replace("`r",'') | Select-Object -skip 26
+$DownloadScriptVer=($ScriptRaw | Where-Object { $_ -match "$CurrentScriptVer" }) -replace "[^\d.]",""
+
 if(!(test-path $Folder)){New-Item -Path $Folder -ItemType "directory"}
 
 function PendingReboot {
