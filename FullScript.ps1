@@ -1,5 +1,5 @@
 Set-ExecutionPolicy -executionpolicy bypass -scope Process -force
-$CurrentScriptVer="1.0.8"
+$CurrentScriptVer="1.0.9"
 $host.UI.RawUI.WindowTitle = "The Little Helper Script $CurrentScriptVer"
 
 $Folder='c:\Repair'
@@ -57,7 +57,7 @@ $Global:TimeScheduledTasks
 $NetworkLog=$Folder+"\Network.log"
 $TSTLog=$Folder+"\ScheduledTasks-Timed.log"
 $Network=(Get-NetConnectionProfile).Name
-$FormColors="Yellow","Blue","Red","Green","LightBlue", "DarkRed","LightGreen"
+$FormColors="Blue","Red","LightBlue", "DarkRed","LightGreen","Green","Yellow"
 $RunAfter=$Folder+"\Repair.ps1"
 $VSSLog=$Folder+"\VSS.log"
 $Global:VSSChangeLog 
@@ -236,11 +236,12 @@ function ReRegDLLs($DLLLog) {
 		$DLLList=$DLLList+(get-childitem $DLLF\*.ocx).fullname
 		foreach($DFile in $DLLList){
 			c:\windows\system32\regsvr32 /s %DFile
+			$FCount+=1
 			$Percent=(($FCount/$DLLList.count) * 100)
 			write-progress -Activity "Re-Registering DLLs" -PercentComplete $Percent
-			$FCount+=1
 		}
 		$Global:DLLLog=$($Global:DLLLog + $DLLList)
+		Write-Progress -Completed -Activity " "
 	}
 }
 
@@ -1069,4 +1070,3 @@ GUI #
 Stop-Transcript
 
 #Written by MicrosoftSavvy
-
