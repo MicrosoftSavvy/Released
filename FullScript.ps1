@@ -66,7 +66,6 @@ $Spooler="C:\Windows\System32\Spool\Printers"
 $Script=invoke-webrequest -uri https://raw.githubusercontent.com/MicrosoftSavvy/Released/refs/heads/main/FullScript.ps1
 $ScriptRaw=(($Script.rawcontent).split("`n")).replace("`r",'') | Select-Object -skip 26
 $DownloadScriptVer=(($ScriptRaw | Where-Object { $_ -match "CurrentScriptVer" }) -replace "[^\d.]","")[0]
-
 if(!(test-path $Folder)){New-Item -Path $Folder -ItemType "directory"}
 
 function PendingReboot {
@@ -483,9 +482,7 @@ function EnablePowerOptions {
 		Remove-Item $tempFile
 		$headerLinesBlock = $Matches[1]
 		$valueLinesBlock = $Matches[2]
-		if ($valueLinesBlock -notmatch "(?sm)^`"$valueName`"=.+?(?=(\r\n\S|\z))") {
-		#  throw "Value name not found: $valueName"
-	}
+#		if ($valueLinesBlock -notmatch "(?sm)^`"$valueName`"=.+?(?=(\r\n\S|\z))") { throw "Value name not found: $valueName"}
 	$valueDataPair = $Matches[0]
 	$headerLinesBlock, $valueDataPair | out-file -Encoding Unicode $outFile -append
 	Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Power\PowerSettings\$groupguid\$guid" -Name "Attributes" -Value 00000002 -Type DWORD
@@ -506,11 +503,9 @@ function FixTime {
 
 	begin {}
 	process {
-		$CurrentStatus = "Checking System Time" 
+		$CurrentStatus = "Using NTP Server($NtpServer) to get time." 
 		if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 		[System.Windows.Forms.Application]::DoEvents()
-
-		Write-Host "Using NTP Server($NtpServer) to get time."
 		$TimeSample = w32tm.exe /StripChart /Computer:"$NtpServer" /DataOnly /Samples:1
 		$Diff = $($($TimeSample | Select-Object -Last 1) -split ', ' | Select-Object -Last 1)
 		$TimeScale = $Diff -split '' | Select-Object -Last 1 -Skip 1
@@ -524,9 +519,13 @@ function FixTime {
 		if ($Diff -lt 0) {
 			$Diff = 0 - $Diff
 		}
-		Write-Host "Time Difference between NTP server and local system: $($([Math]::Round($Diff,2))) minutes"
+		$CurrentStatus = "Time Difference between NTP server and local system: $($([Math]::Round($Diff,2))) minutes"
+		if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
+		[System.Windows.Forms.Application]::DoEvents()
 		if ($Diff -gt $Max) {
-			Write-Host "Time if off - Setting up NTP sync"
+			$CurrentStatus = "Time if off - Setting up NTP sync"
+			if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
+			[System.Windows.Forms.Application]::DoEvents()
 			Set-ItemProperty -Path 'HKLM:\\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location' -Name Value -Value Allow
 			Set-ItemProperty -Path 'HKLM:\\SYSTEM\CurrentControlSet\Services\tzautoupdate' -Name Start -Value 3
 			Set-Service -Name "tzautoupdate" -StartupType Automatic
@@ -535,7 +534,10 @@ function FixTime {
 			Start-Service -Name "W32Time"
 			w32tm /config /syncfromflags:manual /manualpeerlist:"time-a-g.nist.gov time-b-g.nist.gov time-c-g.nist.gov"
 			w32tm /resync
-		} else {Write-Host "Time is good - skipping"
+		} else {
+			$CurrentStatus = "Time is good - skipping"
+			if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
+			[System.Windows.Forms.Application]::DoEvents()
 		}
 	}
 }
@@ -587,67 +589,41 @@ function AfterStartUp {
 
 function ServiceOwner {
 
-#$ServiceToChange="BrokerInfrastructure"
 $ServiceToChange=$ServiceList.text
 $Service = Get-Service -Name $ServiceToChange
 $acl = Get-Acl -Path "HKLM:\SYSTEM\CurrentControlSet\Services\$($service.Name)"
 $newOwner = New-Object System.Security.Principal.NTAccount("Administrators")
 $acl.SetOwner($newOwner)
 Set-Acl -Path "HKLM:\SYSTEM\CurrentControlSet\Services\$($service.Name)" -AclObject $acl
-
- 
-
 $VarD=$null
 $VarS=$null
 $ResultsD=$null
 $ResultsS=$null
-#$Service=$ServiceList.text
 $AddPermissions="(A;;CCDCLCSWRPWPDTLORC;;;BA)"
 $VarAccount="BA"
 [string]$RawResults=sc.exe sdshow $Service
 $RegexPatternALL='(D:)(\(.*\))(S:)(\(.*\))|(S:)(\(.*\))|(D:)(\(.*\))'
-
-# Match 0 is the complete string
-# Match 1 is the D: label if both sections are present
-# Match 2 is the D: section permissions if both sections are present
-# Match 3 is the S: label if both sections are present
-# Match 4 is the S: section permissions if both sections are present
-# Match 5 is the S: label if only the S: section is present
-# Match 6 is the S: section permissions if only the S: section is present
-# Match 7 is the D: label if only the D: section is present
-# Match 8 is the D: section permissions if only the D: section is present
-
 $RawResults -match $RegexPatternALL | out-null
-#$Matches
-# Find the D: section
 if ($null -eq $matches[1]){
     $VarD=$Matches[8]
 } else {
     $VarD=$Matches[2]
 }
-
-#Find the S: section
 if ($null -eq $Matches[3]) {
     $VarS=$Matches[6]
 } else {
     $VarS=$Matches[4]
 }
-
-# Split the results into individual items then strip out the open and close parenthesis from all objects.
 if ($null -ne $VarD){
     [array]$ResultsD=$VarD -split '\)\(' | foreach-object {$_ -replace "\(", ""} | foreach-object {$_ -replace "\)", ""}
 }
 if ($null -ne $VarS){
     [array]$ResultsS=$VarS -split '\)\(' | foreach-object {$_ -replace "\(", ""} | foreach-object {$_ -replace "\)", ""}
 }
-
 write-output "`nD:"
 $ResultsD
-
 write-output "`nS:"
 $ResultsS
-
-# Build new SD permission string so to confirm if the values are parsed correctly.
 $ExistingPermissions=$null
 if ($null -ne $ResultsD){
     # This is the first element in the array
@@ -666,12 +642,8 @@ write-output "`nParsed permissions:"
 $ExistingPermissions
 write-output "`nOriginal permissions:"
 $RawResults.trim()
-# Compare the newly build results with the original results (trimming whitespace).
-# Only add the new permissions if we could properly build a string with the existing data which matched the original permission string.
 if ($ExistingPermissions -eq $RawResults.trim()) {
     Write-Output "`nCorrectly identified existing permissions."
-    # Make sure that the permissions we are setting are not already in the existing permission string.
-#    if ($ExistingPermissions -notmatch $VarAccount){
         write-output "`nBuilding new permissions string..."
         $NewPermissions=$null
         if ($null -ne $ResultsD){
@@ -691,41 +663,29 @@ if ($ExistingPermissions -eq $RawResults.trim()) {
         write-output "`nNew permissions string will be:"
         $NewPermissions
         $FixedService=sc.exe sdset $service $NewPermissions
-		
 $RawResults -match $RegexPatternALL | out-null
-#$Matches
-# Find the D: section
 if ($null -eq $matches[1]){
     $VarD=$Matches[8]
 } else {
     $VarD=$Matches[2]
 }
-
-#Find the S: section
 if ($null -eq $Matches[3]) {
     $VarS=$Matches[6]
 } else {
     $VarS=$Matches[4]
 }
-
-# Split the results into individual items then strip out the open and close parenthesis from all objects.
 if ($null -ne $VarD){
     [array]$ResultsD=$VarD -split '\)\(' | foreach-object {$_ -replace "\(", ""} | foreach-object {$_ -replace "\)", ""}
 }
 if ($null -ne $VarS){
     [array]$ResultsS=$VarS -split '\)\(' | foreach-object {$_ -replace "\(", ""} | foreach-object {$_ -replace "\)", ""}
 }
-
 write-output "`nD:"
 $ResultsD
-
 write-output "`nS:"
 $ResultsS
-
-# Build new SD permission string so to confirm if the values are parsed correctly.
 $ExistingPermissions=$null
 if ($null -ne $ResultsD){
-    # This is the first element in the array
     $ExistingPermissions=$ExistingPermissions + "D:"
     for ($i=0; $i -lt $ResultsD.count; $i++) {
         $ExistingPermissions=$ExistingPermissions + "(" + $ResultsD[$i] + ")"
@@ -741,12 +701,8 @@ write-output "`nParsed permissions:"
 $ExistingPermissions
 write-output "`nOriginal permissions:"
 $RawResults.trim()
-# Compare the newly build results with the original results (trimming whitespace).
-# Only add the new permissions if we could properly build a string with the existing data which matched the original permission string.
 if ($ExistingPermissions -eq $RawResults.trim()) {
     Write-Output "`nCorrectly identified existing permissions."
-    # Make sure that the permissions we are setting are not already in the existing permission string.
-#    if ($ExistingPermissions -notmatch $VarAccount){
         write-output "`nBuilding new permissions string..."
         $NewPermissions=$null
         if ($null -ne $ResultsD){
@@ -775,26 +731,15 @@ if ($ExistingPermissions -eq $RawResults.trim()) {
 			$ServiceFixedService=$env:windir + "\psexec.exe -s -h sc.exe sdset $service $NewPermissions"
 			$ServiceFixedService[5]
 		}
-#    } else {
         write-output "Permissions for this account already exist. Please review."
-#    }
-
 } else {
     write-output "`nUnable to properly parse the permission results. Please review."
 }
-
-#    } else {
         write-output "Permissions for this account already exist. Please review."
-#    }
-
 } else {
     write-output "`nUnable to properly parse the permission results. Please review."
 }
 }
-
-
-
-		
 		
 function GUI {
 	[reflection.assembly]::loadwithpartialname("System.Windows.Forms") | Out-Null
@@ -836,7 +781,6 @@ function GUI {
 	$ServiceList = New-Object System.Windows.Forms.ComboBox
 	
 	$form.Text = "The Little Helper GUI $CurrentScriptVer"
-#	$form.Size = New-Object System.Drawing.Size(375, 225)
 	$form.Autosize = $True
 
 	if ( -not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] 'Administrator')) {
@@ -844,7 +788,6 @@ function GUI {
 		if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 		[System.Windows.Forms.Application]::DoEvents()
 	} 
-
 
 	$CBCleanUp.Text = "Clean Up"
 	$CBCleanUp.Location = New-Object System.Drawing.Point(10, 10)
@@ -967,7 +910,6 @@ function GUI {
 	$CBDevices.checked = $False
 	$form.Controls.Add($CBDevices)	
 	
-#	@('AUDIOENDPOINT','BATTERY','BIOMETRIC','BLUETOOTH','CAMERA','DISKDRIVE','DISPLAY','FIRMWARE','HIDCLASS','KEYBOARD','MEDIA','MONITOR','MOUSE','NET','PRINTER','PRINTQUEUE','PROCESSOR','PROSHIELDPLUSDEVICE','SCSIADAPTER','SECURITYDEVICES','SOFTWARECOMPONENT','SOFTWAREDEVICE','SYSTEM','UCM','USB','VOLUME','VOLUMESNAPSHOT') | ForEach-Object {[void] $DDDevices.Items.Add($_)}
 	@((gwmi win32_PnPSignedDriver).deviceclass | sort-object -unique) | ForEach-Object {[void] $DDDevices.Items.Add($_)}
 	$DDDevices.width=170
 	$DDDevices.autosize = $true
@@ -1013,7 +955,6 @@ function GUI {
 	}
 	})
 
-
 	$CBPCRST.Add_CheckedChanged({
     if ($CBPCRST.Checked) {
 	$TXTPCR.Enabled=$False
@@ -1029,7 +970,6 @@ function GUI {
 	$DDDevices.Enabled=$False
 	}
 })
-
 
 	$Clear.Text = "Clear"
 	$Clear.Location = New-Object System.Drawing.Point(90, 255)
@@ -1055,16 +995,13 @@ function GUI {
 	($CBDevices.Checked) = $false
 	($CBEPO.Checked) = $false
 	($CBServices.checked) = $false
-
 	})
-
 
 	$Update.Text = "Update"
 	$Update.Location = New-Object System.Drawing.Point(170, 255)
 	$Update.Add_Click({
     	AppUpdate
 	})
-
 
 	$Exit.Text = "Exit"
 	$Exit.Location = New-Object System.Drawing.Point(250, 255)
@@ -1095,10 +1032,7 @@ function GUI {
 	if ($CBServices.checked) { ServiceOwner }
 	if ($CBSpaceCleanUp.Checked) { FreeUpSpace }
 	if ($CBLogs.Checked) { Pull-Logs }
-	if ($CBCleanUp.Checked) { CleanUp } #
-
-
-
+	if ($CBCleanUp.Checked) { CleanUp }
 	$Status.items.add("Run Finished")
 	[System.Windows.Forms.Application]::DoEvents()
 	$n=0
