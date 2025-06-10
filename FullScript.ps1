@@ -56,7 +56,6 @@ $USTLog=$Folder+"\ScheduledTasks-User.log"
 $Global:TimeScheduledTasks
 $NetworkLog=$Folder+"\Network.log"
 $TSTLog=$Folder+"\ScheduledTasks-Timed.log"
-$Network=(Get-NetConnectionProfile).Name
 $FormColors="Blue","Red","LightBlue", "DarkRed","LightGreen","Green","Yellow"
 $RunAfter=$Folder+"\Repair.ps1"
 $VSSLog=$Folder+"\VSS.log"
@@ -399,9 +398,9 @@ function ScheduledTasks {
 
 function PrivateNetwork {
 	$CurrentStatus = "Setting Network as Private" 
+	$Network=(Get-NetConnectionProfile).Name
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 	[System.Windows.Forms.Application]::DoEvents()
-
 	$Global:NetworkOld = (Get-NetConnectionProfile)
 	$Global:NetworkNew = (Set-NetConnectionProfile -Name $Network -NetworkCategory Private)
 }
