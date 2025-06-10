@@ -1,5 +1,5 @@
 Set-ExecutionPolicy -executionpolicy bypass -scope Process -force
-$CurrentScriptVer="1.0.9"
+$CurrentScriptVer="1.1.0"
 $host.UI.RawUI.WindowTitle = "The Little Helper Script $CurrentScriptVer"
 
 $Folder='c:\Repair'
