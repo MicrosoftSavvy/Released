@@ -1448,9 +1448,9 @@ function GUI {
 	if ($CBDS.checked) { DownloadSource }
 	if ($CBNetCheck.checked) { NetworkCheck }
 	if ($CBRecycle.checked) { ClearBins }
-	if ($CBSecureHOSTS.checked) { }
-	if ($CBSecurePC.checked) { }
-	if ($CBIAdmin.checked) { }
+	if ($CBSecureHOSTS.checked) { SecureHost }
+	if ($CBSecurePC.checked) { SecurePC }
+	if ($CBIAdmin.checked) { InteractiveAdmin }
 
 
 	$Status.items.add("Run Finished")
@@ -1491,3 +1491,4 @@ GUI #
 Stop-Transcript
 
 #Written by MicrosoftSavvy
+
