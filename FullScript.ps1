@@ -850,6 +850,7 @@ function SecurePC {
 write-host $null | out-file $Folder\BitKeys-$date.txt
 foreach ($DriveLetter in $Drives){
 	$drive=$DriveLetter.replace("\","")
+	if (((manage-bde -protectors -get $drive) | select-string -pattern 'ERROR:*') -eq $null){
 	$Protectors=(manage-bde -protectors -get $drive).split()
 	$LCount=($Protectors | Select-String -Pattern "ID:" -AllMatches).linenumber
 	$IDs=$Protectors[$LCount]
@@ -865,7 +866,8 @@ foreach ($DriveLetter in $Drives){
 	$DocumentedKey=((Get-Content $Folder\BitKeys-$date.txt | where-object { $_ -like "*$ID*" }))
 	if ($DocumentedKey -eq $null){
 	if (((manage-bde -protectors -get $drive -t recoverypassword).split() | where-object { $_ -like "ERROR:" }).length -lt 1) {
-	(manage-bde -protectors -get $drive -t recoverypassword) | select -skip 3 | out-file $Folder\BitKeys-$date.txt  #>> $Folder\BitKeys-$date.txt
+	(manage-bde -protectors -get $drive -t recoverypassword) | select -skip 3 | out-file $Folder\BitKeys-$date.txt
+	}
 	}
 	}
 	}
@@ -888,8 +890,7 @@ foreach ($DriveLetter in $Drives){
 	#secedit.exe /export /cfg $Folder\OriginalSecuritySettings.inf
 	secedit /db secedit.sdb /import /cfg $SetSecurity /overwrite /log $SetSecurityLog /verbose /quiet
 	secedit /db secedit.sdb /configure /cfg $SetSecurity /overwrite /log $SetSecurityLog /verbose /quiet
-
-	BCDEDIT /set {current} nx OptOut
+	BCDEDIT /set nx OptOut
 
 	$PolicyCats="Account Management","Policy Change"
 	$PolicySubs='logon','logoff','File System','File Share','Plug and Play Events','Credential Validation','Security Group Management','Process Creation','Special Logon','Other Object Access Events','System Integrity','Security State Change','Sensitive Privilege Use','Other Logon/Logoff Events','Other System Events','Security System Extension'
@@ -909,7 +910,6 @@ foreach ($DriveLetter in $Drives){
 		if ((get-localuser).name -contains "Administrator") {Rename-LocalUser -Name Administrator -NewName LocalAdmin; disable-localuser LocalAdmin}
 		if ((get-localuser).name -contains "Guest") {Rename-LocalUser -Name Guest -NewName LocalGuest; disable-localuser LocalGuest}
 		net accounts /minpwage:1 /maxpwage:45 /lockoutthreshold:3 /lockoutduration:30 /lockoutwindow:15
-
 	
 	$NTRights=(get-childitem "c:\ntrights.exe" -recurse -erroraction silentlycontinue).fullname
 	if ($NTRights.split().length -gt 1) {$NTRights=$NTRights[0]}
@@ -1380,19 +1380,70 @@ function GUI {
 	($CBSecureHOSTS.checked) = $False
 	($CBSecurePC.checked) = $False
 	($CBIAdmin.checked) = $False
-
 	})
 
 	$Secure.Text = "Secure"
 	$Secure.Location = New-Object System.Drawing.Point(90, 255)
 	$Secure.Add_Click({
-##    	AppUpdate
+	($CBNetwork.Checked) = $false
+	($CBLogs.Checked) = $false
+	($CBDLLs.Checked) = $false
+	($CBBadDevices.Checked) = $false
+	($CBCHK.Checked) = $false
+	($CBDISM.Checked) = $false
+	($CBSFC.Checked) = $false
+	($CBRT.Checked) = $false
+	($CBSR.Checked) = $false
+	($CBST.Checked) = $true
+	($CBSV.Checked) = $false
+	($CBUpdate.Checked) = $true
+	($CBCleanUp.Checked) = $false
+	($CBTime.Checked) = $true
+	($CBSpaceCleanUp.Checked) = $false
+	($CBPCR.Checked) = $false
+	($CBVSS.Checked) = $true
+	($CBSpool.checked) = $false
+	($CBDevices.Checked) = $false
+	($CBEPO.Checked) = $true
+	($CBServices.checked) = $false
+	($CBDS.checked) = $false
+	($CBNetCheck.checked) = $true
+	($CBRecycle.checked) = $False
+	($CBSecureHOSTS.checked) = $True
+	($CBSecurePC.checked) = $True
+	($CBIAdmin.checked) = $False
 	})
 	
 	$Repair.Text = "Repair OS"
 	$Repair.Location = New-Object System.Drawing.Point(170, 255)
 	$Repair.Add_Click({
-##    	AppUpdate
+	($CBNetwork.Checked) = $true
+	($CBLogs.Checked) = $true
+	($CBDLLs.Checked) = $true
+	($CBBadDevices.Checked) = $true
+	($CBCHK.Checked) = $true
+	($CBDISM.Checked) = $true
+	($CBSFC.Checked) = $true
+	($CBRT.Checked) = $false
+	($CBSR.Checked) = $false
+	($CBST.Checked) = $false
+	($CBSV.Checked) = $false
+	($CBUpdate.Checked) = $false
+	($CBCleanUp.Checked) = $false
+	($CBTime.Checked) = $true
+	($CBSpaceCleanUp.Checked) = $false
+	($CBPCR.Checked) = $false
+	($CBVSS.Checked) = $true
+	($CBSpool.checked) = $false
+	($CBDevices.Checked) = $false
+	($CBEPO.Checked) = $false
+	($CBServices.checked) = $false
+	($CBDS.checked) = $false
+	($CBNetCheck.checked) = $false
+	($CBRecycle.checked) = $False
+	($CBSecureHOSTS.checked) = $false
+	($CBSecurePC.checked) = $false
+	($CBIAdmin.checked) = $False
 	})
 
 
