@@ -45,7 +45,6 @@ MACHINE\SOFTWARE\Policies\Microsoft\Windows\WinRM\Client\AllowUnencryptedTraffic
 MACHINE\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service\AllowBasic=1,0
 MACHINE\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service\DisableRunAs=1,1
 MACHINE\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service\AllowUnencryptedTraffic=1,0
-MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\InactivityTimeoutSecs=4."900"
 MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorAdmin=4,5
 MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorEnhancedAdmin=4,1
 MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorUser=4,3
