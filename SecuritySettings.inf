@@ -36,8 +36,6 @@ Revision=1
 [Kerberos Policy]
 TicketValidateClient = 1
 [Registry Values]
-USERS\Control Panel\Desktop\DelayLockInterval=4,0
-MACHINE\SYSTEM\CurrentControlSet\Control\Remote Assistance\fAllowToGetHelp=4,0
 MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters\SupportedEncryptionTypes=4,2147483640
 MACHINE\System\CurrentControlSet\Control\Lsa\MSV1_0\allownullsessionfallback=4,0
 MACHINE\System\CurrentControlSet\Control\Lsa\pku2u\AllowOnlineID=4,0
@@ -124,6 +122,7 @@ MACHINE\Software\Microsoft\Windows NT\CurrentVersion\Winlogon\PasswordExpiryWarn
 MACHINE\Software\Microsoft\Windows NT\CurrentVersion\Winlogon\ForceUnlockLogon=4,0
 MACHINE\Software\Microsoft\Windows NT\CurrentVersion\Winlogon\CachedLogonsCount=1,"10"
 USERS\S-1-5-20\Software\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Settings\DownloadMode=4,0
+USERS\Control Panel\Desktop\DelayLockInterval=4,0
 MACHINE\SOFTWARE\Policies\Microsoft\Windows\CloudContent\DisableWindowsConsumerFeatures=4,1
 MACHINE\SOFTWARE\Policies\Microsoft\Windows\DataCollection\AllowTelemetry=4,2
 MACHINE\System\CurrentControlSet\Control\Lsa\RestrictRemoteSAM=1,"O:BAG:BAD:(A;;RC;;;BA)"
