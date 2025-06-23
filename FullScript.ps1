@@ -847,6 +847,7 @@ function  SecureHost {
 
 function SecurePC {
 
+
 write-host $null | out-file $Folder\BitKeys-$date.txt
 foreach ($DriveLetter in $Drives){
 	$drive=$DriveLetter.replace("\","")
@@ -869,7 +870,6 @@ foreach ($DriveLetter in $Drives){
 	}
 	}
 	}
-
 }
 
 	$Folder='c:\Repair'
@@ -881,12 +881,16 @@ foreach ($DriveLetter in $Drives){
 	$SCRaw  | Out-File -FilePath $SetSecurity -force -encoding Unicode
 	$content = Get-Content -Raw -Path $SetSecurity
 	$updatedContent = $content -replace "`r`r`n", "`r`n"
-	$updatedContent = $updatedContent.substring(1)
+	#$updatedContent = $updatedContent.substring(1)
 	$SetSecurityLog=$Folder + "\SetSecurityLog.log"
 	Set-Content -encoding Unicode -Path $SetSecurity -Value $updatedContent
+	secedit /validate $SetSecurity
+	secedit /generaterollback /cfg $SetSecurity /rbk $Folder\OriginalSecuritySettings.inf /quiet
+	#secedit.exe /export /cfg $Folder\OriginalSecuritySettings.inf
+	secedit /db secedit.sdb /import /cfg $SetSecurity /overwrite /log $SetSecurityLog /verbose /quiet
+	secedit /db secedit.sdb /configure /cfg $SetSecurity /overwrite /log $SetSecurityLog /verbose /quiet
 
-	secedit.exe /export /cfg $Folder\OriginalSecuritySettings.inf
-	secedit /db secedit.sdb /import /cfg $SetSecurity /overwrite /log $SetSecurityLog /quiet
+
 	if ((get-content $SetSecurityLog) -eq $null){
 		if ((get-localuser).name -contains "Administrator") {Rename-LocalUser -Name Administrator -NewName LocalAdmin; disable-localuser LocalAdmin}
 		if ((get-localuser).name -contains "Guest") {Rename-LocalUser -Name Guest -NewName LocalGuest; disable-localuser LocalGuest}
@@ -919,7 +923,7 @@ auditpol /set /subcategory:"Security Group Management" /failure:disable /success
 
 
 	$NTRights=(get-childitem "c:\ntrights.exe" -recurse -erroraction silentlycontinue).fullname
-	if ($NTRights.length -gt 1) {$NTRights=$NTRights[0]}
+	if ($NTRights.split().length -gt 1) {$NTRights=$NTRights[0]}
 	
 	if ($NTRights -eq $null) {
 		$NTRightsLink="https://github.com/MicrosoftSavvy/Released/raw/refs/heads/main/ntrights.exe"
@@ -971,6 +975,10 @@ auditpol /set /subcategory:"Security Group Management" /failure:disable /success
 			&$ntrights +r $NTRCat -u $CList
 			}
 		}
+		
+		#if ($NoRights -contains $NTRCat){
+		#	&$ntrights +r $NTRCat -u administrators
+		#}
 	}
 }
 
@@ -1049,7 +1057,13 @@ Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlo
 Write-Output "Setting lock after 15 minutes of inactivity"
 powercfg.exe /SETACVALUEINDEX SCHEME_CURRENT SUB_VIDEO VIDEOCONLOCK 900
 powercfg.exe /SETDCVALUEINDEX SCHEME_CURRENT SUB_VIDEO VIDEOCONLOCK 900
-Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\' -Name 'InactivityTimeoutSecs'  -PropertyType DWORD -Value 0x00000384 -Force -ErrorAction 'SilentlyContinue'
+$Key=Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -ErrorAction 'SilentlyContinue' | Select-Object -ExpandProperty 'InactivityTimeoutSecs'
+if ($Key -eq $Null){
+New-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'InactivityTimeoutSecs'  -Value 0x00000384 -Force -ErrorAction 'SilentlyContinue'
+}else {
+Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'InactivityTimeoutSecs'  -Value 0x00000384 -Force -ErrorAction 'SilentlyContinue'
+}
+
 
 Write-Output "Enable NTLMv2 Only"
 Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Lsa' -Name 'LmCompatibilityLevel' -value 5 -Force -ErrorAction 'SilentlyContinue'
