@@ -17,7 +17,7 @@ NewGuestName = "LocalGuest"
 ClearTextPassword = 0
 LSAAnonymousNameLookup = 0
 EnableAdminAccount = 0
-EnableGuestAccount = 1
+EnableGuestAccount = 0
 [Event Audit]
 AuditSystemEvents = 2
 AuditLogonEvents = 2
