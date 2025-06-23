@@ -123,7 +123,7 @@ MACHINE\Software\Microsoft\Windows NT\CurrentVersion\Winlogon\ForceUnlockLogon=4
 MACHINE\Software\Microsoft\Windows NT\CurrentVersion\Winlogon\CachedLogonsCount=1,"10"
 USERS\S-1-5-20\Software\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Settings\DownloadMode=4,0
 MACHINE\SOFTWARE\Policies\Microsoft\Windows\CloudContent\DisableWindowsConsumerFeatures=4,1
-MACHINE\SOFTWARE\Policies\Microsoft\Windows\DataCollection\AllowTelemetry=4,3
+MACHINE\SOFTWARE\Policies\Microsoft\Windows\DataCollection\AllowTelemetry=4,2
 MACHINE\System\CurrentControlSet\Control\Lsa\RestrictRemoteSAM=1,"O:BAG:BAD:(A;;RC;;;BA)"
 MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\FilterAdministratorToken=4,1
 [Privilege Rights]
@@ -153,7 +153,7 @@ SeRestorePrivilege = *S-1-5-32-544
 SeShutdownPrivilege = *S-1-5-32-551,*S-1-5-32-545,*S-1-5-32-544
 SeTakeOwnershipPrivilege = *S-1-5-32-544
 SeDenyNetworkLogonRight = *S-1-5-32-546
-SeDenyInteractiveLogonRight = LocalGuest,*S-1-5-32-546
+SeDenyInteractiveLogonRight = *S-1-5-32-546
 SeUndockPrivilege = *S-1-5-32-545,*S-1-5-32-544
 SeManageVolumePrivilege = *S-1-5-32-544
 SeRemoteInteractiveLogonRight = *S-1-5-32-555,*S-1-5-32-544
