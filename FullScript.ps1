@@ -847,7 +847,6 @@ function  SecureHost {
 
 function SecurePC {
 
-
 write-host $null | out-file $Folder\BitKeys-$date.txt
 foreach ($DriveLetter in $Drives){
 	$drive=$DriveLetter.replace("\","")
@@ -890,12 +889,7 @@ foreach ($DriveLetter in $Drives){
 	secedit /db secedit.sdb /import /cfg $SetSecurity /overwrite /log $SetSecurityLog /verbose /quiet
 	secedit /db secedit.sdb /configure /cfg $SetSecurity /overwrite /log $SetSecurityLog /verbose /quiet
 
-
-	if ((get-content $SetSecurityLog) -eq $null){
-		if ((get-localuser).name -contains "Administrator") {Rename-LocalUser -Name Administrator -NewName LocalAdmin; disable-localuser LocalAdmin}
-		if ((get-localuser).name -contains "Guest") {Rename-LocalUser -Name Guest -NewName LocalGuest; disable-localuser LocalGuest}
-		net accounts /minpwage:1 /maxpwage:45 /lockoutthreshold:3 /lockoutduration:30 /lockoutwindow:15
-	}
+	BCDEDIT /set {current} nx OptOut
 
 	$PolicyCats="Account Management","Policy Change"
 	$PolicySubs='logon','logoff','File System','File Share','Plug and Play Events','Credential Validation','Security Group Management','Process Creation','Special Logon','Other Object Access Events','System Integrity','Security State Change','Sensitive Privilege Use','Other Logon/Logoff Events','Other System Events','Security System Extension'
@@ -906,22 +900,17 @@ foreach ($DriveLetter in $Drives){
 	foreach ($PolicySub in $PolicySubs){
 		$Policy=auditpol /set /subcategory:$PolicySub /failure:enable /success:enable
 	}
+	auditpol /set /subcategory:"Security Group Management" /failure:disable /success:enable
 	$Policy=auditpol /get /category:*
 
-auditpol /set /subcategory:"Security Group Management" /failure:disable /success:enable
 
 
-	$Nics=(get-netipconfiguration).interfacealias	
-	$netShare = New-Object -ComObject HNetCfg.HNetShare
-	foreach($Nic in $Nics) {
-		$interface=$nic
-		$privateConnection = $netShare.EnumEveryConnection | Where-Object {$netShare.NetConnectionProps.Invoke($_).Name -eq $Interface}
-		$privateConfig = $netShare.INetSharingConfigurationForINetConnection.Invoke($privateConnection)
-		$privateConfig.DisableSharing()
-		$privateConfig.EnableInternetFirewall()
-	}	
+	if ((get-content $SetSecurityLog) -eq $null){
+		if ((get-localuser).name -contains "Administrator") {Rename-LocalUser -Name Administrator -NewName LocalAdmin; disable-localuser LocalAdmin}
+		if ((get-localuser).name -contains "Guest") {Rename-LocalUser -Name Guest -NewName LocalGuest; disable-localuser LocalGuest}
+		net accounts /minpwage:1 /maxpwage:45 /lockoutthreshold:3 /lockoutduration:30 /lockoutwindow:15
 
-
+	
 	$NTRights=(get-childitem "c:\ntrights.exe" -recurse -erroraction silentlycontinue).fullname
 	if ($NTRights.split().length -gt 1) {$NTRights=$NTRights[0]}
 	
@@ -976,13 +965,6 @@ auditpol /set /subcategory:"Security Group Management" /failure:disable /success
 			}
 		}
 		
-		#if ($NoRights -contains $NTRCat){
-		#	&$ntrights +r $NTRCat -u administrators
-		#}
-	}
-}
-
-
 Write-Output "Disabling AutoRun"	
 New-ItemProperty -Path HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer -Name NoDriveTypeAutoRun -value 255 -type Dword -Force -ErrorAction 'SilentlyContinue'
 
@@ -993,67 +975,52 @@ New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name 
 }else {
 Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "EnableSmartScreen" -Value 1 -Force -ErrorAction 'SilentlyContinue'
 }
-
 $Key=Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -ErrorAction 'SilentlyContinue' | Select-Object -ExpandProperty "ShellSmartScreenLevel" 
 if ($Key -eq $Null){
 New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "ShellSmartScreenLevel" -Value 1 -Force -ErrorAction 'SilentlyContinue'
 }else {
 Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "ShellSmartScreenLevel" -Value 1 -Force -ErrorAction 'SilentlyContinue'
 }
-
 $Key=Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftEdge\PhishingFilter" -ErrorAction 'SilentlyContinue' | Select-Object -ExpandProperty "EnabledV9"
 if ($Key -eq $Null){
 New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftEdge\PhishingFilter" -Name "EnabledV9"  -Value 1 -Force -ErrorAction 'SilentlyContinue'
 }else {
 Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftEdge\PhishingFilter" -Name "EnabledV9"  -Value 1 -Force -ErrorAction 'SilentlyContinue'
 }
-
 $Key=Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftEdge\PhishingFilter" -ErrorAction 'SilentlyContinue' | Select-Object -ExpandProperty "PreventOverride"
 if ($Key -eq $Null){
 New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftEdge\PhishingFilter" -Name "PreventOverride"  -Value 1 -Force -ErrorAction 'SilentlyContinue'
 }else {
 Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftEdge\PhishingFilter" -Name "PreventOverride"  -Value 1 -Force -ErrorAction 'SilentlyContinue'
 }
-
 $Key=Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftEdge\PhishingFilter" -ErrorAction 'SilentlyContinue' | Select-Object -ExpandProperty "PreventOverrideAppRepUnknown"
 if ($Key -eq $Null){
 New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftEdge\PhishingFilter" -Name "PreventOverrideAppRepUnknown"  -Value 1 -Force -ErrorAction 'SilentlyContinue'
 }else {
 Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftEdge\PhishingFilter" -Name "PreventOverrideAppRepUnknown"  -Value 1 -Force -ErrorAction 'SilentlyContinue'
 }
-
 $Key=Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Client" -ErrorAction 'SilentlyContinue'
 if ($Key -eq $Null){
 New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Client" -Name "AllowBasic"  -Value 0 -Force -ErrorAction 'SilentlyContinue'
 New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Client" -Name "AllowDigest"  -Value 0 -Force -ErrorAction 'SilentlyContinue'
 New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Client" -Name "AllowUnencryptedTraffic"  -Value 0 -Force -ErrorAction 'SilentlyContinue'
-
 }else {
 Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Client" -Name "AllowBasic"  -Value 0 -Force -ErrorAction 'SilentlyContinue'
 Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Client" -Name "AllowDigest"  -Value 0 -Force -ErrorAction 'SilentlyContinue'
 Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Client" -Name "AllowUnencryptedTraffic"  -Value 0 -Force -ErrorAction 'SilentlyContinue'
-
 }
-
 $Key=Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service" -ErrorAction 'SilentlyContinue'
 if ($Key -eq $Null){
 New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service" -Name "AllowBasic"  -Value 0 -Force -ErrorAction 'SilentlyContinue'
 New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service" -Name "DisableRunAs"  -Value 1 -Force -ErrorAction 'SilentlyContinue'
 New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service" -Name "AllowUnencryptedTraffic"  -Value 0 -Force -ErrorAction 'SilentlyContinue'
-
 }else {
 Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service" -Name "AllowBasic"  -Value 0 -Force -ErrorAction 'SilentlyContinue'
 Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service" -Name "DisableRunAs"  -Value 1 -Force -ErrorAction 'SilentlyContinue'
 Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service" -Name "AllowUnencryptedTraffic"  -Value 0 -Force -ErrorAction 'SilentlyContinue'
-
 }
-
-
-
-
 Write-Output "Setting Smart Card Removal Behavior"
 Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" -Name "scremoveoption" -Value 1 -Force -ErrorAction 'SilentlyContinue'
-
 Write-Output "Setting lock after 15 minutes of inactivity"
 powercfg.exe /SETACVALUEINDEX SCHEME_CURRENT SUB_VIDEO VIDEOCONLOCK 900
 powercfg.exe /SETDCVALUEINDEX SCHEME_CURRENT SUB_VIDEO VIDEOCONLOCK 900
@@ -1063,14 +1030,21 @@ New-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies
 }else {
 Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'InactivityTimeoutSecs'  -Value 0x00000384 -Force -ErrorAction 'SilentlyContinue'
 }
-
-
 Write-Output "Enable NTLMv2 Only"
 Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Lsa' -Name 'LmCompatibilityLevel' -value 5 -Force -ErrorAction 'SilentlyContinue'
-
-#Remove-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "EnableSmartScreen" 
-#Remove-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftEdge\PhishingFilter" -Name "EnabledV9" 
-
+		}
+	}
+	}
+	
+	$Nics=(get-netipconfiguration).interfacealias	
+	$netShare = New-Object -ComObject HNetCfg.HNetShare
+	foreach($Nic in $Nics) {
+		$interface=$nic
+		$privateConnection = $netShare.EnumEveryConnection | Where-Object {$netShare.NetConnectionProps.Invoke($_).Name -eq $Interface}
+		$privateConfig = $netShare.INetSharingConfigurationForINetConnection.Invoke($privateConnection)
+		$privateConfig.DisableSharing()
+		$privateConfig.EnableInternetFirewall()
+	}	
 }
 
 function InteractiveAdmin {
@@ -1505,4 +1479,5 @@ GUI #
 Stop-Transcript
 
 #Written by MicrosoftSavvy
+
 
