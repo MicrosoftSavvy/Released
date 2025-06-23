@@ -36,6 +36,8 @@ Revision=1
 [Kerberos Policy]
 TicketValidateClient = 1
 [Registry Values]
+USERS\Control Panel\Desktop\DelayLockInterval=4,0
+MACHINE\SYSTEM\CurrentControlSet\Control\Remote Assistance\fAllowToGetHelp=4,0
 MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters\SupportedEncryptionTypes=4,2147483640
 MACHINE\System\CurrentControlSet\Control\Lsa\MSV1_0\allownullsessionfallback=4,0
 MACHINE\System\CurrentControlSet\Control\Lsa\pku2u\AllowOnlineID=4,0
