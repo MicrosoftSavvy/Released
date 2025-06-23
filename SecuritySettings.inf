@@ -29,6 +29,9 @@ AuditProcessTracking = 2
 AuditDSAccess = 2
 AuditAccountLogon = 2
 [Registry Values]
+MACHINE\SOFTWARE\Policies\Microsoft\Windows\DataCollection\AllowTelemetry=4,3
+MACHINE\SOFTWARE\Policies\Microsoft\Windows\CloudContent\DisableWindowsConsumerFeatures=4,1
+USERS\S-1-5-20\Software\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Settings\DownloadMode=4,0
 MACHINE\Software\Microsoft\Windows NT\CurrentVersion\Winlogon\CachedLogonsCount=1,"10"
 MACHINE\Software\Microsoft\Windows NT\CurrentVersion\Winlogon\ForceUnlockLogon=4,0
 MACHINE\Software\Microsoft\Windows NT\CurrentVersion\Winlogon\PasswordExpiryWarning=4,5
