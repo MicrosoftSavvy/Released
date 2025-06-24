@@ -1728,3 +1728,4 @@ Stop-Transcript
 #Written by MicrosoftSavvy
 
 
+#powershell -executionpolicy bypass -c $Link='https://raw.githubusercontent.com/MicrosoftSavvy/Released/refs/heads/main/FullScript.ps1'; $FileScript=$env:temp + '\temp.ps1'; invoke-webrequest $Link -outfile $FileScript; powershell -executionpolicy bypass -file $FileScript
