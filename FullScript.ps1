@@ -1,5 +1,5 @@
 Set-ExecutionPolicy -executionpolicy bypass -scope Process -force
-$CurrentScriptVer="1.1.1"
+$CurrentScriptVer="1.1.2"
 $host.UI.RawUI.WindowTitle = "The Little Helper Script $CurrentScriptVer"
 
 $Folder='c:\Repair'
@@ -8,38 +8,11 @@ $CurrentDate=(Get-date).ToString('MM-dd-yyyy')
 $Date=(Get-date).AddDays(1).ToString('MM-dd-yyyy')
 $CBSLog=$Folder + "\CBSLog.log"
 $DISMLog=$Folder + "\DISMLog.log"
-$VaribleExport=$Folder + "\Varibles.log"
-$DLLRLog=$Folder + "\DLLReRegister.log"
 $Transcript=$Folder + "\Transcript.log"
-$Ver=(Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion').CurrentBuild + '.' + (Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion').UBR
-$OSNumber=((Get-WmiObject -Class Win32_OperatingSystem).name).split()[1] + " " + ((Get-WmiObject -Class Win32_OperatingSystem).name).split()[2]
-$OSType=((Get-WmiObject -Class Win32_OperatingSystem).name).split()[3]
-$OSType=$OSType.substring(0, 3)
-$OS=$OSNumber + '*'
-$OSName=$OSNumber + " " + $OSType
-$URL="https://uupdump.net/known.php?q=" + $Ver
-$ISODownload=Invoke-WebRequest -uri $URL
-$ISOList=($ISODownload.links)
-$temp='*A href=`"selectlang.php?id=*'
-$ISOList=($ISOList | Where-Object { $_.outerhtml -like $temp -and $_.innerhtml -like $OS }).outerhtml
-$ISOL=$ISOList.replace('<A href="selectlang.php?id=','')
-$ISOL=$ISOL -replace('"',' ')
-$ID=$ISOL.split()[0]
-$DL='https://uupdump.net/get.php?id='+$ID+'&pack=en-us&edition=core;professional'
-$FindFile=Invoke-WebRequest -uri $DL
-$DLLFolders='c:\Windows\System32','c:\Windows\Syswow64'
-$DownLoad=($FindFile.links | Where-Object {$_.outertext -like "$OSType*"}).outerhtml
-$DLF=$DownLoad.replace('<A href=','')
-$DLF=$DLF -replace '"',' '
-$File2Download=$DLF.Split()[1]
-$FN=$DLF.Split()[2]
-$FileName=$FN.substring(1)
-$File2Download=$File2Download.replace('amp;','')
-$File=$Folder+'\'+$FileName
-$Global:DLLLog
 $Global:NetRuntime
-$NRTLog=$Folder+"\Runtime.log"
 $WinGetLog=$Folder+"\AppUpdate.log"
+
+$NRTLog=$Folder+"\Runtime.log"
 #$RTLinks='https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170'
 $Runtimes='https://aka.ms/vs/17/release/vc_redist.x86.exe','https://aka.ms/vs/17/release/vc_redist.x64.exe','https://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/VSU_4/vcredist_x86.exe','https://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/VSU_4/vcredist_x64.exe'
 $CurrentTime=(Get-date).tostring('yyyy-MM-dd HH:mm:ss')
@@ -49,12 +22,13 @@ $FUSFolders=@('c:\ESD','C:\Windows\SoftwareDistribution\Download','c:\ProgramDat
 $USTLog=$Folder+"\ScheduledTasks-User.log"
 $NetworkLog=$Folder+"\Network.log"
 $TSTLog=$Folder+"\ScheduledTasks-Timed.log"
-$FormColors="Blue","Red","LightBlue", "DarkRed","LightGreen","Green","Yellow"
+
+$FormColors="Blue","Red","Gray","LightBlue", "DarkRed","LightGreen","Green","Yellow"
+
 $RunAfter=$Folder+"\Repair.ps1"
 $VSSLog=$Folder+"\VSS.log"
 $Global:VSSChangeLog 
-$Spool="C:\Windows\System32\Spool"
-$Spooler="C:\Windows\System32\Spool\Printers"
+
 $Script=invoke-webrequest -uri https://raw.githubusercontent.com/MicrosoftSavvy/Released/refs/heads/main/FullScript.ps1
 $ScriptRaw=(($Script.rawcontent).split("`n")).replace("`r",'') | Select-Object -skip 26
 $DownloadScriptVer=(($ScriptRaw | Where-Object { $_ -match "CurrentScriptVer" }) -replace "[^\d.]","")[0]
@@ -87,15 +61,12 @@ function Pull-Logs {
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 	if (Test-Path [System.Windows.Forms.Application]) {if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}}
 
-
 	$System = ((Get-EventLog -LogName System -After (Get-Date).AddMinutes(-$MinutesBack) -entrytype "Error" -ErrorAction SilentlyContinue) | Format-Table -AutoSize -Wrap)
 	$Application = ((Get-EventLog -LogName Application -After (Get-Date).AddMinutes(-$MinutesBack) -entrytype "Error" -ErrorAction SilentlyContinue) | Format-Table -AutoSize -Wrap)
 	$Security = ((Get-EventLog -LogName Security -After (Get-Date).AddMinutes(-$MinutesBack) -entrytype "FailureAudit"  -ErrorAction SilentlyContinue) | Format-Table -AutoSize -Wrap)
 	if (!($System -eq $null)){Out-File -FilePath $SystemLog -InputObject (Get-EventLog -LogName System -After (Get-Date).AddMinutes(-$MinutesBack) -entrytype "Error" | Format-Table -AutoSize -Wrap)}
 	if (!($Application -eq $null)){Out-File -FilePath $ApplicationLog -InputObject (Get-EventLog -LogName Application -After (Get-Date).AddMinutes(-$MinutesBack) -entrytype "Error" | Format-Table -AutoSize -Wrap)}
 	if (!($Security -eq $null)){Out-File -FilePath $SecurityLog -InputObject (Get-EventLog -LogName Security -After (Get-Date).AddMinutes(-$MinutesBack) -entrytype "FailureAudit" | Format-Table -AutoSize -Wrap)}
-
-
 
 	$DISMContents=get-content "c:\Windows\Logs\DISM\DISM.log"  | Where-Object { $_ -GE $StartLogDate} 
 	$DISMErr=$DISMContents | Select-String 'Err'
@@ -121,10 +92,7 @@ function Pull-Logs {
 			}
 		}
 
-	if (!($Global:DLLLog -eq $null)){Out-File -FilePath $DLLRLog -InputObject $Global:DLLLog}
-	if (!($Global:WinGet -eq $null)){Out-File -FilePath $WinGetLog -InputObject $Global:WinGet}
-	if (!($Global:NetRuntime -eq $null)){Out-File -FilePath $NRTLog -InputObject $Global:NetRuntime}
-
+	
 
 }
 
@@ -176,6 +144,32 @@ function RunDISM {
 }
 
 function DownloadSource {
+
+$Ver=(Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion').CurrentBuild + '.' + (Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion').UBR
+$OSNumber=((Get-WmiObject -Class Win32_OperatingSystem).name).split()[1] + " " + ((Get-WmiObject -Class Win32_OperatingSystem).name).split()[2]
+$OSType=((Get-WmiObject -Class Win32_OperatingSystem).name).split()[3]
+$OSType=$OSType.substring(0, 3)
+$OS=$OSNumber + '*'
+$OSName=$OSNumber + " " + $OSType
+$URL="https://uupdump.net/known.php?q=" + $Ver
+$ISODownload=Invoke-WebRequest -uri $URL
+$ISOList=($ISODownload.links)
+$temp='*A href=`"selectlang.php?id=*'
+$ISOList=($ISOList | Where-Object { $_.outerhtml -like $temp -and $_.innerhtml -like $OS }).outerhtml
+$ISOL=$ISOList.replace('<A href="selectlang.php?id=','')
+$ISOL=$ISOL -replace('"',' ')
+$ID=$ISOL.split()[0]
+$DL='https://uupdump.net/get.php?id='+$ID+'&pack=en-us&edition=core;professional'
+$FindFile=Invoke-WebRequest -uri $DL
+$DownLoad=($FindFile.links | Where-Object {$_.outertext -like "$OSType*"}).outerhtml
+$DLF=$DownLoad.replace('<A href=','')
+$DLF=$DLF -replace '"',' '
+$File2Download=$DLF.Split()[1]
+$FN=$DLF.Split()[2]
+$FileName=$FN.substring(1)
+$File2Download=$File2Download.replace('amp;','')
+$File=$Folder+'\'+$FileName
+
 	$CurrentStatus = "Downloading Source System Files" 
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
@@ -187,6 +181,8 @@ function DownloadSource {
 }
 
 function DISMRepairSource {
+
+
 	$CurrentStatus = "Running Repairs with Source Files" 
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
@@ -255,6 +251,9 @@ function ReRegDLLs($DLLLog) {
 	$CurrentStatus = "Re-Registering DLLs in System32 and SYSWOW64" 
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
+	$DLLRLog=$Folder + "\DLLReRegister.log"
+	$Global:DLLLog
+	$DLLFolders='c:\Windows\System32','c:\Windows\Syswow64'
 	ForEach($DLLF in $DLLFolders){
 		$FCount=0
 		$DLLList=(get-childitem $DLLF\*.dll).fullname
@@ -268,9 +267,13 @@ function ReRegDLLs($DLLLog) {
 		$Global:DLLLog=$($Global:DLLLog + $DLLList)
 		Write-Progress -Completed -Activity " "
 	}
+	if (!($Global:DLLLog -eq $null)){Out-File -FilePath $DLLRLog -InputObject $Global:DLLLog}
+	
 }
 
 function ShowVaribles {
+	$VaribleExport=$Folder + "\Varibles.log"
+	
 	$CurrentStatus = "Varibles being exported to " + $VaribleExport 
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
@@ -327,6 +330,10 @@ function Runtimes {
 		$n+=1
 	} until ($n -gt 9)
 	$Global:NetRuntime=switch ($NetRuntime) {{ $_.length -ge 9 } { $_ }}
+
+	if (!($Global:NetRuntime -eq $null)){Out-File -FilePath $NRTLog -InputObject $Global:NetRuntime}
+
+
 }
 
 function Update {
@@ -343,6 +350,9 @@ function Update {
 	&"$Winget" source update
 	$WinGet=&"$Winget" upgrade --all --silent --accept-source-agreements  --disable-interactivity --include-unknown --verbose
 	$Global:WinGet=switch ($WinGet) {{ $_.length -ge 9 } { $_ }}
+
+	if (!($Global:WinGet -eq $null)){Out-File -FilePath $WinGetLog -InputObject $Global:WinGet}
+
 }
 
 function RemoveBadDevices {
@@ -605,6 +615,8 @@ function Spooler {
 		$CurrentStatus = "Clearing spooler folder." 
 		if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 		if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
+	$Spool="C:\Windows\System32\Spool"
+	$Spooler="C:\Windows\System32\Spool\Printers"
 
 	$NewOwner = New-Object System.Security.Principal.NTAccount("BUILTIN\Administrators")
 	$NewUser = New-Object System.Security.AccessControl.FileSystemAccessRule("BUILTIN\Administrators","FullControl", "ContainerInherit, ObjectInherit", "None", "Allow")
@@ -806,25 +818,62 @@ $DNSList=(Get-DnsClientServerAddress -AddressFamily IPv4 | Select-Object -Expand
 $PublicDNS='1.1.1.1','8.8.8.8','208.67.222.222'
 $PingDomain='google.com'
 $PullDomain=Invoke-WebRequest $PingDomain
-if ($PullDomain -ne $null) {Write-Host "Able to connect to $PingDomain"}
+	$CurrentStatus = "Testing Network Cards" 
+	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
+	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
+
+
+
+if ($PullDomain -ne $null) {
+	$CurrentStatus = "Able to connect to $PingDomain" 
+	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
+	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
+}
+
 Try {
-	if ((test-connection -computername $IPGate -count 1 -quiet) -eq $True) {Write-host "Able to ping $IPGate"} else {Write-host "Not able to ping $IPGate"}
+	if ((test-connection -computername $IPGate -count 1 -quiet) -eq $True) {
+	$CurrentStatus = "Able to ping $IPGate" 
+	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
+	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
+	} else {
+	$CurrentStatus = "Not able to ping $IPGate" 
+	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Red}
+	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
+}
 	foreach ($DNS in $DNSList) {
-		write-host "`nUsing $DNS"
+		$CurrentStatus = "`nUsing $DNS" 
+		if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
+		if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}		
 		if ((test-connection -computername $DNS -count 1 -quiet) -eq $true) {
 		Try {
-		((Resolve-DnsName $PingDomain -Server $DNS -Type A -nohostsfile) | ft -autosize)
+		$Results=((Resolve-DnsName $PingDomain -Server $DNS -Type A -nohostsfile) | ft -autosize)
+		if ($Results.length -gt 2){
+		$CurrentStatus = "$PingDomain is availble using $DNS" 
+		}
+		if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
+		if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
 		} catch {
-		Write-host "$PingDomain not reachable using current DNS server: $DNS"
+		$CurrentStatus = "$PingDomain not reachable using current DNS server: $DNS" 
+		if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
+		if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
 		Try {
 		foreach ($PDNS in $PublicDNS) {
-			write-host "`nUsing $PDNS"		
-			((Resolve-DnsName $PingDomain -Server $PDNS -Type A -nohostsfile) | ft -autosize)	
+#		write-host "`nUsing $PDNS"		
+		$Results=((Resolve-DnsName $PingDomain -Server $PDNS -Type A -nohostsfile) | ft -autosize)	
+		$CurrentStatus = $Results 
+		if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
+		if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
 		}
 		} catch {
-	Write-host "$PingDomain not reachable using DNS server: $PDS"
+		$CurrentStatus = "$PingDomain not reachable using DNS server: $PDS" 
+		if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
+		if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
+		
 	}}}}} catch {
-		Write-Host "Gateway not pingable"
+		$CurrentStatus = "Gateway not pingable"
+		if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Red}
+		if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
+		
 	}
 }
 
@@ -904,39 +953,39 @@ foreach ($DriveLetter in $Drives){
 	auditpol /set /subcategory:"Security Group Management" /failure:disable /success:enable
 	$Policy=auditpol /get /category:*
 
-
+###Running manually if import log is empty
 
 	if ((get-content $SetSecurityLog) -eq $null){
 		if ((get-localuser).name -contains "Administrator") {Rename-LocalUser -Name Administrator -NewName LocalAdmin; disable-localuser LocalAdmin}
 		if ((get-localuser).name -contains "Guest") {Rename-LocalUser -Name Guest -NewName LocalGuest; disable-localuser LocalGuest}
 		net accounts /minpwage:1 /maxpwage:45 /lockoutthreshold:3 /lockoutduration:30 /lockoutwindow:15
 	
-	$NTRights=(get-childitem "c:\ntrights.exe" -recurse -erroraction silentlycontinue).fullname
-	if ($NTRights.split().length -gt 1) {$NTRights=$NTRights[0]}
-	
-	if ($NTRights -eq $null) {
-		$NTRightsLink="https://github.com/MicrosoftSavvy/Released/raw/refs/heads/main/ntrights.exe"
-		Invoke-WebRequest $NTRightsLink -outfile $env:windir\ntrights.exe
 		$NTRights=(get-childitem "c:\ntrights.exe" -recurse -erroraction silentlycontinue).fullname
-		if ($NTRights.length -gt 1) {$NTRights=$NTRights[0]}
-	}
-
-	$UserGroups=(Get-LocalGroup).name
-	$NTRCats=(&$ntrights | select -skip 8).Replace(" ","")
-	$AdminService="Administrators","Local Service","Network Service","Service"
-	$User="Administrators","Backup Operators","Power Users","Users"
-	$BURights="Administrators","Backup Operators"
-	$Admin="Administrators"
-	$AdminRights='SeAuditPrivilege','SeSecurityPrivilege','SeCreateSymbolicLinkPrivilege','SeMachineAccountPrivilege','SeIncreaseQuotaPrivilege','SeSystemTimePrivilege','SeTimeZonePrivilege','SeTakeOwnershipPrivilege','SeEnableDelegationPrivilege','SeRemoteShutdownPrivilege','SeProfileSingleProcessPrivilege','SeLoadDriverPrivilege','SeDebugPrivilege','SeIncreaseBasePriorityPrivilege','SeSystemEnvironmentPrivilege','SeManageVolumePrivilege','SeSystemProfilePrivilege','SeUnsolicitedInputPrivilege'
-	$BURights='SeBackupPrivilege','SeRestorePrivilege'
-	$UserRights='SeShutdownPrivilege','SeCreatePagefilePrivilege','SeUndockPrivilege'
-	$NoRights='SeCreatePermanentPrivilege','SeCreateTokenPrivilege','SeAssignPrimaryTokenPrivilege','SeTcbPrivilege,''SeLockMemoryPrivilege','SeChangeNotifyPrivilege','SeIncreaseWorkingSetPrivilege','SeRelabelPrivilege','SeDelegateSessionUserImpersonatePrivilege','SeSyncAgentPrivilege','SeTrustedCredManAccessPrivilege'
-	$AdminServiceRights='SeImpersonatePrivilege','SeCreateGlobalPrivilege'
-	$Users=(Get-LocalUser).name
+		if ($NTRights.split().length -gt 1) {$NTRights=$NTRights[0]}
 	
-	foreach($UserGroup in $UserGroups){
-		foreach($NTRCat in $NTRCats){
-		&$ntrights -r $NTRCat -u $UserGroup
+		if ($NTRights -eq $null) {
+			$NTRightsLink="https://github.com/MicrosoftSavvy/Released/raw/refs/heads/main/ntrights.exe"
+			Invoke-WebRequest $NTRightsLink -outfile $env:windir\ntrights.exe
+			$NTRights=(get-childitem "c:\ntrights.exe" -recurse -erroraction silentlycontinue).fullname
+			if ($NTRights.length -gt 1) {$NTRights=$NTRights[0]}
+		}
+
+		$UserGroups=(Get-LocalGroup).name
+		$NTRCats=(&$ntrights | select -skip 8).Replace(" ","")
+		$AdminService="Administrators","Local Service","Network Service","Service"
+		$User="Administrators","Backup Operators","Power Users","Users"
+		$BURights="Administrators","Backup Operators"
+		$Admin="Administrators"
+		$AdminRights='SeAuditPrivilege','SeSecurityPrivilege','SeCreateSymbolicLinkPrivilege','SeMachineAccountPrivilege','SeIncreaseQuotaPrivilege','SeSystemTimePrivilege','SeTimeZonePrivilege','SeTakeOwnershipPrivilege','SeEnableDelegationPrivilege','SeRemoteShutdownPrivilege','SeProfileSingleProcessPrivilege','SeLoadDriverPrivilege','SeDebugPrivilege','SeIncreaseBasePriorityPrivilege','SeSystemEnvironmentPrivilege','SeManageVolumePrivilege','SeSystemProfilePrivilege','SeUnsolicitedInputPrivilege'
+		$BURights='SeBackupPrivilege','SeRestorePrivilege'
+		$UserRights='SeShutdownPrivilege','SeCreatePagefilePrivilege','SeUndockPrivilege'
+		$NoRights='SeCreatePermanentPrivilege','SeCreateTokenPrivilege','SeAssignPrimaryTokenPrivilege','SeTcbPrivilege,''SeLockMemoryPrivilege','SeChangeNotifyPrivilege','SeIncreaseWorkingSetPrivilege','SeRelabelPrivilege','SeDelegateSessionUserImpersonatePrivilege','SeSyncAgentPrivilege','SeTrustedCredManAccessPrivilege'
+		$AdminServiceRights='SeImpersonatePrivilege','SeCreateGlobalPrivilege'
+		$Users=(Get-LocalUser).name
+	
+		foreach($UserGroup in $UserGroups){
+			foreach($NTRCat in $NTRCats){
+			&$ntrights -r $NTRCat -u $UserGroup
 		
 			foreach($User in $Users){
 			&$ntrights -r $NTRCat -u $User
@@ -965,76 +1014,78 @@ foreach ($DriveLetter in $Drives){
 			}
 		}
 		
-Write-Output "Disabling AutoRun"	
-New-ItemProperty -Path HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer -Name NoDriveTypeAutoRun -value 255 -type Dword -Force -ErrorAction 'SilentlyContinue'
+	Write-Output "Disabling AutoRun"	
+	New-ItemProperty -Path HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer -Name NoDriveTypeAutoRun -value 255 -type Dword -Force -ErrorAction 'SilentlyContinue'
 
-Write-Output "Enabling Edge SmartScreen Filter"
-$Key=Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -ErrorAction 'SilentlyContinue' | Select-Object -ExpandProperty 'EnableSmartScreen'
-if ($Key -eq $Null){
-New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "EnableSmartScreen" -Value 1 -Force -ErrorAction 'SilentlyContinue'
-}else {
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "EnableSmartScreen" -Value 1 -Force -ErrorAction 'SilentlyContinue'
-}
-$Key=Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -ErrorAction 'SilentlyContinue' | Select-Object -ExpandProperty "ShellSmartScreenLevel" 
-if ($Key -eq $Null){
-New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "ShellSmartScreenLevel" -Value 1 -Force -ErrorAction 'SilentlyContinue'
-}else {
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "ShellSmartScreenLevel" -Value 1 -Force -ErrorAction 'SilentlyContinue'
-}
-$Key=Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftEdge\PhishingFilter" -ErrorAction 'SilentlyContinue' | Select-Object -ExpandProperty "EnabledV9"
-if ($Key -eq $Null){
-New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftEdge\PhishingFilter" -Name "EnabledV9"  -Value 1 -Force -ErrorAction 'SilentlyContinue'
-}else {
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftEdge\PhishingFilter" -Name "EnabledV9"  -Value 1 -Force -ErrorAction 'SilentlyContinue'
-}
-$Key=Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftEdge\PhishingFilter" -ErrorAction 'SilentlyContinue' | Select-Object -ExpandProperty "PreventOverride"
-if ($Key -eq $Null){
-New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftEdge\PhishingFilter" -Name "PreventOverride"  -Value 1 -Force -ErrorAction 'SilentlyContinue'
-}else {
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftEdge\PhishingFilter" -Name "PreventOverride"  -Value 1 -Force -ErrorAction 'SilentlyContinue'
-}
-$Key=Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftEdge\PhishingFilter" -ErrorAction 'SilentlyContinue' | Select-Object -ExpandProperty "PreventOverrideAppRepUnknown"
-if ($Key -eq $Null){
-New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftEdge\PhishingFilter" -Name "PreventOverrideAppRepUnknown"  -Value 1 -Force -ErrorAction 'SilentlyContinue'
-}else {
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftEdge\PhishingFilter" -Name "PreventOverrideAppRepUnknown"  -Value 1 -Force -ErrorAction 'SilentlyContinue'
-}
-$Key=Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Client" -ErrorAction 'SilentlyContinue'
-if ($Key -eq $Null){
-New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Client" -Name "AllowBasic"  -Value 0 -Force -ErrorAction 'SilentlyContinue'
-New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Client" -Name "AllowDigest"  -Value 0 -Force -ErrorAction 'SilentlyContinue'
-New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Client" -Name "AllowUnencryptedTraffic"  -Value 0 -Force -ErrorAction 'SilentlyContinue'
-}else {
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Client" -Name "AllowBasic"  -Value 0 -Force -ErrorAction 'SilentlyContinue'
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Client" -Name "AllowDigest"  -Value 0 -Force -ErrorAction 'SilentlyContinue'
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Client" -Name "AllowUnencryptedTraffic"  -Value 0 -Force -ErrorAction 'SilentlyContinue'
-}
-$Key=Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service" -ErrorAction 'SilentlyContinue'
-if ($Key -eq $Null){
-New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service" -Name "AllowBasic"  -Value 0 -Force -ErrorAction 'SilentlyContinue'
-New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service" -Name "DisableRunAs"  -Value 1 -Force -ErrorAction 'SilentlyContinue'
-New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service" -Name "AllowUnencryptedTraffic"  -Value 0 -Force -ErrorAction 'SilentlyContinue'
-}else {
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service" -Name "AllowBasic"  -Value 0 -Force -ErrorAction 'SilentlyContinue'
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service" -Name "DisableRunAs"  -Value 1 -Force -ErrorAction 'SilentlyContinue'
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service" -Name "AllowUnencryptedTraffic"  -Value 0 -Force -ErrorAction 'SilentlyContinue'
-}
-Write-Output "Setting Smart Card Removal Behavior"
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" -Name "scremoveoption" -Value 1 -Force -ErrorAction 'SilentlyContinue'
-Write-Output "Setting lock after 15 minutes of inactivity"
-powercfg.exe /SETACVALUEINDEX SCHEME_CURRENT SUB_VIDEO VIDEOCONLOCK 900
-powercfg.exe /SETDCVALUEINDEX SCHEME_CURRENT SUB_VIDEO VIDEOCONLOCK 900
-$Key=Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -ErrorAction 'SilentlyContinue' | Select-Object -ExpandProperty 'InactivityTimeoutSecs'
-if ($Key -eq $Null){
-New-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'InactivityTimeoutSecs'  -Value 0x00000384 -Force -ErrorAction 'SilentlyContinue'
-}else {
-Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'InactivityTimeoutSecs'  -Value 0x00000384 -Force -ErrorAction 'SilentlyContinue'
-}
-Write-Output "Enable NTLMv2 Only"
-Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Lsa' -Name 'LmCompatibilityLevel' -value 5 -Force -ErrorAction 'SilentlyContinue'
+	Write-Output "Enabling Edge SmartScreen Filter"
+	$Key=Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -ErrorAction 'SilentlyContinue' | Select-Object -ExpandProperty 'EnableSmartScreen'
+	if ($Key -eq $Null){
+	New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "EnableSmartScreen" -Value 1 -Force -ErrorAction 'SilentlyContinue'
+	}else {
+	Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "EnableSmartScreen" -Value 1 -Force -ErrorAction 'SilentlyContinue'
+	}
+	$Key=Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -ErrorAction 'SilentlyContinue' | Select-Object -ExpandProperty "ShellSmartScreenLevel" 
+	if ($Key -eq $Null){
+	New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "ShellSmartScreenLevel" -Value 1 -Force -ErrorAction 'SilentlyContinue'
+	}else {
+	Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "ShellSmartScreenLevel" -Value 1 -Force -ErrorAction 'SilentlyContinue'
+	}
+	$Key=Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftEdge\PhishingFilter" -ErrorAction 'SilentlyContinue' | Select-Object -ExpandProperty "EnabledV9"
+	if ($Key -eq $Null){
+	New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftEdge\PhishingFilter" -Name "EnabledV9"  -Value 1 -Force -ErrorAction 'SilentlyContinue'
+	}else {
+	Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftEdge\PhishingFilter" -Name "EnabledV9"  -Value 1 -Force -ErrorAction 'SilentlyContinue'
+	}
+	$Key=Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftEdge\PhishingFilter" -ErrorAction 'SilentlyContinue' | Select-Object -ExpandProperty "PreventOverride"
+	if ($Key -eq $Null){
+	New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftEdge\PhishingFilter" -Name "PreventOverride"  -Value 1 -Force -ErrorAction 'SilentlyContinue'
+	}else {
+	Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftEdge\PhishingFilter" -Name "PreventOverride"  -Value 1 -Force -ErrorAction 'SilentlyContinue'
+	}
+	$Key=Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftEdge\PhishingFilter" -ErrorAction 'SilentlyContinue' | Select-Object -ExpandProperty "PreventOverrideAppRepUnknown"
+	if ($Key -eq $Null){
+	New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftEdge\PhishingFilter" -Name "PreventOverrideAppRepUnknown"  -Value 1 -Force -ErrorAction 'SilentlyContinue'
+	}else {
+	Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftEdge\PhishingFilter" -Name "PreventOverrideAppRepUnknown"  -Value 1 -Force -ErrorAction 'SilentlyContinue'
+	}
+	$Key=Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Client" -ErrorAction 'SilentlyContinue'
+	if ($Key -eq $Null){
+	New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Client" -Name "AllowBasic"  -Value 0 -Force -ErrorAction 'SilentlyContinue'
+	New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Client" -Name "AllowDigest"  -Value 0 -Force -ErrorAction 'SilentlyContinue'
+	New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Client" -Name "AllowUnencryptedTraffic"  -Value 0 -Force -ErrorAction 'SilentlyContinue'
+	}else {
+	Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Client" -Name "AllowBasic"  -Value 0 -Force -ErrorAction 'SilentlyContinue'
+	Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Client" -Name "AllowDigest"  -Value 0 -Force -ErrorAction 'SilentlyContinue'
+	Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Client" -Name "AllowUnencryptedTraffic"  -Value 0 -Force -ErrorAction 'SilentlyContinue'
+	}
+	$Key=Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service" -ErrorAction 'SilentlyContinue'
+	if ($Key -eq $Null){
+	New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service" -Name "AllowBasic"  -Value 0 -Force -ErrorAction 'SilentlyContinue'
+	New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service" -Name "DisableRunAs"  -Value 1 -Force -ErrorAction 'SilentlyContinue'
+	New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service" -Name "AllowUnencryptedTraffic"  -Value 0 -Force -ErrorAction 'SilentlyContinue'
+	}else {
+	Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service" -Name "AllowBasic"  -Value 0 -Force -ErrorAction 'SilentlyContinue'
+	Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service" -Name "DisableRunAs"  -Value 1 -Force -ErrorAction 'SilentlyContinue'
+	Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service" -Name "AllowUnencryptedTraffic"  -Value 0 -Force -ErrorAction 'SilentlyContinue'
+	}
+	Write-Output "Setting Smart Card Removal Behavior"
+	Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" -Name "scremoveoption" -Value 1 -Force -ErrorAction 'SilentlyContinue'
+	Write-Output "Setting lock after 15 minutes of inactivity"
+	powercfg.exe /SETACVALUEINDEX SCHEME_CURRENT SUB_VIDEO VIDEOCONLOCK 900
+	powercfg.exe /SETDCVALUEINDEX SCHEME_CURRENT SUB_VIDEO VIDEOCONLOCK 900
+	$Key=Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -ErrorAction 'SilentlyContinue' | Select-Object -ExpandProperty 'InactivityTimeoutSecs'
+	if ($Key -eq $Null){
+	New-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'InactivityTimeoutSecs'  -Value 0x00000384 -Force -ErrorAction 'SilentlyContinue'
+	}else {
+	Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'InactivityTimeoutSecs'  -Value 0x00000384 -Force -ErrorAction 'SilentlyContinue'
+	}
+	Write-Output "Enable NTLMv2 Only"
+	Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Lsa' -Name 'LmCompatibilityLevel' -value 5 -Force -ErrorAction 'SilentlyContinue'
 		}
 	}
 	}
+	
+##End Manual
 	
 	$Nics=(get-netipconfiguration).interfacealias	
 	$netShare = New-Object -ComObject HNetCfg.HNetShare
@@ -1083,8 +1134,6 @@ function GUI {
 	$CBSV = New-Object System.Windows.Forms.CheckBox
 	$CBUpdate = New-Object System.Windows.Forms.CheckBox
 	$CBNetwork = New-Object System.Windows.Forms.CheckBox
-	$CBTime = New-Object System.Windows.Forms.CheckBox
-	$CBCleanUp = New-Object System.Windows.Forms.CheckBox
 	$CBPCR = New-Object System.Windows.Forms.CheckBox
 	$CBPCRST = New-Object System.Windows.Forms.CheckBox
 	$CBVSS = New-Object System.Windows.Forms.CheckBox
@@ -1106,6 +1155,143 @@ function GUI {
 	$ServiceList = New-Object System.Windows.Forms.ComboBox
 	
 	
+	
+	$tooltip1 = New-Object System.Windows.Forms.ToolTip
+	$Run.Name="Run"
+	$Repair.Name="Repair"
+	$Secure.Name="Secure"
+	$Clear.Name="Clear"
+	$Exit.Name="Exit"
+	$Update.Name="Update"
+	$CBCleanUp.Name="CBCleanUp"
+	$CBTime.Name="CBTime"
+	$CBSpaceCleanUp.Name="CBSpaceCleanUp"
+	$CBNetwork.Name="CBNetwork"
+	$CBLogs.Name="CBLogs"
+	$CBDLLs.Name="CBDLLs"
+	$CBBadDevices.Name="CBBadDevices"
+	$CBCHK.Name="CBCHK"
+	$CBDISM.Name="CBDISM"
+	$CBSFC.Name="CBSFC"
+	$CBRT.Name="CBRT"
+	$CBSR.Name="CBSR"
+	$CBST.Name="CBST"
+	$CBSV.Name="CBSV"
+	$CBUpdate.Name="CBUpdate"
+	$CBNetwork.Name="CBNetwork"
+	$CBPCR.Name="CBPCR"
+	$CBPCRST.Name="CBPCRST"
+	$CBVSS.Name="CBVSS"
+	$CBSpool.Name="CBSpool"
+	$CBDevices.Name="CBDevices"
+	$CBEPO.Name="CBEPO"
+	$CBServices.Name="CBServices"
+	$CBDS.Name="CBDS"
+	$CBNetCheck.Name="CBNetCheck"
+	$CBRecycle.Name="CBRecycle"
+	$CBSecureHOSTS.Name="CBSecureHOSTS"
+	$CBSecurePC.Name="CBSecurePC"
+	$CBIAdmin.Name="CBIAdmin"
+	$TXTMIN.Name="TXTMIN"
+	$Status.Name="Status"
+	$TXTPCR.Name="TXTPCR"
+	$DDDevices.Name="DDDevices"
+	$ServiceList.Name="ServiceList"
+
+	$ShowHelp={
+    #display popup help
+    #each value is the name of a control on the form.
+     Switch ($this.name) {
+
+		"Run" {$tip = "Runs Checked options"}
+		"Repair" {$tip = "Checks options that would be best for running repairs"}
+		"Secure" {$tip = "Checks options that would be best to help secure PC"}
+		"Clear" {$tip = "Clears all check boxes"}
+		"Exit" {$tip = "Exit the Script"}
+		"Update" {$tip = "Update the Script"}
+		"CBCleanUp" {$tip = "Clean-up after running"}
+		"CBTime" {$tip = "Check System Time to NTP"}
+		"CBSpaceCleanUp" {$tip = "Free up space on PC"}
+		"CBNetwork" {$tip = "Set network to private"}
+		"CBLogs" {$tip = "Pull log files for time specified"}
+		"CBDLLs" {$tip = "Re-Register all DLLs"}
+		"CBBadDevices" {$tip = "Remove Devices with problematic drivers"}
+		"CBCHK" {$tip = "Run CheckDisk"}
+		"CBDISM" {$tip = "Run DISM and download source files if needed"}
+		"CBSFC" {$tip = "Runs System File Checker"}
+		"CBRT" {$tip = "Installs RunTimes"}
+		"CBSR" {$tip = "Schedule restart if needed at 3AM"}
+		"CBST" {$tip = "Pulls list of scheduled tasks that run as user or run at scheduled times"}
+		"CBSV" {$tip = "Pulls varibles and exports them to a file"}
+		"CBUpdate" {$tip = "Update the system"}
+		"CBPCR" {$tip = "Rename PC to either Serial Number or custom setting"}
+		"CBPCRST" {$tip = "Rename PC to Serial Number"}
+		"CBVSS" {$tip = "Turn on Shadow Copies"}
+		"CBSpool" {$tip = "Clear Print Spooler Folder"}
+		"CBDevices" {$tip = "Remove all devices from the category selected"}
+		"CBEPO" {$tip = "Enable all options in Power Settings"}
+		"CBServices" {$tip = "Reset Permissions on service"}
+		"CBDS" {$tip = "Download source files regards if needed"}
+		"CBNetCheck" {$tip = "Checks DNS and if pingable"}
+		"CBRecycle" {$tip = "Clear everyone's recycle bin"}
+		"CBSecureHOSTS" {$tip = "Downloads a secure HOSTS file to assist in safer internet"}
+		"CBSecurePC" {$tip = "Settings to assist in securing PC"}
+		"CBIAdmin" {$tip = "Sets INTERACTIVE as admin giving all users admin rights to only this computer and only while signed in"}
+		"TXTMIN" {$tip = "Time to go back for logs"}
+		"Status" {$tip = "Current status window"}
+		"TXTPCR" {$tip = "Rename PC to ..."}
+		"DDDevices" {$tip = "Remove all devices of this type"}
+		"ServiceList" {$tip = "List of services"}
+      }
+$tooltip1.SetToolTip($this,$tip)
+
+}
+
+$Run.add_MouseHover($ShowHelp)
+$Repair.add_MouseHover($ShowHelp)
+$Secure.add_MouseHover($ShowHelp)
+$Clear.add_MouseHover($ShowHelp)
+$Exit.add_MouseHover($ShowHelp)
+$Update.add_MouseHover($ShowHelp)
+$CBCleanUp.add_MouseHover($ShowHelp)
+$CBTime.add_MouseHover($ShowHelp)
+$CBSpaceCleanUp.add_MouseHover($ShowHelp)
+$CBNetwork.add_MouseHover($ShowHelp)
+$CBLogs.add_MouseHover($ShowHelp)
+$CBDLLs.add_MouseHover($ShowHelp)
+$CBBadDevices.add_MouseHover($ShowHelp)
+$CBCHK.add_MouseHover($ShowHelp)
+$CBDISM.add_MouseHover($ShowHelp)
+$CBSFC.add_MouseHover($ShowHelp)
+$CBRT.add_MouseHover($ShowHelp)
+$CBSR.add_MouseHover($ShowHelp)
+$CBST.add_MouseHover($ShowHelp)
+$CBSV.add_MouseHover($ShowHelp)
+$CBUpdate.add_MouseHover($ShowHelp)
+$CBNetwork.add_MouseHover($ShowHelp)
+$CBTime.add_MouseHover($ShowHelp)
+$CBCleanUp.add_MouseHover($ShowHelp)
+$CBPCR.add_MouseHover($ShowHelp)
+$CBPCRST.add_MouseHover($ShowHelp)
+$CBVSS.add_MouseHover($ShowHelp)
+$CBSpool.add_MouseHover($ShowHelp)
+$CBDevices.add_MouseHover($ShowHelp)
+$CBEPO.add_MouseHover($ShowHelp)
+$CBServices.add_MouseHover($ShowHelp)
+$CBDS.add_MouseHover($ShowHelp)
+$CBNetCheck.add_MouseHover($ShowHelp)
+$CBRecycle.add_MouseHover($ShowHelp)
+$CBSecureHOSTS.add_MouseHover($ShowHelp)
+$CBSecurePC.add_MouseHover($ShowHelp)
+$CBIAdmin.add_MouseHover($ShowHelp)
+$TXTMIN.add_MouseHover($ShowHelp)
+$Status.add_MouseHover($ShowHelp)
+$TXTPCR.add_MouseHover($ShowHelp)
+$DDDevices.add_MouseHover($ShowHelp)
+$ServiceList.add_MouseHover($ShowHelp)
+
+	
+	
 	$form.Text = "The Little Helper GUI $CurrentScriptVer"
 	$form.Autosize = $True
 
@@ -1115,12 +1301,14 @@ function GUI {
 		if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
 	} 
 
+	
 	$CBCleanUp.Text = "Clean Up"
 	$CBCleanUp.Location = New-Object System.Drawing.Point(10, 10)
 	$CBCleanUp.Autosize = $True
 	$CBCleanUp.checked = $True
 	$form.Controls.Add($CBCleanUp)
 	
+	$CBTime.Name="CBTime"
 	$CBTime.Text = "Fix Time"
 	$CBTime.Location = New-Object System.Drawing.Point(10, 30)
 	$CBTime.Autosize = $True
@@ -1380,6 +1568,7 @@ function GUI {
 	($CBSecureHOSTS.checked) = $False
 	($CBSecurePC.checked) = $False
 	($CBIAdmin.checked) = $False
+	$form.BackColor = [System.Drawing.Color]::LightGray
 	})
 
 	$Secure.Text = "Secure"
@@ -1494,6 +1683,10 @@ function GUI {
 
 	$Status.items.add("Run Finished")
 	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
+#	$ListResults=$Status.items
+	$StatusLog=$Folder + "\RunStatus.log"
+	Out-File -FilePath $StatusLog -InputObject ($Status.items)
+	
 	$n=0
 	do{
 		$n=$n+1
