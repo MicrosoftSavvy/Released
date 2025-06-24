@@ -23,9 +23,6 @@ $USTLog=$Folder+"\ScheduledTasks-User.log"
 $NetworkLog=$Folder+"\Network.log"
 $TSTLog=$Folder+"\ScheduledTasks-Timed.log"
 
-#$FormColors="Blue","Red","Gray","LightBlue", "DarkRed","LightGreen","Green","Yellow"
-
-
 $RunAfter=$Folder+"\Repair.ps1"
 $VSSLog=$Folder+"\VSS.log"
 $Global:VSSChangeLog 
@@ -98,6 +95,11 @@ function Pull-Logs {
 }
 
 function VSS {
+	$CurrentStatus = "Checking to see if VSS is enabledl enabling and scheduling" 
+	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
+	if (Test-Path [System.Windows.Forms.Application]) {if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}}
+
+
 	foreach ($DriveLetter in $Drives){
 	$drive=$DriveLetter.replace(":\","")
 	if (!(Get-ScheduledTask | Where-Object { $_.TaskName -like '*Shadow*' } | Select-Object TaskName, State)){
@@ -126,7 +128,7 @@ function VSS {
 		if ($Status -ne $null) {$Status.items.add($Global:VSSChangeLog)}else {Write-Host $Global:VSSChangeLog -foregroundcolor Green}
 		if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
 	
-} else {$Global:VSSChangeLog = "VSS Already Enabled.`n"; if ($Status -ne $null) {$Status.items.add($Global:VSSChangeLog)}else {Write-Host $Global:VSSChangeLog -foregroundcolor Green}
+} else {$Global:VSSChangeLog = "VSS Already Enabled on $Drive.`n"; if ($Status -ne $null) {$Status.items.add($Global:VSSChangeLog)}else {Write-Host $Global:VSSChangeLog -foregroundcolor Green}
 }
 }
 	if (!($Global:VSSChangeLog -eq $null)){Out-File -FilePath $VSSLog -InputObject $Global:VSSChangeLog}
@@ -145,6 +147,7 @@ function RunDISM {
 }
 
 function DownloadSource {
+
 
 $Ver=(Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion').CurrentBuild + '.' + (Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion').UBR
 $OSNumber=((Get-WmiObject -Class Win32_OperatingSystem).name).split()[1] + " " + ((Get-WmiObject -Class Win32_OperatingSystem).name).split()[2]
@@ -282,6 +285,11 @@ function ShowVaribles {
 }
 
 function ScheduleRestart {
+	$CurrentStatus = "Checking if restart is pending and scheduling for $Time" 
+	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
+	if (Test-Path [System.Windows.Forms.Application]) {if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}}
+
+
 	if (PendingReboot -eq "True") {
 		$RestartSchedule=(schtasks /Create /SC ONCE /TN "ScheduledRestart" /TR "shutdown /r /f /t 0" /SD $Date /ST $time /F /Z /rl HIGHEST /ru System /V1)
 		if (!(Get-ScheduledTask | Where-Object { $_.TaskName -like '*ScheduledRestart*' } | Select-Object TaskName, State)){$RestartSchedule}
@@ -503,6 +511,10 @@ function RemoveDeviceGroup {
 }
 
 function EnablePowerOptions {
+
+	$CurrentStatus = "Enabling all options in Power Settings" 
+	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
+	if (Test-Path [System.Windows.Forms.Application]) {if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}}
 
 	$powerSettingTable = Get-WmiObject -Namespace root\cimv2\power -Class Win32_PowerSetting
 	$powerSettingInSubgroubTable = Get-WmiObject -Namespace root\cimv2\power -Class Win32_PowerSettingInSubgroup
@@ -1686,7 +1698,6 @@ $ServiceList.add_MouseHover($ShowHelp)
 
 	$Status.items.add("Run Finished")
 	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
-#	$ListResults=$Status.items
 	$StatusLog=$Folder + "\RunStatus.log"
 	Out-File -FilePath $StatusLog -InputObject ($Status.items)
 	
