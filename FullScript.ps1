@@ -23,7 +23,8 @@ $USTLog=$Folder+"\ScheduledTasks-User.log"
 $NetworkLog=$Folder+"\Network.log"
 $TSTLog=$Folder+"\ScheduledTasks-Timed.log"
 
-$FormColors="Blue","Red","Gray","LightBlue", "DarkRed","LightGreen","Green","Yellow"
+#$FormColors="Blue","Red","Gray","LightBlue", "DarkRed","LightGreen","Green","Yellow"
+
 
 $RunAfter=$Folder+"\Repair.ps1"
 $VSSLog=$Folder+"\VSS.log"
@@ -1108,6 +1109,8 @@ function GUI {
 	[reflection.assembly]::loadwithpartialname("System.Drawing") | Out-Null
 
 
+	$FormColors=[Enum]::GetValues([System.Drawing.KnownColor]) | where {$_ -notlike "Menu*" -and $_ -notlike "Gradient*" -and $_ -notlike "Button*"-and $_ -notlike "Window*"-and $_ -notlike "Scroll*"-and $_ -notlike "Info*"-and $_ -notlike "Inactive*"-and $_ -notlike "Hot*"-and $_ -notlike "Highlight*"-and $_ -notmatch "Graytext"-and $_ -notlike "Control*"-and $_ -notmatch "AppWorkspace"-and $_ -notlike "Active*"-and $_ -notmatch "Desktop"-and $_ -notmatch "Transparent"}
+
 
 
 	$form = New-Object System.Windows.Forms.Form
@@ -1694,7 +1697,7 @@ $ServiceList.add_MouseHover($ShowHelp)
 		$form.BackColor = [System.Drawing.Color]::$FColor 
 		Start-Sleep -Milliseconds 50
 		}
-	} while ($n -lt 5)
+	} while ($n -lt 1)
 		})
 
 	$form.Controls.Add($Run)
