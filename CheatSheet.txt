@@ -1,0 +1,275 @@
+CHEAT SHEET (IF YOU DO NOT UNDERSTAND PLEASE ASK OR JUST DO NOT RUN)
+SystemPropertiesAdvanced.exe 	= 	advanced system properties
+control appwiz.cpl	=	Add \ Remove App wizard
+control access.cpl 	=	Accessibility Options
+control sysdm.cpl 	=	Add New Hardware
+control timedate.cpl	=	Date/Time Properties
+control desk.cpl	=	Display Properties
+control findfast.cpl	=	FindFast
+control fonts		=	Fonts Folder
+control inetcpl.cpl	=	Internet Properties
+control joy.cpl		=	Joystick Properties
+control main.cpl	=	Keyboard Properties
+control mlcfg32.cpl	=	Microsoft Exchange (or Windows Messaging)
+control wgpocpl.cpl	=	Microsoft Mail Post Office
+control modem.cpl	=	Modem Properties
+control main.cpl	=	Mouse Properties
+control mmsys.cpl	=	Multimedia Properties
+control netcpl.cpl	=	Network Connections Properties
+control ncpa.cpl	=	Network Connections Properties
+control password.cpl	=	Password Properties
+control printers	=	Printers Folder
+control intl.cpl	=	Regional Settings
+control sticpl.cpl	=	Scanners and Cameras
+control mmsys.cpl	=	Sound Properties
+control sysdm.cpl	=	System Properties
+control keymgr.dll	=	Credential Manager
+dcomcnfg = Componet Services
+printmanagement.msc	=	Print Management Console
+UserAccountControlSettings.exe	=	UAC
+devmgmt.msc	=	Device Manager
+shell:::{A8A91A66-3A7D-4424-8D24-04E180695C7A} = Devices and Printers (From Run or explorer box)
+
+#-Windows11-24h2.iso
+https://dl.atruent.com/wl/?id=HReqEcCsBv3cJYhyEBN0CaIBBNQjb1HT&fmode=download 
+#!ps
+Set-ExecutionPolicy -ExecutionPolicy Bypass -Force; [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; ((New-Object System.Net.WebClient).DownloadFile('https://dl.atruent.com/wl/?id=HReqEcCsBv3cJYhyEBN0CaIBBNQjb1HT&fmode=download','c:\atruent\Windows11-24h2.iso'))
+
+#-Windows11-23h2.iso
+https://dl.atruent.com/wl/?id=I0WDdjiheHDWaggHJdZd2UPVEnRWqAfq&fmode=download 
+#!ps
+Set-ExecutionPolicy -ExecutionPolicy Bypass -Force; [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; ((New-Object System.Net.WebClient).DownloadFile('https://dl.atruent.com/wl/?id=I0WDdjiheHDWaggHJdZd2UPVEnRWqAfq&fmode=download','c:\atruent\Windows11-23h2.iso'))
+
+#-Windows11-22h2.iso
+https://dl.atruent.com/wl/?id=6iTK9BNXGy8AchtBuo6bxJ0aiaGencuF&fmode=download 
+#!ps
+Set-ExecutionPolicy -ExecutionPolicy Bypass -Force; [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; ((New-Object System.Net.WebClient).DownloadFile('https://dl.atruent.com/wl/?id=6iTK9BNXGy8AchtBuo6bxJ0aiaGencuF&fmode=download','c:\atruent\Windows11-22h2.iso'))
+
+#-Windows11-21h2.iso
+https://dl.atruent.com/wl/?id=VKxlspAU31f38VgSuGsRH9Xzr6G0q199&fmode=download 
+#!ps
+Set-ExecutionPolicy -ExecutionPolicy Bypass -Force; [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; ((New-Object System.Net.WebClient).DownloadFile('https://dl.atruent.com/wl/?id=VKxlspAU31f38VgSuGsRH9Xzr6G0q199&fmode=download ','c:\atruent\Windows11-21h2.iso'))
+
+
+#-Install Print Management Console
+#!ps
+Add-WindowsCapability -Online -Name "Print.Management.Console~~~~0.0.1.0"
+#OR
+DISM /Online /Get-CapabilityInfo /CapabilityName:Print.Management.Console~~~~0.0.1.0
+
+#-Change network to private
+powershell -executionpolicy bypass -c $Network = (Get-NetConnectionProfile).Name; Set-NetConnectionProfile -Name $Network -NetworkCategory Private -ErrorAction SilentlyContinue
+
+#-Find out what versions on in WIM
+dism /Get-WimInfo /WimFile:c:\atruent\11-24h2.wim
+
+#-Run DISM repair with source wim
+dism /online /cleanup-image /restorehealth /source:wim:c:\atruent\11-24h2.wim:1 /limitaccess
+
+#-Backup Drivers
+mkdir c:\atruent\DriverBackup
+PNPUTIL /export-driver * c:\atruent\DriverBackup
+
+#-Install Drivers
+pnputil /add-driver *.inf /install /subdirs
+
+#-Look for hardware changes
+pnputil /scan-devices
+
+#-List of property options
+#!ps
+(get-printerdriver) | get-member
+
+#-Install driver for printers that is already installed (not showing up in print driver dropdown)
+add-printerdriver -name "HP Universal Printing PS"
+
+#-datto rmm
+https://dl.atruent.com/wl/?id=wSMNUsC0DNHasgUrzdGxyqZj6q8PWftz&fmode=download
+
+#-sential 1 
+https://dl.atruent.com/wl/?id=IASsxWCoNQ5ynZjp4uTpWO6rKpFvLHOB&fmode=download
+
+#-Go back after feature update
+DISM /Online /Initiate-OSUninstall /Quiet /norestart
+
+#-Delete Windows Hello registered items
+takeown /f C:\Windows\ServiceProfiles\LocalService\AppData\Local\Microsoft\Ngc /R
+cacls C:\Windows\ServiceProfiles\LocalService\AppData\Local\Microsoft\Ngc /e /c /t /g administrators:f
+move C:\Windows\ServiceProfiles\LocalService\AppData\Local\Microsoft\Ngc C:\Windows\ServiceProfiles\LocalService\AppData\Local\Microsoft\Ngc.old
+
+#-Sync time with NIST
+net start w32time
+w32tm /config /syncfromflags:manual /manualpeerlist:"time-a-g.nist.gov time-b-g.nist.gov time-c-g.nist.gov"
+w32tm /resync
+
+#-Re-Register DLLS
+cd c:\windows\system32 && for %f in (*.ocx *.dll) do c:\windows\system32\regsvr32 /s %f
+cd c:\windows\syswow64 && for %f in (*.ocx *.dll) do c:\windows\system32\regsvr32 /s %f
+
+#-Download and Run Prep Script
+#!ps
+Set-ExecutionPolicy -ExecutionPolicy Bypass -Force; [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; & mkdir c:\atruent\temp -Force; ((New-Object System.Net.WebClient).DownloadString('https://dl.atruent.com/wl/?id=LRVysq1Kgx7KeJBZaFkN5bWnSNGCBAB5&fmode=download')) > "c:\atruent\temp\preppc.ps1"; powershell.exe -ExecutionPolicy Bypass -File "c:\atruent\temp\preppc.ps1"
+
+#-List all installed printer drivers as printer drivers
+#!ps
+$Printers=(pnputil.exe /enum-devices /class printer | find "Device Description"); $Printers=$Printers.substring(28);foreach($Printer in $Printers){add-printerdriver -name $printer}
+
+#-Connect to Office 365 powershell
+Install-Module ExchangeOnlineManagement -Force -Scope AllUsers
+Import-Module ExchangeOnlineManagement
+Connect-ExchangeOnline
+
+#-Enable SMB1 server
+Set-SmbServerConfiguration -EnableSMB1Protocol $true
+
+#-Check status of SMB1 server
+Get-SmbServerConfiguration | Select EnableSMB1Protocol
+
+#-Enable SMB1 client
+dism /online /enable-feature /featurename:SMB1Protocol /all /norestart
+OR
+Enable-WindowsOptionalFeature -Online -FeatureName SMB1Protocol
+OR
+Set-SmbClientConfiguration -EnableSMB1Protocol $true
+
+#-Stored Passwords
+rundll32.exe keymgr.dll, KRShowKeyMgr
+
+#-Remove files over a year old from folder
+#!ps
+Get-ChildItem "C:\Program Files (x86)\Fortinet\FortiClientEMS\Logs" -Recurse -File | Where CreationTime -lt  (Get-Date).AddDays(-366)  | Remove-Item -Force
+
+#-Windows login exe (boot to win setup shift f10 can rename cmd to sethc.exe and get cmd before logging in) 
+c:\windows\system32\sethc.exe
+
+#-Bypass Windows Installer forcing creating microsoft account
+shift f10
+oobe\bypassnro
+
+#-Make shortcuts that upload to OneDrive (to sync between PCs)
+mklink /j "Folder that will be shortcut" "Folder that will be the destination"
+#work pc = mklink /j "c:\testfolder" "c:\users\support\onedrive\testfolder"
+#home pc = mklink /j "c:\users\support\onedrive\testfolder" "c:\testfolder"
+
+#-Turn off fast startup
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Power" /v HiberbootEnabled /t REG_DWORD /d 0 /y
+
+#-Turn on fast startup
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Power" /v HiberbootEnabled /t REG_DWORD /d 1 /y
+
+#What version of 11 am I running
+#!ps
+(Get-Item "HKLM:SOFTWARE\Microsoft\Windows NT\CurrentVersion").GetValue('DisplayVersion')
+
+#lookup website using certian dns
+nslookup wjz.com 8.8.8.8
+
+#-Try to everyone empty recyle bins
+del c:\$Recycle.Bin\* /s /q
+
+#-Lock PCs
+Rundll32.exe user32.dll,LockWorkStation
+
+#-Look for ID in logs (User logins)
+# 4624 (successful logon), 4625 (failed logon), 4634 (logoff), 4648 (logon using explicit credentials), and 4768/4776 (Kerberos authentication
+Get-WinEvent -FilterHashTable @{LogName='Security'; ID=4625}
+Get-EventLog -LogName Security -InstanceId 4624, 4625, 4634, 4648 | Select-object TimeGenerated, InstanceID, MachineName, EntryType, Message | Format-Table -GroupBy InstanceID
+	
+#Login Failure Information
+powershell -c (Get-EventLog -LogName Security -InstanceId 4625).message	
+
+#-Backup Quick Access, SharePoint-OneDrive links and Backup Outlook Signatures for all users (Atruent \ username-backup)
+#!ps
+$Users=(Get-ChildItem c:\Users); foreach($User in $Users) {mkdir c:\Atruent\$User-Backup\QuickAcces; copy-item -path "c:\Users\$User\appdata\roaming\Microsoft\Windows\Recent\AutomaticDestinations\f01b4d95cf55d32a.automaticDestinations-ms" -destination "c:\Atruent\$User-Backup\QuickAcces\f01b4d95cf55d32a.automaticDestinations-ms" -erroraction silentlycontinue; copy-item -path "c:\Users\$user\appdata\roaming\Microsoft\Signatures" -destination "c:\Atruent\$User-Backup\Signatures" -recurse -erroraction silentlycontinue; copy-item -path "c:\Users\$user\appdata\local\Google\Chrome" -destination "c:\Atruent\$User-Backup\Chrome" -recurse -erroraction silentlycontinue; reg export "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\SyncRootManager" "c:\Atruent\$User-Backup\SharePoint-OneDrive.reg"}; write-host "Backed up to the Atruent folder in the root of the C drive" -foregroundcolor Green
+
+#Turn on TPM
+#!ps
+Enable-TpmAutoProvisioning
+manage-bde -protectors -add c: -tpm 
+
+#Get TPM Info
+#!ps
+Get-TPM
+
+#Remove Problematic Connected Devices
+powershell -executionpolicy bypass -c start-transcript -path "c:\Atruent\RemoveProblematicDevices.txt" -append; clear-host; foreach ($dev in (Get-PnpDevice ^| Where-Object {$_.Status -notmatch 'OK' -and $_.Present -like 'True' -and $_.InstanceId -notmatch 'STORAGE' -and $_.Class -notmatch 'SmartCardFilter'})) {write-host Problematic $dev.Name}; Write-Host "Press Enter to remove the devices listed above..."; Read-Host; $DevList=(Get-PnpDevice ^| Where-Object {$_.Status -notmatch 'OK' -and $_.Present -like 'True' -and $_.InstanceId -notmatch 'STORAGE' -and $_.Class -notmatch 'SmartCardFilter'}); foreach ($dev in $DevList) {write-host Removing $dev.Name; pnputil /remove-device $dev.InstanceId}; Stop-Transcript
+
+#System Recovery
+rstrui.exe /OFFLINE:C:\Windows 
+
+#List SIDs
+powershell -executionpolicy bypass -c Get-ChildItem -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\' -Recurse -ErrorAction SilentlyContinue ^| Select-Object {$_.GetValue('ProfileImagePath'), ($_.Name).replace('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\','')}
+
+#Uptime
+Systeminfo | find "System Boot"
+
+#Turn off BitLocker, Enable, Clear, Set Owner and Initialize TPM, add TPM to BitLocker (When key not showing up in DRMM)
+manage-bde -off c:
+powershell -c Enable-TpmAutoProvisioning
+powershell -c clear-tpm
+powershell -c Set-TpmOwnerAuth
+powershell -c Initialize-Tpm
+manage-bde -protectors -add c: -tpm 
+
+#Launch scheduled task to start intune sync
+#!ps
+Get-ScheduledTask | where {$_.TaskName -eq 'PushLaunch'} | Start-ScheduledTask
+
+#To get info on scheduled task for Intune
+#!ps
+Get-ScheduledTask | where {$_.TaskName -eq 'PushLaunch'} | Get-ScheduledTaskInfo
+
+#Edit Windows Boot
+bcdedit /default {identifier}
+
+#See if PC is pending restart
+powershell -c function Test-PendingReboot {if (Get-ChildItem 'HKLM:\Software\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending' -EA Ignore) { return $true }; if (Get-Item 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired' -EA Ignore) { return $true }; if (Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager' -Name PendingFileRenameOperations -EA Ignore) { return $true }; try {$util = [wmiclass]'\\.\root\ccm\clientsdk:CCM_ClientUtilities'; $status = $util.DetermineIfRebootPending(); if (($status -ne $null) -and $status.RebootPending) {return $true}} catch { }; return $false}; $Pending=Test-PendingReboot; clear-host; write-host Pending reboot: $Pending 
+
+#Information on pending restart (Needs to install module)
+powershell -c Install-Module -Name PendingReboot -force; Test-PendingReboot -Detailed
+
+#Check disk space
+powershell -c Get-WmiObject Win32_LogicalDisk ^| Select-Object DeviceID, @{Name='Size (GB)'; Expression={[math]::Round($_.Size / 1GB, 2)}}, @{Name='FreeSpace (GB)'; Expression={[math]::Round($_.FreeSpace / 1GB, 2)}}
+
+#Delete Temp Files
+del %temp% /q && del c:\windows\temp\* /q
+
+#Add Printer Driver from driver already installed (different model)
+#!ps
+Add-PrinterDriver -Name "Printer Driver Name"
+
+#Add Printer to existing port
+Add-Printer -Name "UPS Labels" -DriverName "UPS Thermal 2844 -PortName "USB001"
+
+#List Scheduled Tasks and Next Run Time if timed
+Get-ScheduledTask | Select-Object TaskName, Author, State, TaskPath, @{Name="Next Run Time";Expression={$_.Triggers.TimeTriggers.StartBoundary}}
+
+#List all Run As tasks
+#!ps
+Get-ScheduledTask -TaskPath "\" | Select-Object @{Name="Run As";Expression={ $_.principal.userid } }, TaskPath, TaskName
+
+#List all run as user scheduled tasks 
+#!ps
+Get-ScheduledTask | Where-Object {$_.Principal.UserId -notlike "NT AUTHORITY*" -and $_.Principal.UserId -notlike "SYSTEM" -and $_.Principal.UserId -notlike "LOCAL SERVICE" -and $_.Principal.UserId -notlike "NETWORK SERVICE" -and $_.Principal.UserId -notlike $null} | Select-Object @{Name="Run As";Expression={ $_.principal.userid } }, TaskPath, TaskName
+
+#Check and Install Windows Updates
+#Different Categories - 'Drivers', 'Updates', 'Security Updates', 'Critical Updates'
+powershell -c Set-ExecutionPolicy -ExecutionPolicy Bypass -Force; Install-Module -Name PSWindowsUpdate -force; import-module -Name PSWindowsUpdate; Get-WindowsUpdate -MicrosoftUpdate -Category 'Drivers' -AcceptAll -Install
+
+#Windows Update
+Install-Module PSWindowsUpdate
+Import-Module PSWindowsUpdate
+Install-WindowsUpdate -AcceptAll 
+Get-WUHistory
+Uninstall-WindowsUpdate -KBArticleID KB4023057 
+Install-WindowsUpdate -KBArticleID KB4023057 
+Get-WindowsUpdate 
+Get-WindowsUpdate -MicrosoftUpdate 
+Get-WindowsUpdate -WindowsUpdate -Category 'Drivers', 'Updates', 'Security Updates', 'Critical Updates' -AcceptAll
+Install-WindowsUpdate -MicrosoftUpdate -Category 'Drivers', 'Updates', 'Security Updates', 'Critical Updates' -AcceptAll
+
+
+Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force; Install-Module PSWindowsUpdate -force; Import-Module PSWindowsUpdate -force; Install-WindowsUpdate -MicrosoftUpdate -Category 'Drivers' -AcceptAll
+
+
+
