@@ -6,33 +6,13 @@ $Folder='c:\Repair'
 $Time="03:00"
 $CurrentDate=(Get-date).ToString('MM-dd-yyyy')
 $Date=(Get-date).AddDays(1).ToString('MM-dd-yyyy')
-$CBSLog=$Folder + "\CBSLog.log"
-$DISMLog=$Folder + "\DISMLog.log"
 $Transcript=$Folder + "\Transcript.log"
-$Global:NetRuntime
-$WinGetLog=$Folder+"\AppUpdate.log"
-
-$NRTLog=$Folder+"\Runtime.log"
-#$RTLinks='https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170'
-$Runtimes='https://aka.ms/vs/17/release/vc_redist.x86.exe','https://aka.ms/vs/17/release/vc_redist.x64.exe','https://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/VSU_4/vcredist_x86.exe','https://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/VSU_4/vcredist_x64.exe'
-$CurrentTime=(Get-date).tostring('yyyy-MM-dd HH:mm:ss')
-$hardwaretype=(Get-WmiObject -Class Win32_ComputerSystem -Property PCSystemType).PCSystemType
 $Users= get-childitem -directory -path "c:\users"; 
-$FUSFolders=@('c:\ESD','C:\Windows\SoftwareDistribution\Download','c:\ProgramData\Adobe\Temp','c:\$GetCurrent','c:\recovery','c:\windows10upgrade','C:\WINDOWS\SystemTemp\ScreenConnect') 
-$USTLog=$Folder+"\ScheduledTasks-User.log"
-$NetworkLog=$Folder+"\Network.log"
-$TSTLog=$Folder+"\ScheduledTasks-Timed.log"
-
-$RunAfter=$Folder+"\Repair.ps1"
-$VSSLog=$Folder+"\VSS.log"
 $Global:VSSChangeLog 
-
 $Script=invoke-webrequest -uri https://raw.githubusercontent.com/MicrosoftSavvy/Released/refs/heads/main/FullScript.ps1
 $ScriptRaw=(($Script.rawcontent).split("`n")).replace("`r",'') | Select-Object -skip 26
 $DownloadScriptVer=(($ScriptRaw | Where-Object { $_ -match "CurrentScriptVer" }) -replace "[^\d.]","")[0]
 $Drives=(get-psdrive -PSProvider 'FileSystem').root
-$Global:SSLog
-$SetSecurityLog=$Folder + "\SetSecurityLog.log"
 if(!(test-path $Folder)){New-Item -Path $Folder -ItemType "directory"}
 
 function PendingReboot {
@@ -54,6 +34,9 @@ function Pull-Logs {
 	$ApplicationLog=$Folder+"\Application.log"
 	$SecurityLog=$Folder+"\Security.log"
 	$StartLogDate=(Get-date).addminutes(-$MinutesBack).tostring('yyyy-MM-dd HH:mm:ss')
+	$CBSLog=$Folder + "\CBSLog.log"
+	$DISMLog=$Folder + "\DISMLog.log"
+
 
 	$CurrentStatus = "Pulling errors from log files for the last $MinutesBack minutes" 
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
@@ -98,6 +81,7 @@ function VSS {
 	$CurrentStatus = "Checking to see if VSS is enabledl enabling and scheduling" 
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 	if (Test-Path [System.Windows.Forms.Application]) {if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}}
+	$VSSLog=$Folder+"\VSS.log"
 
 
 	foreach ($DriveLetter in $Drives){
@@ -288,6 +272,7 @@ function ScheduleRestart {
 	$CurrentStatus = "Checking if restart is pending and scheduling for $Time" 
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 	if (Test-Path [System.Windows.Forms.Application]) {if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}}
+	$RunAfter=$Folder+"\Repair.ps1"
 
 
 	if (PendingReboot -eq "True") {
@@ -325,6 +310,10 @@ function Runtimes {
 	$CurrentStatus = "Downloading and Installing Runtimes" 
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
+	$NRTLog=$Folder+"\Runtime.log"
+	#$RTLinks='https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170'
+	$Runtimes='https://aka.ms/vs/17/release/vc_redist.x86.exe','https://aka.ms/vs/17/release/vc_redist.x64.exe','https://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/VSU_4/vcredist_x86.exe','https://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/VSU_4/vcredist_x64.exe'
+
 	foreach($Rt in $Runtimes){
 		$RtFN = ($Folder + '\' + (($Rt.replace('/',' ')).split() | Where-Object {$_ -like "*.exe"}))
 		[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
@@ -349,6 +338,7 @@ function Update {
 	$CurrentStatus = "Running Updates on Windows and Microsoft Store Apps" 
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
+	$WinGetLog=$Folder+"\AppUpdate.log"
 	Install-PackageProvider -Name NuGet -Force | Out-Null
 	Install-Module -Name Microsoft.WinGet.Client -Force -Repository PSGallery | Out-Null
 	Repair-WinGetPackageManager
@@ -392,6 +382,9 @@ function FreeUpSpace {
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
 
+	$hardwaretype=(Get-WmiObject -Class Win32_ComputerSystem -Property PCSystemType).PCSystemType
+	$FUSFolders=@('c:\ESD','C:\Windows\SoftwareDistribution\Download','c:\ProgramData\Adobe\Temp','c:\$GetCurrent','c:\recovery','c:\windows10upgrade','C:\WINDOWS\SystemTemp\ScreenConnect') 
+
 	Repair-WindowsImage -Online -StartComponentCleanup -ResetBase
 		foreach ($CurrentFUSList in $FUSFolders){
 		if(Test-Path $CurrentFUSList) {
@@ -424,6 +417,10 @@ function ScheduledTasks {
 	$CurrentStatus = "Getting Scheduled Tasks that run as a user" 
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
+	$CurrentTime=(Get-date).tostring('yyyy-MM-dd HH:mm:ss')
+	$USTLog=$Folder+"\ScheduledTasks-User.log"
+	$TSTLog=$Folder+"\ScheduledTasks-Timed.log"
+
 	$UserScheduledTasks=(Get-ScheduledTask | Where-Object {$_.Principal.UserId -notlike "NT AUTHORITY*" -and $_.Principal.UserId -notlike "SYSTEM" -and $_.Principal.UserId -notlike "LOCAL SERVICE" -and $_.Principal.UserId -notlike "NETWORK SERVICE" -and $_.Principal.UserId -notlike $null} | Select-Object @{Name="Run As";Expression={ $_.principal.userid } }, TaskPath, TaskName)
 	$TimeScheduledTasks=(Get-ScheduledTask | ForEach-Object {
 		$task = $_
@@ -455,6 +452,7 @@ function PrivateNetwork {
 	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
 	$Global:NetworkOld = (Get-NetConnectionProfile)
 	$Global:NetworkNew = (Set-NetConnectionProfile -Name $Network -NetworkCategory Private)
+	$NetworkLog=$Folder+"\Network.log"
 
 	if (!($Network -eq $null)){Out-File -FilePath $NetworkLog -InputObject $Network}
 	if (!($Global:NetworkOld -eq $null)){Out-File -FilePath $NetworkLog -InputObject $Global:NetworkOld -append}
@@ -907,9 +905,26 @@ function  SecureHost {
 
 }
 
+function PullWiFiPWDs {
+	$WiFiList=$Folder + "\Wi-Fi Passwords.log"
+	[array]$WiFiPWs=(netsh wlan show profiles) | Select-String "\:(.+)$" | %{$name=$_.Matches.Groups[1].Value.Trim(); $_} | %{(netsh wlan show profile name="$name" key=clear)} | Select-String "Key Content\W+\:(.+)$" | %{$pass=$_.Matches.Groups[1].Value.Trim(); $_} | %{[PSCustomObject]@{ "Wi-Fi Network"=$name;Password=$pass }}
+	$WiFiPWs | Out-File -FilePath $WiFiList -force -encoding utf8
+	$CurrentStatus = (Get-Content $WiFiList) | select -skip 1 | select -skiplast 2
+	if ($Status -ne $null) {
+		foreach ($Current in $CurrentStatus){
+		$Status.items.add($Current)
+		}
+		}else {
+			$CurrentStatus
+			}
+	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
+	
+}
+
 function SecurePC {
 
 write-host $null | out-file $Folder\BitKeys-$date.txt
+
 foreach ($DriveLetter in $Drives){
 	$drive=$DriveLetter.replace("\","")
 	if (((manage-bde -protectors -get $drive) | select-string -pattern 'ERROR:*') -eq $null){
@@ -940,6 +955,8 @@ foreach ($DriveLetter in $Drives){
 	$SCR=Invoke-WebRequest -uri $SCDownload
 	$SCRaw=($SCR.rawcontent).split("`n") | Select-Object -skip 26
 	#$SCRaw=(($SCR.rawcontent).split("`n") | Select-Object -skip 26).replace('`r','`r`n')
+	$SetSecurityLog=$Folder + "\SetSecurityLog.log"
+
 	$SetSecurity=$Folder + "\SetSecurity.inf"
 	$SCRaw  | Out-File -FilePath $SetSecurity -force -encoding Unicode
 	$content = Get-Content -Raw -Path $SetSecurity
@@ -1162,6 +1179,7 @@ function GUI {
 	$CBSecureHOSTS = New-Object System.Windows.Forms.CheckBox
 	$CBSecurePC = New-Object System.Windows.Forms.CheckBox
 	$CBIAdmin = New-Object System.Windows.Forms.CheckBox
+	$CBWiFi = New-Object System.Windows.Forms.CheckBox
 	$TXTMIN = New-Object System.Windows.Forms.TextBox
 
 	$Status = New-Object System.Windows.Forms.ListBox
@@ -1207,6 +1225,7 @@ function GUI {
 	$CBSecureHOSTS.Name="CBSecureHOSTS"
 	$CBSecurePC.Name="CBSecurePC"
 	$CBIAdmin.Name="CBIAdmin"
+	$CBWiFi.Name="WiFi"
 	$TXTMIN.Name="TXTMIN"
 	$Status.Name="Status"
 	$TXTPCR.Name="TXTPCR"
@@ -1257,6 +1276,7 @@ function GUI {
 		"TXTPCR" {$tip = "Rename PC to ..."}
 		"DDDevices" {$tip = "Remove all devices of this type"}
 		"ServiceList" {$tip = "List of services"}
+		"WiFi" {$tip = "List all saved wifi passwords"}
       }
 $tooltip1.SetToolTip($this,$tip)
 
@@ -1299,6 +1319,7 @@ $CBRecycle.add_MouseHover($ShowHelp)
 $CBSecureHOSTS.add_MouseHover($ShowHelp)
 $CBSecurePC.add_MouseHover($ShowHelp)
 $CBIAdmin.add_MouseHover($ShowHelp)
+$CBWiFi.add_MouseHover($ShowHelp)
 $TXTMIN.add_MouseHover($ShowHelp)
 $Status.add_MouseHover($ShowHelp)
 $TXTPCR.add_MouseHover($ShowHelp)
@@ -1488,6 +1509,13 @@ $ServiceList.add_MouseHover($ShowHelp)
 	$CBIAdmin.checked = $False
 	$form.Controls.Add($CBIAdmin)
 		
+	$CBWiFi.Text = "Pull Wi-Fi Passwords"
+	$CBWiFi.Location = New-Object System.Drawing.Point(340, 110)
+	$CBWiFi.Autosize = $True
+	$CBWiFi.checked = $False
+	$form.Controls.Add($CBWiFi)
+	
+
 	@((get-service).name) | ForEach-Object {[void] $ServiceList.Items.Add($_)}
 	$ServiceList.width=170
 	$ServiceList.autosize = $true
@@ -1583,6 +1611,7 @@ $ServiceList.add_MouseHover($ShowHelp)
 	($CBSecureHOSTS.checked) = $False
 	($CBSecurePC.checked) = $False
 	($CBIAdmin.checked) = $False
+	($CBWiFi.checked) = $False
 	$form.BackColor = [System.Drawing.Color]::LightGray
 	})
 
@@ -1616,6 +1645,7 @@ $ServiceList.add_MouseHover($ShowHelp)
 	($CBSecureHOSTS.checked) = $True
 	($CBSecurePC.checked) = $True
 	($CBIAdmin.checked) = $False
+	($CBWiFi.checked) = $False
 	})
 	
 	$Repair.Text = "Repair OS"
@@ -1648,6 +1678,7 @@ $ServiceList.add_MouseHover($ShowHelp)
 	($CBSecureHOSTS.checked) = $false
 	($CBSecurePC.checked) = $false
 	($CBIAdmin.checked) = $False
+	($CBWiFi.checked) = $False
 	})
 
 
@@ -1694,22 +1725,17 @@ $ServiceList.add_MouseHover($ShowHelp)
 	if ($CBSecureHOSTS.checked) { SecureHost }
 	if ($CBSecurePC.checked) { SecurePC }
 	if ($CBIAdmin.checked) { InteractiveAdmin }
-
-
+	if ($CBWiFi.checked) { PullWiFiPWDs }
+	$Status.items.add("--------------")
 	$Status.items.add("Run Finished")
-	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
 	$StatusLog=$Folder + "\RunStatus.log"
+	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
 	Out-File -FilePath $StatusLog -InputObject ($Status.items)
-	
-	$n=0
-	do{
-		$n=$n+1
-		foreach ($FColor  in $FormColors) {	
-		$form.BackColor = [System.Drawing.Color]::$FColor 
-		Start-Sleep -Milliseconds 50
-		}
-	} while ($n -lt 1)
-		})
+
+	$Rand=Get-Random -Maximum $FormColors.length
+	$Fcolor=$FormColors[$Rand]
+	$form.BackColor = [System.Drawing.Color]::$FColor 
+	})
 
 	$form.Controls.Add($Run)
 	$form.Controls.Add($Repair)
