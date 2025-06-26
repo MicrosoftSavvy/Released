@@ -921,13 +921,49 @@ function PullWiFiPWDs {
 	
 }
 
+function NewITPC {
+
+	$SoftwareList = ((invoke-webrequest "https://raw.githubusercontent.com/MicrosoftSavvy/Released/refs/heads/main/NewITSoftware.txt").rawcontent).split("`n") | select-object -skip 26
+	$SLCount=(($SoftwareList | Select-String -Pattern "Remove" -AllMatches).linenumber - 1)
+	$Installs=($SoftwareList | Select -first $SLCount)
+	$Removals=($SoftwareList | Select -skip $SLCount)
+
+
+foreach($Install in $Installs){
+winget install $install --accept-source-agreements --accept-package-agreements --silent --disable-interactivity
+}
+
+foreach ($Removal in $Removals){
+	winget remove $Removal
+}
+
+
+}
+
+	
+	
+	$Installs='PDQ.PDQDeploy','PDQ.PDQInventory','Famatech.AdvancedIPScanner','Microsoft.VisualStudio.2022.Professional','Google.Chrome','PuTTY.PuTTY','CodecGuide.K-LiteCodecPack.Mega','9P7KNL5RWT25'
+	$Removals='*xbox*','*news*','norton*','mcafee'
+	
+	foreach($Install in $Installs){
+			winget install --id $install --accept-package-agreements --accept-source-agreements --silent 
+	}
+	
+	foreach($Removal in $Removals){
+			winget remove $Removal --silent
+	}
+	
+	
+	
+}
+
+
 function SecurePC {
 
 write-host $null | out-file $Folder\BitKeys-$date.txt
-
 foreach ($DriveLetter in $Drives){
 	$drive=$DriveLetter.replace("\","")
-	if (((manage-bde -protectors -get $drive) | select-string -pattern 'ERROR:*') -eq $null){
+	#if (((manage-bde -protectors -get $drive) | select-string -pattern 'ERROR:*') -eq $null){
 	$Protectors=(manage-bde -protectors -get $drive).split()
 	$LCount=($Protectors | Select-String -Pattern "ID:" -AllMatches).linenumber
 	$IDs=$Protectors[$LCount]
@@ -947,7 +983,7 @@ foreach ($DriveLetter in $Drives){
 	}
 	}
 	}
-	}
+#	}
 }
 
 	$Folder='c:\Repair'
@@ -1766,3 +1802,4 @@ Stop-Transcript
 
 
 #powershell -executionpolicy bypass -c $Link='https://raw.githubusercontent.com/MicrosoftSavvy/Released/refs/heads/main/FullScript.ps1'; $FileScript=$env:temp + '\temp.ps1'; invoke-webrequest $Link -outfile $FileScript; powershell -executionpolicy bypass -file $FileScript
+
