@@ -99,6 +99,9 @@ MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\DontDisplayLas
 MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorUser=4,0
 MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorEnhancedAdmin=4,2
 MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorAdmin=4,2
+MACHINE\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy\fMinimizeConnections=4,3
+MACHINE\SOFTWARE\Policies\Microsoft\Windows\Network Connections\NC_ShowSharedAccessUI=4,0
+MACHINE\Software\Policies\Microsoft\Windows\Kernel DMA Protection\DeviceEnumerationPolicy=4,0
 MACHINE\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service\AllowUnencryptedTraffic=4,"0"
 MACHINE\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service\DisableRunAs=4,"1"
 MACHINE\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service\AllowBasic=4,"0"
