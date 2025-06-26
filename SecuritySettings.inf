@@ -84,6 +84,7 @@ MACHINE\SOFTWARE\Policies\Microsoft\Windows\System\EnableSmartScreen=4,1
 MACHINE\SOFTWARE\Policies\Microsoft\Windows\System\ShellSmartScreenLevel=1,"Block"
 MACHINE\SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization\DODownloadMode=4,0
 MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\NoWebServices=4,1
+MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings\IsContinuousUpdateEnabled=4,1
 MACHINE\Software\Policies\Microsoft\Windows\Safer\CodeIdentifiers\AuthenticodeEnabled=4,0
 MACHINE\SOFTWARE\Policies\Microsoft\Windows\CredentialsDelegation\AllowProtectedCreds=4,1
 MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\ValidateAdminCodeSignatures=4,0
