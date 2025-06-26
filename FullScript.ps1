@@ -28,7 +28,6 @@ function PendingReboot {
 } 
 
 function Pull-Logs {
-
 	if ($TXTMIN.Text -ne $null) {$MinutesBack=$TXTMIN.Text}else {$MinutesBack=180}
 	$SystemLog=$Folder+"\System.log"
 	$ApplicationLog=$Folder+"\Application.log"
@@ -36,19 +35,15 @@ function Pull-Logs {
 	$StartLogDate=(Get-date).addminutes(-$MinutesBack).tostring('yyyy-MM-dd HH:mm:ss')
 	$CBSLog=$Folder + "\CBSLog.log"
 	$DISMLog=$Folder + "\DISMLog.log"
-
-
 	$CurrentStatus = "Pulling errors from log files for the last $MinutesBack minutes" 
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 	if (Test-Path [System.Windows.Forms.Application]) {if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}}
-
 	$System = ((Get-EventLog -LogName System -After (Get-Date).AddMinutes(-$MinutesBack) -entrytype "Error" -ErrorAction SilentlyContinue) | Format-Table -AutoSize -Wrap)
 	$Application = ((Get-EventLog -LogName Application -After (Get-Date).AddMinutes(-$MinutesBack) -entrytype "Error" -ErrorAction SilentlyContinue) | Format-Table -AutoSize -Wrap)
 	$Security = ((Get-EventLog -LogName Security -After (Get-Date).AddMinutes(-$MinutesBack) -entrytype "FailureAudit"  -ErrorAction SilentlyContinue) | Format-Table -AutoSize -Wrap)
 	if (!($System -eq $null)){Out-File -FilePath $SystemLog -InputObject (Get-EventLog -LogName System -After (Get-Date).AddMinutes(-$MinutesBack) -entrytype "Error" | Format-Table -AutoSize -Wrap)}
 	if (!($Application -eq $null)){Out-File -FilePath $ApplicationLog -InputObject (Get-EventLog -LogName Application -After (Get-Date).AddMinutes(-$MinutesBack) -entrytype "Error" | Format-Table -AutoSize -Wrap)}
 	if (!($Security -eq $null)){Out-File -FilePath $SecurityLog -InputObject (Get-EventLog -LogName Security -After (Get-Date).AddMinutes(-$MinutesBack) -entrytype "FailureAudit" | Format-Table -AutoSize -Wrap)}
-
 	$DISMContents=get-content "c:\Windows\Logs\DISM\DISM.log"  | Where-Object { $_ -GE $StartLogDate} 
 	$DISMErr=$DISMContents | Select-String 'Err'
 	$DISMErrors=$DISMContents | Select-String -SimpleMatch 'ERROR'
@@ -60,7 +55,6 @@ function Pull-Logs {
 		} else {
 	}
 }
-
 	$CBSContents=get-content "c:\Windows\Logs\CBS\CBS.log" | Where-Object { $_ -GE $StartLogDate} 
 	$CBSErr=$CBSContents | Select-String 'Err'
 	$CBSErrors=$CBSContents | Select-String -SimpleMatch 'ERROR'
@@ -72,9 +66,6 @@ function Pull-Logs {
 			} else {
 			}
 		}
-
-	
-
 }
 
 function VSS {
@@ -82,8 +73,6 @@ function VSS {
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 	if (Test-Path [System.Windows.Forms.Application]) {if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}}
 	$VSSLog=$Folder+"\VSS.log"
-
-
 	foreach ($DriveLetter in $Drives){
 	$drive=$DriveLetter.replace(":\","")
 	if (!(Get-ScheduledTask | Where-Object { $_.TaskName -like '*Shadow*' } | Select-Object TaskName, State)){
@@ -111,7 +100,6 @@ function VSS {
 		$Global:VSSChangeLog = $Global:VSSChangeLog + "Scheduled Task for creating Shadow Copies at 7AM and 12PM for drive $driveLetter is set."
 		if ($Status -ne $null) {$Status.items.add($Global:VSSChangeLog)}else {Write-Host $Global:VSSChangeLog -foregroundcolor Green}
 		if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
-	
 } else {$Global:VSSChangeLog = "VSS Already Enabled on $Drive.`n"; if ($Status -ne $null) {$Status.items.add($Global:VSSChangeLog)}else {Write-Host $Global:VSSChangeLog -foregroundcolor Green}
 }
 }
@@ -131,8 +119,6 @@ function RunDISM {
 }
 
 function DownloadSource {
-
-
 $Ver=(Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion').CurrentBuild + '.' + (Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion').UBR
 $OSNumber=((Get-WmiObject -Class Win32_OperatingSystem).name).split()[1] + " " + ((Get-WmiObject -Class Win32_OperatingSystem).name).split()[2]
 $OSType=((Get-WmiObject -Class Win32_OperatingSystem).name).split()[3]
@@ -157,7 +143,6 @@ $FN=$DLF.Split()[2]
 $FileName=$FN.substring(1)
 $File2Download=$File2Download.replace('amp;','')
 $File=$Folder+'\'+$FileName
-
 	$CurrentStatus = "Downloading Source System Files" 
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
@@ -169,8 +154,6 @@ $File=$Folder+'\'+$FileName
 }
 
 function DISMRepairSource {
-
-
 	$CurrentStatus = "Running Repairs with Source Files" 
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
@@ -261,7 +244,6 @@ function ReRegDLLs($DLLLog) {
 
 function ShowVaribles {
 	$VaribleExport=$Folder + "\Varibles.log"
-	
 	$CurrentStatus = "Varibles being exported to " + $VaribleExport 
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
@@ -273,8 +255,6 @@ function ScheduleRestart {
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 	if (Test-Path [System.Windows.Forms.Application]) {if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}}
 	$RunAfter=$Folder+"\Repair.ps1"
-
-
 	if (PendingReboot -eq "True") {
 		$RestartSchedule=(schtasks /Create /SC ONCE /TN "ScheduledRestart" /TR "shutdown /r /f /t 0" /SD $Date /ST $time /F /Z /rl HIGHEST /ru System /V1)
 		if (!(Get-ScheduledTask | Where-Object { $_.TaskName -like '*ScheduledRestart*' } | Select-Object TaskName, State)){$RestartSchedule}
@@ -328,10 +308,7 @@ function Runtimes {
 		$n+=1
 	} until ($n -gt 9)
 	$Global:NetRuntime=switch ($NetRuntime) {{ $_.length -ge 9 } { $_ }}
-
 	if (!($Global:NetRuntime -eq $null)){Out-File -FilePath $NRTLog -InputObject $Global:NetRuntime}
-
-
 }
 
 function Update {
@@ -349,16 +326,13 @@ function Update {
 	&"$Winget" source update
 	$WinGet=&"$Winget" upgrade --all --silent --accept-source-agreements  --disable-interactivity --include-unknown --verbose
 	$Global:WinGet=switch ($WinGet) {{ $_.length -ge 9 } { $_ }}
-
 	if (!($Global:WinGet -eq $null)){Out-File -FilePath $WinGetLog -InputObject $Global:WinGet}
-
 }
 
 function RemoveBadDevices {
 	$CurrentStatus = "Removing Problematic Devices" 
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
-
 	 foreach ($dev in (Get-PnpDevice | Where-Object {$_.Status -notmatch "OK" -and $_.Present -like "True" -and $_.InstanceId -notmatch "STORAGE" -and $_.Class -notmatch "SmartCardFilter"})) {
 		 write-host Removing $dev.Name -foregroundcolor Green
 		 &"pnputil" /remove-device $dev.InstanceId
@@ -366,7 +340,6 @@ function RemoveBadDevices {
 }
 
 function AppUpdate {
-	
 	if ($DownloadScriptVer -gt $CurrentScriptVer){
 		$CurrentStatus = "Downloading Update" 
 		if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
@@ -381,7 +354,6 @@ function FreeUpSpace {
 	$CurrentStatus = "Freeing up disk space" 
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
-
 	$hardwaretype=(Get-WmiObject -Class Win32_ComputerSystem -Property PCSystemType).PCSystemType
 	$FUSFolders=@('c:\ESD','C:\Windows\SoftwareDistribution\Download','c:\ProgramData\Adobe\Temp','c:\$GetCurrent','c:\recovery','c:\windows10upgrade','C:\WINDOWS\SystemTemp\ScreenConnect') 
 
@@ -440,11 +412,7 @@ function ScheduledTasks {
 	} | Format-Table @{Label="TaskName";Expression={$_.TaskName};Width=40}, @{Label="TaskPath";Expression={$_.TaskPath};Width=50}, @{Label="Next Run Time";Expression={$startBoundary.ToString('yyyy-MM-dd HH:mm:ss')};Width=20} -wrap)
 	if (!($UserScheduledTasks -eq $null)){Out-File -FilePath $USTLog -InputObject $UserScheduledTasks}
 	if (!($TimeScheduledTasks -eq $null)){Out-File -FilePath $TSTLog -InputObject $TimeScheduledTasks}
-
-
 }
-
-
 function PrivateNetwork {
 	$CurrentStatus = "Setting Network as Private" 
 	$Network=(Get-NetConnectionProfile).Name
@@ -457,8 +425,6 @@ function PrivateNetwork {
 	if (!($Network -eq $null)){Out-File -FilePath $NetworkLog -InputObject $Network}
 	if (!($Global:NetworkOld -eq $null)){Out-File -FilePath $NetworkLog -InputObject $Global:NetworkOld -append}
 	if (!($Global:NetworkNew -eq $null)){Out-File -FilePath $NetworkLog -InputObject $Global:NetworkNew -append}
-
-
 }
 
 function PC-Rename {
@@ -833,8 +799,6 @@ $PullDomain=Invoke-WebRequest $PingDomain
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
 
-
-
 if ($PullDomain -ne $null) {
 	$CurrentStatus = "Able to connect to $PingDomain" 
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
@@ -923,40 +887,32 @@ function PullWiFiPWDs {
 
 function NewITPC {
 
-	$SoftwareList = ((invoke-webrequest "https://raw.githubusercontent.com/MicrosoftSavvy/Released/refs/heads/main/NewITSoftware.txt").rawcontent).split("`n") | select-object -skip 26
+	$SoftwareList = (((invoke-webrequest "https://raw.githubusercontent.com/MicrosoftSavvy/Released/refs/heads/main/NewITSoftware.txt").rawcontent).split("`n") | select-object -skip 26) -replace("`r",'')
 	$SLCount=(($SoftwareList | Select-String -Pattern "Remove" -AllMatches).linenumber - 1)
-	$Installs=($SoftwareList | Select -first $SLCount)
-	$Removals=($SoftwareList | Select -skip $SLCount)
-
-
-foreach($Install in $Installs){
-winget install $install --accept-source-agreements --accept-package-agreements --silent --disable-interactivity
-}
-
-foreach ($Removal in $Removals){
-	winget remove $Removal
-}
-
-
-}
-
-	
-	
-	$Installs='PDQ.PDQDeploy','PDQ.PDQInventory','Famatech.AdvancedIPScanner','Microsoft.VisualStudio.2022.Professional','Google.Chrome','PuTTY.PuTTY','CodecGuide.K-LiteCodecPack.Mega','9P7KNL5RWT25'
-	$Removals='*xbox*','*news*','norton*','mcafee'
-	
+	$Installs=($SoftwareList | Select -first $SLCount) | select -skip 1 | select -skiplast 1
+	$Removals=($SoftwareList | Select -skip $SLCount) | select -skip 1 | select -skiplast 1
 	foreach($Install in $Installs){
-			winget install --id $install --accept-package-agreements --accept-source-agreements --silent 
+	$CurrentStatus = "Installing $Install" 
+	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
+	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
+	winget install $install --accept-source-agreements --accept-package-agreements --silent --disable-interactivity
 	}
-	
-	foreach($Removal in $Removals){
-			winget remove $Removal --silent
+	foreach ($Removal in $Removals){
+	$CurrentStatus = "Removing $Removal" 
+	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
+	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
+	$installed = Get-WinGetPackage -Source winget
+	$SoftwareRemove = $installed | Where-Object {$_.Name -like $Removal} | Select-Object -ExpandProperty Id
+		foreach($SR in $SoftwareRemove){
+			if ($SR -like "MSIX*"){
+				$SRX=$SR.replace("MSIX\","")
+				Remove-AppXPackage -package $SRX
+			}else{
+	winget remove $SR
+			}
+		}	
 	}
-	
-	
-	
 }
-
 
 function SecurePC {
 
@@ -985,14 +941,12 @@ foreach ($DriveLetter in $Drives){
 	}
 #	}
 }
-
 	$Folder='c:\Repair'
 	$SCDownload="https://raw.githubusercontent.com/MicrosoftSavvy/Released/refs/heads/main/SecuritySettings.inf"
 	$SCR=Invoke-WebRequest -uri $SCDownload
 	$SCRaw=($SCR.rawcontent).split("`n") | Select-Object -skip 26
 	#$SCRaw=(($SCR.rawcontent).split("`n") | Select-Object -skip 26).replace('`r','`r`n')
 	$SetSecurityLog=$Folder + "\SetSecurityLog.log"
-
 	$SetSecurity=$Folder + "\SetSecurity.inf"
 	$SCRaw  | Out-File -FilePath $SetSecurity -force -encoding Unicode
 	$content = Get-Content -Raw -Path $SetSecurity
@@ -1006,7 +960,6 @@ foreach ($DriveLetter in $Drives){
 	secedit /db secedit.sdb /import /cfg $SetSecurity /overwrite /log $SetSecurityLog /verbose /quiet
 	secedit /db secedit.sdb /configure /cfg $SetSecurity /overwrite /log $SetSecurityLog /verbose /quiet
 	BCDEDIT /set nx OptOut
-
 	$PolicyCats="Account Management","Policy Change"
 	$PolicySubs='logon','logoff','File System','File Share','Plug and Play Events','Credential Validation','Security Group Management','Process Creation','Special Logon','Other Object Access Events','System Integrity','Security State Change','Sensitive Privilege Use','Other Logon/Logoff Events','Other System Events','Security System Extension'
 	$Policy=auditpol /set /category:* /failure:enable /success:disable
@@ -1018,24 +971,19 @@ foreach ($DriveLetter in $Drives){
 	}
 	auditpol /set /subcategory:"Security Group Management" /failure:disable /success:enable
 	$Policy=auditpol /get /category:*
-
 ###Running manually if import log is empty
-
 	if ((get-content $SetSecurityLog) -eq $null){
 		if ((get-localuser).name -contains "Administrator") {Rename-LocalUser -Name Administrator -NewName LocalAdmin; disable-localuser LocalAdmin}
 		if ((get-localuser).name -contains "Guest") {Rename-LocalUser -Name Guest -NewName LocalGuest; disable-localuser LocalGuest}
 		net accounts /minpwage:1 /maxpwage:45 /lockoutthreshold:3 /lockoutduration:30 /lockoutwindow:15
-	
 		$NTRights=(get-childitem "c:\ntrights.exe" -recurse -erroraction silentlycontinue).fullname
 		if ($NTRights.split().length -gt 1) {$NTRights=$NTRights[0]}
-	
 		if ($NTRights -eq $null) {
 			$NTRightsLink="https://github.com/MicrosoftSavvy/Released/raw/refs/heads/main/ntrights.exe"
 			Invoke-WebRequest $NTRightsLink -outfile $env:windir\ntrights.exe
 			$NTRights=(get-childitem "c:\ntrights.exe" -recurse -erroraction silentlycontinue).fullname
 			if ($NTRights.length -gt 1) {$NTRights=$NTRights[0]}
 		}
-
 		$UserGroups=(Get-LocalGroup).name
 		$NTRCats=(&$ntrights | select -skip 8).Replace(" ","")
 		$AdminService="Administrators","Local Service","Network Service","Service"
@@ -1048,11 +996,9 @@ foreach ($DriveLetter in $Drives){
 		$NoRights='SeCreatePermanentPrivilege','SeCreateTokenPrivilege','SeAssignPrimaryTokenPrivilege','SeTcbPrivilege,''SeLockMemoryPrivilege','SeChangeNotifyPrivilege','SeIncreaseWorkingSetPrivilege','SeRelabelPrivilege','SeDelegateSessionUserImpersonatePrivilege','SeSyncAgentPrivilege','SeTrustedCredManAccessPrivilege'
 		$AdminServiceRights='SeImpersonatePrivilege','SeCreateGlobalPrivilege'
 		$Users=(Get-LocalUser).name
-	
 		foreach($UserGroup in $UserGroups){
 			foreach($NTRCat in $NTRCats){
 			&$ntrights -r $NTRCat -u $UserGroup
-		
 			foreach($User in $Users){
 			&$ntrights -r $NTRCat -u $User
 			}
@@ -1061,28 +1007,23 @@ foreach ($DriveLetter in $Drives){
 			&$ntrights +r $NTRCat -u $CList
 			}
 		}
-
 		if ($BURights -contains $NTRCat){
 			foreach($CList in $BU){
 			&$ntrights +r $NTRCat -u $CList
 			}
 		}
-
 		if ($UserRights -contains $NTRCat){
 			foreach($CList in $User){
 			&$ntrights +r $NTRCat -u $CList
 			}
 		}
-
 		if ($AdminServiceRights -contains $NTRCat){
 			foreach($CList in $AdminService){
 			&$ntrights +r $NTRCat -u $CList
 			}
 		}
-		
 	Write-Output "Disabling AutoRun"	
 	New-ItemProperty -Path HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer -Name NoDriveTypeAutoRun -value 255 -type Dword -Force -ErrorAction 'SilentlyContinue'
-
 	Write-Output "Enabling Edge SmartScreen Filter"
 	$Key=Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -ErrorAction 'SilentlyContinue' | Select-Object -ExpandProperty 'EnableSmartScreen'
 	if ($Key -eq $Null){
@@ -1150,9 +1091,7 @@ foreach ($DriveLetter in $Drives){
 		}
 	}
 	}
-	
 ##End Manual
-	
 	$Nics=(get-netipconfiguration).interfacealias	
 	$netShare = New-Object -ComObject HNetCfg.HNetShare
 	foreach($Nic in $Nics) {
@@ -1166,17 +1105,12 @@ foreach ($DriveLetter in $Drives){
 
 function InteractiveAdmin {
 	net localgroup administrators "NT AUTHORITY\INTERACTIVE" /add
-	
 }
 
 function GUI {
 	[reflection.assembly]::loadwithpartialname("System.Windows.Forms") | Out-Null
 	[reflection.assembly]::loadwithpartialname("System.Drawing") | Out-Null
-
-
 	$FormColors=[Enum]::GetValues([System.Drawing.KnownColor]) | where {$_ -notlike "Menu*" -and $_ -notlike "Gradient*" -and $_ -notlike "Button*"-and $_ -notlike "Window*"-and $_ -notlike "Scroll*"-and $_ -notlike "Info*"-and $_ -notlike "Inactive*"-and $_ -notlike "Hot*"-and $_ -notlike "Highlight*"-and $_ -notmatch "Graytext"-and $_ -notlike "Control*"-and $_ -notmatch "AppWorkspace"-and $_ -notlike "Active*"-and $_ -notmatch "Desktop"-and $_ -notmatch "Transparent"}
-
-
 
 	$form = New-Object System.Windows.Forms.Form
 	$Run = New-Object System.Windows.Forms.Button
@@ -1216,6 +1150,8 @@ function GUI {
 	$CBSecurePC = New-Object System.Windows.Forms.CheckBox
 	$CBIAdmin = New-Object System.Windows.Forms.CheckBox
 	$CBWiFi = New-Object System.Windows.Forms.CheckBox
+$CBITPC = New-Object System.Windows.Forms.CheckBox
+
 	$TXTMIN = New-Object System.Windows.Forms.TextBox
 
 	$Status = New-Object System.Windows.Forms.ListBox
@@ -1262,6 +1198,7 @@ function GUI {
 	$CBSecurePC.Name="CBSecurePC"
 	$CBIAdmin.Name="CBIAdmin"
 	$CBWiFi.Name="WiFi"
+	$CBITPC.Name="CBITPC"
 	$TXTMIN.Name="TXTMIN"
 	$Status.Name="Status"
 	$TXTPCR.Name="TXTPCR"
@@ -1313,6 +1250,7 @@ function GUI {
 		"DDDevices" {$tip = "Remove all devices of this type"}
 		"ServiceList" {$tip = "List of services"}
 		"WiFi" {$tip = "List all saved wifi passwords"}
+		"CBITPC" {$tip = "Removes McAfee and Norton, Installs PDQ, Putty, IP Scanner"}
       }
 $tooltip1.SetToolTip($this,$tip)
 
@@ -1361,6 +1299,7 @@ $Status.add_MouseHover($ShowHelp)
 $TXTPCR.add_MouseHover($ShowHelp)
 $DDDevices.add_MouseHover($ShowHelp)
 $ServiceList.add_MouseHover($ShowHelp)
+$CBITPC.add_MouseHover($ShowHelp)
 
 	
 	
@@ -1377,50 +1316,50 @@ $ServiceList.add_MouseHover($ShowHelp)
 	$CBCleanUp.Text = "Clean Up"
 	$CBCleanUp.Location = New-Object System.Drawing.Point(10, 10)
 	$CBCleanUp.Autosize = $True
-	$CBCleanUp.checked = $True
+	$CBCleanUp.checked = $False
 	$form.Controls.Add($CBCleanUp)
 	
 	$CBTime.Name="CBTime"
 	$CBTime.Text = "Fix Time"
 	$CBTime.Location = New-Object System.Drawing.Point(10, 30)
 	$CBTime.Autosize = $True
-	$CBTime.checked = $True
+	$CBTime.checked = $False
 	$form.Controls.Add($CBTime)
 
 	$CBSpaceCleanUp.Text = "Space Clean-Up"
 	$CBSpaceCleanUp.Location = New-Object System.Drawing.Point(10, 50)
 	$CBSpaceCleanUp.Autosize = $True
-	$CBSpaceCleanUp.checked = $True
+	$CBSpaceCleanUp.checked = $False
 	$form.Controls.Add($CBSpaceCleanUp)
 	
 	$CBNetwork.Text = "Set Network as Private"
 	$CBNetwork.Location = New-Object System.Drawing.Point(10, 70)
 	$CBNetwork.Autosize = $True
-	$CBNetwork.checked = $True
+	$CBNetwork.checked = $False
 	$form.Controls.Add($CBNetwork)
 
 	$CBLogs.Text = "Pull Logs (min)"
 	$CBLogs.Location = New-Object System.Drawing.Point(10, 90)
 	$CBLogs.Autosize = $True
-	$CBLogs.checked = $True
+	$CBLogs.checked = $False
 	$form.Controls.Add($CBLogs)
 
 	$CBDLLs.Text = "Re-Register DLLs"
 	$CBDLLs.Location = New-Object System.Drawing.Point(10, 110)
 	$CBDLLs.Autosize = $True
-	$CBDLLs.checked = $True
+	$CBDLLs.checked = $False
 	$form.Controls.Add($CBDLLs)
 
 	$CBDISM.Text = "Run DISM"
 	$CBDISM.Location = New-Object System.Drawing.Point(10, 130)
 	$CBDISM.Autosize = $True
-	$CBDISM.checked = $True
+	$CBDISM.checked = $False
 	$form.Controls.Add($CBDISM)
 
 	$CBVSS.Text = "Turn On VSS"
 	$CBVSS.Location = New-Object System.Drawing.Point(10, 150)
 	$CBVSS.Autosize = $True
-	$CBVSS.checked = $True
+	$CBVSS.checked = $False
 	$form.Controls.Add($CBVSS)
 
 	$CBPCR.Text = "Rename PC"
@@ -1432,31 +1371,31 @@ $ServiceList.add_MouseHover($ShowHelp)
 	$CBBadDevices.Text = "Remove Problematic Devices"
 	$CBBadDevices.Location = New-Object System.Drawing.Point(160, 10)
 	$CBBadDevices.Autosize = $True
-	$CBBadDevices.checked = $True
+	$CBBadDevices.checked = $False
 	$form.Controls.Add($CBBadDevices)
 
 	$CBSFC.Text = "Run System File Checker"
 	$CBSFC.Location = New-Object System.Drawing.Point(160, 30)
 	$CBSFC.Autosize = $True
-	$CBSFC.checked = $True
+	$CBSFC.checked = $False
 	$form.Controls.Add($CBSFC)
 
 	$CBRT.Text = "Install Runtimes"
 	$CBRT.Location = New-Object System.Drawing.Point(160, 50)
 	$CBRT.Autosize = $True
-	$CBRT.checked = $True
+	$CBRT.checked = $False
 	$form.Controls.Add($CBRT)
 	
 	$CBSR.Text = "Schedule Restart"
 	$CBSR.Location = New-Object System.Drawing.Point(160, 70)
 	$CBSR.Autosize = $True
-	$CBSR.checked = $True
+	$CBSR.checked = $False
 	$form.Controls.Add($CBSR)
 
 	$CBST.Text = "Export Scheduled Tasks"
 	$CBST.Location = New-Object System.Drawing.Point(160, 90)
 	$CBST.Autosize = $True
-	$CBST.checked = $True
+	$CBST.checked = $False
 	$form.Controls.Add($CBST)
 
 	$CBSV.Text = "Export Varibles"
@@ -1468,13 +1407,13 @@ $ServiceList.add_MouseHover($ShowHelp)
 	$CBCHK.Text = "Run Check Disk"
 	$CBCHK.Location = New-Object System.Drawing.Point(160, 130)
 	$CBCHK.Autosize = $True
-	$CBCHK.checked = $True
+	$CBCHK.checked = $False
 	$form.Controls.Add($CBCHK)
 
 	$CBSpool.Text = "Clear Spooler"
 	$CBSpool.Location = New-Object System.Drawing.Point(160, 150)
 	$CBSpool.Autosize = $True
-	$CBSpool.checked = $True
+	$CBSpool.checked = $False
 	$form.Controls.Add($CBSpool)
 
 	$CBPCRST.Text = "SN"
@@ -1551,7 +1490,12 @@ $ServiceList.add_MouseHover($ShowHelp)
 	$CBWiFi.checked = $False
 	$form.Controls.Add($CBWiFi)
 	
-
+	$CBITPC.Text = "New Tech PC"
+	$CBITPC.Location = New-Object System.Drawing.Point(340, 130)
+	$CBITPC.Autosize = $True
+	$CBITPC.checked = $False
+	$form.Controls.Add($CBITPC)
+	
 	@((get-service).name) | ForEach-Object {[void] $ServiceList.Items.Add($_)}
 	$ServiceList.width=170
 	$ServiceList.autosize = $true
@@ -1648,6 +1592,7 @@ $ServiceList.add_MouseHover($ShowHelp)
 	($CBSecurePC.checked) = $False
 	($CBIAdmin.checked) = $False
 	($CBWiFi.checked) = $False
+	($CBITPC.checked) = $False
 	$form.BackColor = [System.Drawing.Color]::LightGray
 	})
 
@@ -1682,6 +1627,7 @@ $ServiceList.add_MouseHover($ShowHelp)
 	($CBSecurePC.checked) = $True
 	($CBIAdmin.checked) = $False
 	($CBWiFi.checked) = $False
+	($CBITPC.checked) = $False
 	})
 	
 	$Repair.Text = "Repair OS"
@@ -1715,9 +1661,8 @@ $ServiceList.add_MouseHover($ShowHelp)
 	($CBSecurePC.checked) = $false
 	($CBIAdmin.checked) = $False
 	($CBWiFi.checked) = $False
+	($CBITPC.checked) = $False
 	})
-
-
 	$Update.Text = "Update"
 	$Update.Location = New-Object System.Drawing.Point(330, 255)
 	$Update.Add_Click({
@@ -1762,6 +1707,7 @@ $ServiceList.add_MouseHover($ShowHelp)
 	if ($CBSecurePC.checked) { SecurePC }
 	if ($CBIAdmin.checked) { InteractiveAdmin }
 	if ($CBWiFi.checked) { PullWiFiPWDs }
+	if ($CBITPC.checked) { NewITPC }
 	$Status.items.add("--------------")
 	$Status.items.add("Run Finished")
 	$StatusLog=$Folder + "\RunStatus.log"
@@ -1799,7 +1745,4 @@ GUI #
 Stop-Transcript
 
 #Written by MicrosoftSavvy
-
-
 #powershell -executionpolicy bypass -c $Link='https://raw.githubusercontent.com/MicrosoftSavvy/Released/refs/heads/main/FullScript.ps1'; $FileScript=$env:temp + '\temp.ps1'; invoke-webrequest $Link -outfile $FileScript; powershell -executionpolicy bypass -file $FileScript
-
