@@ -9,4 +9,7 @@ CodecGuide.K-LiteCodecPack.Mega
 9P7KNL5RWT25
 
 [Remove]
-'*xbox*','*news*','norton*','mcafee'
+*xbox*
+*news*
+norton*
+mcafee
