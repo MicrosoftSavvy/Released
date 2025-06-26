@@ -7,6 +7,7 @@ Google.Chrome
 PuTTY.PuTTY
 CodecGuide.K-LiteCodecPack.Mega
 9P7KNL5RWT25
+Bitwarden.Bitwarden
 
 [Remove]
 *xbox*
