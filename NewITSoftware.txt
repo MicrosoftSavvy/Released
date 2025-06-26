@@ -1,0 +1,12 @@
+[Install]
+PDQ.PDQDeploy
+PDQ.PDQInventory
+Famatech.AdvancedIPScanner
+Microsoft.VisualStudio.2022.Professional
+Google.Chrome
+PuTTY.PuTTY
+CodecGuide.K-LiteCodecPack.Mega
+9P7KNL5RWT25
+
+[Remove]
+'*xbox*','*news*','norton*','mcafee'
