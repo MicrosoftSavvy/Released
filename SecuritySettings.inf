@@ -48,6 +48,7 @@ MACHINE\System\CurrentControlSet\Services\Netlogon\Parameters\MaximumPasswordAge
 MACHINE\System\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange=4,0
 MACHINE\System\CurrentControlSet\Services\LDAP\LDAPClientIntegrity=4,1
 MACHINE\System\CurrentControlSet\Services\LDAP\LDAPClientConfidentiality=4,1
+MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\DisableIPSourceRouting=4,2
 MACHINE\System\CurrentControlSet\Services\LanmanWorkstation\Parameters\RequireSecuritySignature=4,1
 MACHINE\System\CurrentControlSet\Services\LanmanWorkstation\Parameters\EnableSecuritySignature=4,1
 MACHINE\System\CurrentControlSet\Services\LanmanWorkstation\Parameters\EnablePlainTextPassword=4,0
