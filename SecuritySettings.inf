@@ -31,6 +31,8 @@ AuditAccountLogon = 3
 [Version]
 signature="$CHICAGO$"
 Revision=1
+
+
 [Kerberos Policy]
 TicketValidateClient = 1
 [Privilege Rights]
@@ -71,6 +73,10 @@ SeTimeZonePrivilege = *S-1-5-32-545,*S-1-5-32-544,*S-1-5-19
 SeCreateSymbolicLinkPrivilege = *S-1-5-32-544
 SeDelegateSessionUserImpersonatePrivilege = *S-1-5-32-544,*S-1-5-20,*S-1-5-19
 SeDenyRemoteInteractiveLogonRight = *S-1-5-32-546
+[System Log]
+MaximumLogSize = 32768
+AuditLogRetentionPeriod = 0
+RestrictGuestAccess = 1
 [Security Log]
 MaximumLogSize = 1024000
 AuditLogRetentionPeriod = 0
@@ -123,13 +129,6 @@ MACHINE\System\CurrentControlSet\Control\Lsa\EveryoneIncludesAnonymous=4,0
 MACHINE\System\CurrentControlSet\Control\Lsa\DisableDomainCreds=4,0
 MACHINE\System\CurrentControlSet\Control\Lsa\CrashOnAuditFail=4,0
 MACHINE\System\CurrentControlSet\Control\Lsa\AuditBaseObjects=4,0
-MACHINE\SOFTWARE\Classes\batfile\shell\runasuser\SuppressionPolicy=4,4096
-MACHINE\SOFTWARE\Classes\cmdfile\shell\runasuser\SuppressionPolicy=4,4096
-MACHINE\SOFTWARE\Classes\exefile\shell\runasuser\SuppressionPolicy=4,4096
-MACHINE\SOFTWARE\Classes\mscfile\shell\runasuser\SuppressionPolicy=4,4096
-MACHINE\SYSTEM\CurrentControlSet\Services\Netbt\Parameters\NoNameReleaseOnDemand=4,1
-MACHINE\SOFTWARE\Policies\Microsoft\PassportForWork\PINComplexity\MinimumPINLength=4,6
-MACHINE\SOFTWARE\Policies\Microsoft\Windows\GameDVR\AllowgameDVR =4,0
 MACHINE\Software\Policies\Microsoft\Windows\WinRM\Service\DisableRunAs=4,0
 MACHINE\Software\Policies\Microsoft\Windows\WinRM\Service\AllowUnencryptedTraffic=4,0
 MACHINE\Software\Policies\Microsoft\Windows\WinRM\Service\AllowNegotiate=4,0
@@ -181,16 +180,19 @@ MACHINE\SYSTEM\CurrentControlSet\Policies\EarlyLaunch\DriverLoadPolicy=4,8
 MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest\UseLogonCredential=4,0
 MACHINE\SOFTWARE\Policies\Microsoft\Windows\Windows Search\AllowIndexingEncryptedStoresOrItems=4,0
 MACHINE\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service\DisableRunAs=4,1
+MACHINE\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service\DisableRunAs=4,1
 MACHINE\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service\AllowUnencryptedTraffic=4,0
 MACHINE\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service\AllowBasic=4,0
 MACHINE\SOFTWARE\Policies\Microsoft\Windows\WinRM\Client\AllowUnencryptedTraffic=4,0
 MACHINE\SOFTWARE\Policies\Microsoft\Windows\WinRM\Client\AllowDigest=4,0
 MACHINE\SOFTWARE\Policies\Microsoft\Windows\WinRM\Client\AllowBasic=4,0
-MACHINE\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy\fMinimizeConnections=4,3
+MACHINE\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy\fMinimizeConnections=4,1
 MACHINE\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy\fBlockNonDomain=4,1
 MACHINE\SOFTWARE\Policies\Microsoft\Windows\System\ShellSmartScreenLevel=1,"Block"
+MACHINE\SOFTWARE\Policies\Microsoft\Windows\System\ShellSmartScreenLevel=1,"1"
 MACHINE\SOFTWARE\Policies\Microsoft\Windows\System\EnumerateLocalUsers=4,0
 MACHINE\SOFTWARE\Policies\Microsoft\Windows\System\EnableSmartScreen=4,1
+MACHINE\SOFTWARE\Policies\Microsoft\Windows\System\EnableSmartScreen=1,"1"
 MACHINE\SOFTWARE\Policies\Microsoft\Windows\PowerShell\Transcription\EnableTranscripting=4,1
 MACHINE\SOFTWARE\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging\EnableScriptBlockLogging=4,1
 MACHINE\SOFTWARE\Policies\Microsoft\Windows\Personalization\NoLockScreenSlideshow=4,1
@@ -216,8 +218,10 @@ MACHINE\SOFTWARE\Policies\Microsoft\Windows NT\Rpc\RestrictRemoteClients=4,1
 MACHINE\SOFTWARE\Policies\Microsoft\Power\PowerSettings\0e796bdb-100d-47d6-a2d5-f7d2daa51f51\DCSettingIndex=4,1
 MACHINE\SOFTWARE\Policies\Microsoft\Power\PowerSettings\0e796bdb-100d-47d6-a2d5-f7d2daa51f51\ACSettingIndex=4,1
 MACHINE\SOFTWARE\Policies\Microsoft\MicrosoftEdge\PhishingFilter\PreventOverrideAppRepUnknown=4,1
-MACHINE\SOFTWARE\Policies\Microsoft\MicrosoftEdge\PhishingFilter\PreventOverride=4,1
+MACHINE\SOFTWARE\Policies\Microsoft\MicrosoftEdge\PhishingFilter\PreventOverrideAppRepUnknown=1,"1"
+MACHINE\SOFTWARE\Policies\Microsoft\MicrosoftEdge\PhishingFilter\PreventOverride=1,"1"
 MACHINE\SOFTWARE\Policies\Microsoft\MicrosoftEdge\PhishingFilter\EnabledV9=4,1
+MACHINE\SOFTWARE\Policies\Microsoft\MicrosoftEdge\PhishingFilter\EnabledV9=1,"1"
 MACHINE\SOFTWARE\Policies\Microsoft\MicrosoftEdge\Internet Settings\PreventCertErrorOverrides=4,1
 MACHINE\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds\DisableEnclosureDownload=4,1
 MACHINE\SOFTWARE\Policies\Microsoft\Biometrics\FacialFeatures\EnhancedAntiSpoofing=4,1
@@ -227,3 +231,5 @@ MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\Audit\ProcessC
 MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\CredUI\EnumerateAdministrators=4,0
 MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings\IsContinuousUpdateEnabled=4,1
 MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings\IsContinuousInnovationOptedIn=4,1
+[Service General Setting]
+"seclogon",4,"D:AR(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;BA)(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;SY)(A;;CCLCSWLOCRRC;;;IU)S:(AU;FA;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;WD)"
