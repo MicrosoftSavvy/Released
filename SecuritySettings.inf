@@ -98,7 +98,7 @@ MACHINE\System\CurrentControlSet\Services\LanManServer\Parameters\EnableSecurity
 MACHINE\System\CurrentControlSet\Services\LanManServer\Parameters\EnableForcedLogOff=4,1
 MACHINE\System\CurrentControlSet\Services\LDAP\LDAPClientIntegrity=4,1
 MACHINE\System\CurrentControlSet\Services\LDAP\LDAPClientConfidentiality=4,1
-MACHINE\System\CurrentControlSet\Control\Session Manager\SubSystems\optional=1,7
+MACHINE\System\CurrentControlSet\Control\Session Manager\SubSystems\optional=7,
 MACHINE\System\CurrentControlSet\Control\Session Manager\ProtectionMode=4,1
 MACHINE\System\CurrentControlSet\Control\Session Manager\Memory Management\ClearPageFileAtShutdown=4,0
 MACHINE\System\CurrentControlSet\Control\Session Manager\Kernel\ObCaseInsensitive=4,1
