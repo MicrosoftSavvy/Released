@@ -79,6 +79,7 @@ MACHINE\System\CurrentControlSet\Control\Lsa\DisableDomainCreds=4,0
 MACHINE\System\CurrentControlSet\Control\Lsa\CrashOnAuditFail=4,0
 MACHINE\System\CurrentControlSet\Control\Lsa\AuditBaseObjects=4,0
 MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\CredUI\EnumerateAdministrators=4,0
+MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings\IsContinuousInnovationOptedIn=4,1
 MACHINE\SOFTWARE\Policies\Microsoft\MicrosoftEdge\PhishingFilter\PreventOverrideAppRepUnknown=4,1
 MACHINE\SOFTWARE\Policies\Microsoft\Windows\System\EnableSmartScreen=4,1
 MACHINE\SOFTWARE\Policies\Microsoft\Windows\System\ShellSmartScreenLevel=1,"Block"
