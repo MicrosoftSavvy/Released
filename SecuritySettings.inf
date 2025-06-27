@@ -71,10 +71,6 @@ SeTimeZonePrivilege = *S-1-5-32-545,*S-1-5-32-544,*S-1-5-19
 SeCreateSymbolicLinkPrivilege = *S-1-5-32-544
 SeDelegateSessionUserImpersonatePrivilege = *S-1-5-32-544,*S-1-5-20,*S-1-5-19
 SeDenyRemoteInteractiveLogonRight = *S-1-5-32-546
-[System Log]
-MaximumLogSize = 32768
-AuditLogRetentionPeriod = 0
-RestrictGuestAccess = 1
 [Security Log]
 MaximumLogSize = 1024000
 AuditLogRetentionPeriod = 0
