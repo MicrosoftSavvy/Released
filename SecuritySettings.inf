@@ -80,6 +80,11 @@ MACHINE\System\CurrentControlSet\Control\Lsa\CrashOnAuditFail=4,0
 MACHINE\System\CurrentControlSet\Control\Lsa\AuditBaseObjects=4,0
 MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\CredUI\EnumerateAdministrators=4,0
 MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings\IsContinuousInnovationOptedIn=4,1
+MACHINE\SOFTWARE\Policies\Microsoft\Windows\LanmanWorkstation\AllowInsecureGuestAuth=4,0
+MACHINE\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy\fBlockNonDomain=4,1
+MACHINE\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy\fMinimizeConnections=4,3
+MACHINE\SOFTWARE\Policies\Microsoft\Windows\AppCompat\DisableInventory=4,1
+
 MACHINE\SOFTWARE\Policies\Microsoft\MicrosoftEdge\PhishingFilter\PreventOverrideAppRepUnknown=4,1
 MACHINE\SOFTWARE\Policies\Microsoft\Windows\System\EnableSmartScreen=4,1
 MACHINE\SOFTWARE\Policies\Microsoft\Windows\System\ShellSmartScreenLevel=1,"Block"
@@ -88,6 +93,7 @@ MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\NoWebService
 MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings\IsContinuousUpdateEnabled=4,1
 MACHINE\Software\Policies\Microsoft\Windows\Safer\CodeIdentifiers\AuthenticodeEnabled=4,0
 MACHINE\SOFTWARE\Policies\Microsoft\Windows\CredentialsDelegation\AllowProtectedCreds=4,1
+
 MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\ValidateAdminCodeSignatures=4,0
 MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\UndockWithoutLogon=4,1
 MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\TypeOfAdminApprovalMode=4,1
@@ -102,6 +108,7 @@ MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\EnableUIADeskt
 MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\EnableSecureUIAPaths=4,1
 MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\EnableLUA=4,1
 MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\EnableInstallerDetection=4,1
+MACHINE\SOFTWARE\Policies\Microsoft\Windows\System\EnableSmartScreen=4,1
 MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\DontDisplayLastUserName=4,0
 MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorUser=4,0
 MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorEnhancedAdmin=4,2
