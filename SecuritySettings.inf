@@ -31,8 +31,6 @@ AuditAccountLogon = 3
 [Version]
 signature="$CHICAGO$"
 Revision=1
-
-
 [Kerberos Policy]
 TicketValidateClient = 1
 [Privilege Rights]
