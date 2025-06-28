@@ -904,11 +904,7 @@ function NewITPC {
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
 
-
-
-	$installed = Get-WinGetPackage -Source winget
-	$SoftwareRemove = $installed | Where-Object {$_.Name -like $Removal} | Select-Object -ExpandProperty Id
-	if ($installed -eq $null){$SoftwareRemove = (Get-AppxPackage | Where-Object { $_.Name -like $Removal }).PublisherId}
+	$SoftwareRemove = (Get-AppxPackage | Where-Object { $_.Name -like $Removal }).PublisherId
 	
 	foreach($SR in $SoftwareRemove){
 			if ($SR -like "MSIX*"){
@@ -934,7 +930,6 @@ foreach ($DriveLetter in $Drives){
 	
 	if (((manage-bde -protectors -get $drive | where-object { $_ -like "*TPM*" }) -eq $null)) {manage-bde -protectors -add -TPM $Drive}
 	if (((manage-bde -protectors -get $drive | where-object { $_ -like "*Numerical*" }) -eq $null)) {manage-bde -protectors -add $Drive -RecoveryPassword}
-	#manage-bde -protectors -enable $Drive
 	manage-bde -on $Drive -skiphardwaretest
 	foreach ($ID in $IDs){
 	if (((manage-bde -protectors -get $drive | where-object { $_ -like "*External*" }) -eq $null)) {manage-bde -protectors -add $Drive -RecoveryKey $Folder -id $ID}
