@@ -1124,15 +1124,12 @@ function UpdateDriver {
 	Install-Module PSWindowsUpdate -Force -Repository PSGallery | Out-Null
 	Import-Module PSWindowsUpdate
 	Install-WindowsUpdate -MicrosoftUpdate -Category 'driver' -AcceptAll -Install -IgnoreReboot -Verbose
-	
-}
-
+	}
 
 function GUI {
 	[reflection.assembly]::loadwithpartialname("System.Windows.Forms") | Out-Null
 	[reflection.assembly]::loadwithpartialname("System.Drawing") | Out-Null
 	$FormColors=[Enum]::GetValues([System.Drawing.KnownColor]) | where {$_ -notlike "Menu*" -and $_ -notlike "Gradient*" -and $_ -notlike "Button*"-and $_ -notlike "Window*"-and $_ -notlike "Scroll*"-and $_ -notlike "Info*"-and $_ -notlike "Inactive*"-and $_ -notlike "Hot*"-and $_ -notlike "Highlight*"-and $_ -notmatch "Graytext"-and $_ -notlike "Control*"-and $_ -notmatch "AppWorkspace"-and $_ -notlike "Active*"-and $_ -notmatch "Desktop"-and $_ -notmatch "Transparent"}
-
 	$form = New-Object System.Windows.Forms.Form
 	$Run = New-Object System.Windows.Forms.Button
 	$Repair = New-Object System.Windows.Forms.Button
@@ -1140,7 +1137,6 @@ function GUI {
 	$Clear = New-Object System.Windows.Forms.Button
 	$Exit = New-Object System.Windows.Forms.Button
 	$Update = New-Object System.Windows.Forms.Button
-
 	$CBCleanUp = New-Object System.Windows.Forms.CheckBox
 	$CBTime = New-Object System.Windows.Forms.CheckBox
 	$CBSpaceCleanUp = New-Object System.Windows.Forms.CheckBox
@@ -1174,16 +1170,11 @@ function GUI {
 	$CBITPC = New-Object System.Windows.Forms.CheckBox
 	$CBUF = New-Object System.Windows.Forms.CheckBox
 	$CBUD = New-Object System.Windows.Forms.CheckBox
-
 	$TXTMIN = New-Object System.Windows.Forms.TextBox
-
 	$Status = New-Object System.Windows.Forms.ListBox
 	$TXTPCR = New-Object System.Windows.Forms.TextBox
 	$DDDevices = New-Object System.Windows.Forms.ComboBox
 	$ServiceList = New-Object System.Windows.Forms.ComboBox
-	
-	
-	
 	$tooltip1 = New-Object System.Windows.Forms.ToolTip
 	$Run.Name="Run"
 	$Repair.Name="Repair"
@@ -1644,7 +1635,6 @@ $CBUD.add_MouseHover($ShowHelp)
 	($CBITPC.checked) = $False
 	($CBUF.checked) = $False
 	($CBUD.checked) = $False
-	
 	$form.BackColor = [System.Drawing.Color]::LightGray
 	})
 
@@ -1682,7 +1672,6 @@ $CBUD.add_MouseHover($ShowHelp)
 	($CBITPC.checked) = $False
 	($CBUF.checked) = $True
 	($CBUD.checked) = $False
-	
 	})
 	
 	$Repair.Text = "Repair OS"
@@ -1768,8 +1757,7 @@ $CBUD.add_MouseHover($ShowHelp)
 	if ($CBITPC.checked) { NewITPC }
 	if ($CBUF.checked) { UpdateFeature }
 	if ($CBUD.checked) { UpdateDriver }
-	
-	
+		
 	$Status.items.add("--------------")
 	$Status.items.add("Run Finished")
 	$StatusLog=$Folder + "\RunStatus.log"
