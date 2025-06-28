@@ -1498,6 +1498,12 @@ $CBITPC.add_MouseHover($ShowHelp)
 	$CBITPC.checked = $False
 	$form.Controls.Add($CBITPC)
 	
+	$CBUpdate.Text = "Update PC"
+	$CBUpdate.Location = New-Object System.Drawing.Point(340, 150)
+	$CBUpdate.Autosize = $True
+	$CBUpdate.checked = $False
+	$form.Controls.Add($CBUpdate)
+	
 	@((get-service).name) | ForEach-Object {[void] $ServiceList.Items.Add($_)}
 	$ServiceList.width=170
 	$ServiceList.autosize = $true
