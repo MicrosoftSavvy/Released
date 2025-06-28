@@ -969,6 +969,7 @@ foreach ($DriveLetter in $Drives){
 	secedit /db secedit.sdb /configure /cfg $SetSecurity /overwrite /log $SetSecurityLog /verbose /quiet
 	BCDEDIT /set nx OptOut
 #	Set-SmbClientConfiguration -EnableInsecureGuestLogons $false -Force
+	Disable-WindowsOptionalFeature -Online -FeatureName MicrosoftWindowsPowerShellV2Root
 
 	$PolicyCats="Account Management","Policy Change"
 	$PolicySubs='logon','logoff','File System','File Share','Plug and Play Events','Credential Validation','Security Group Management','Process Creation','Special Logon','Other Object Access Events','System Integrity','Security State Change','Sensitive Privilege Use','Other Logon/Logoff Events','Other System Events','Security System Extension'
