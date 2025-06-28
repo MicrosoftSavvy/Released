@@ -934,7 +934,7 @@ foreach ($DriveLetter in $Drives){
 	
 	if (((manage-bde -protectors -get $drive | where-object { $_ -like "*TPM*" }) -eq $null)) {manage-bde -protectors -add -TPM $Drive}
 	if (((manage-bde -protectors -get $drive | where-object { $_ -like "*Numerical*" }) -eq $null)) {manage-bde -protectors -add $Drive -RecoveryPassword}
-	manage-bde -protectors -enable $Drive
+	#manage-bde -protectors -enable $Drive
 	manage-bde -on $Drive -skiphardwaretest
 	foreach ($ID in $IDs){
 	if (((manage-bde -protectors -get $drive | where-object { $_ -like "*External*" }) -eq $null)) {manage-bde -protectors -add $Drive -RecoveryKey $Folder -id $ID}
@@ -947,7 +947,6 @@ foreach ($DriveLetter in $Drives){
 	}
 	}
 	}
-#	}
 }
 	$Folder='c:\Repair'
 	$SCDownload="https://raw.githubusercontent.com/MicrosoftSavvy/Released/refs/heads/main/SecuritySettings.inf"
