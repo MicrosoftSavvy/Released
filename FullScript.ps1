@@ -1,5 +1,5 @@
 Set-ExecutionPolicy -executionpolicy bypass -scope Process -force
-$CurrentScriptVer="1.1.2"
+$CurrentScriptVer="1.1.3"
 $host.UI.RawUI.WindowTitle = "The Little Helper Script $CurrentScriptVer"
 
 $Folder='c:\Repair'
@@ -1109,6 +1109,23 @@ function InteractiveAdmin {
 	net localgroup administrators "NT AUTHORITY\INTERACTIVE" /add
 }
 
+function UpdateFeature {
+	Install-PackageProvider -Name NuGet -Force | Out-Null
+	Install-Module PSWindowsUpdate -Force -Repository PSGallery | Out-Null
+	Import-Module PSWindowsUpdate
+	Install-WindowsUpdate -MicrosoftUpdate -Category 'feature pack' -AcceptAll -Install -IgnoreReboot -Verbose
+	
+}
+
+function UpdateDriver {
+	Install-PackageProvider -Name NuGet -Force | Out-Null
+	Install-Module PSWindowsUpdate -Force -Repository PSGallery | Out-Null
+	Import-Module PSWindowsUpdate
+	Install-WindowsUpdate -MicrosoftUpdate -Category 'driver' -AcceptAll -Install -IgnoreReboot -Verbose
+	
+}
+
+
 function GUI {
 	[reflection.assembly]::loadwithpartialname("System.Windows.Forms") | Out-Null
 	[reflection.assembly]::loadwithpartialname("System.Drawing") | Out-Null
@@ -1152,7 +1169,9 @@ function GUI {
 	$CBSecurePC = New-Object System.Windows.Forms.CheckBox
 	$CBIAdmin = New-Object System.Windows.Forms.CheckBox
 	$CBWiFi = New-Object System.Windows.Forms.CheckBox
-$CBITPC = New-Object System.Windows.Forms.CheckBox
+	$CBITPC = New-Object System.Windows.Forms.CheckBox
+	$CBUF = New-Object System.Windows.Forms.CheckBox
+	$CBUD = New-Object System.Windows.Forms.CheckBox
 
 	$TXTMIN = New-Object System.Windows.Forms.TextBox
 
@@ -1206,6 +1225,8 @@ $CBITPC = New-Object System.Windows.Forms.CheckBox
 	$TXTPCR.Name="TXTPCR"
 	$DDDevices.Name="DDDevices"
 	$ServiceList.Name="ServiceList"
+	$CBUF.Name="CBUF"
+	$CBUD.Name="CBUD"
 
 	$ShowHelp={
     #display popup help
@@ -1253,7 +1274,10 @@ $CBITPC = New-Object System.Windows.Forms.CheckBox
 		"ServiceList" {$tip = "List of services"}
 		"WiFi" {$tip = "List all saved wifi passwords"}
 		"CBITPC" {$tip = "Removes McAfee and Norton, Installs PDQ, Putty, IP Scanner"}
-      }
+        "CBUF" {$tip = "Run Windows Updates from Feature Pack category only"}
+		"CBUD" {$tip = "Run Windows Updates from Driver category only"}
+	  
+	  }
 $tooltip1.SetToolTip($this,$tip)
 
 }
@@ -1302,6 +1326,8 @@ $TXTPCR.add_MouseHover($ShowHelp)
 $DDDevices.add_MouseHover($ShowHelp)
 $ServiceList.add_MouseHover($ShowHelp)
 $CBITPC.add_MouseHover($ShowHelp)
+$CBUF.add_MouseHover($ShowHelp)
+$CBUD.add_MouseHover($ShowHelp)
 
 	
 	
@@ -1504,6 +1530,19 @@ $CBITPC.add_MouseHover($ShowHelp)
 	$CBUpdate.checked = $False
 	$form.Controls.Add($CBUpdate)
 	
+	$CBUF.Text = "Update Feature Pack"
+	$CBUF.Location = New-Object System.Drawing.Point(340, 170)
+	$CBUF.Autosize = $True
+	$CBUF.checked = $False
+	$form.Controls.Add($CBUF)
+	
+	$CBUD.Text = "Update Drivers"
+	$CBUD.Location = New-Object System.Drawing.Point(340, 190)
+	$CBUD.Autosize = $True
+	$CBUD.checked = $False
+	$form.Controls.Add($CBUD)
+	
+	
 	@((get-service).name) | ForEach-Object {[void] $ServiceList.Items.Add($_)}
 	$ServiceList.width=170
 	$ServiceList.autosize = $true
@@ -1601,6 +1640,9 @@ $CBITPC.add_MouseHover($ShowHelp)
 	($CBIAdmin.checked) = $False
 	($CBWiFi.checked) = $False
 	($CBITPC.checked) = $False
+	($CBUF.checked) = $False
+	($CBUD.checked) = $False
+	
 	$form.BackColor = [System.Drawing.Color]::LightGray
 	})
 
@@ -1636,6 +1678,9 @@ $CBITPC.add_MouseHover($ShowHelp)
 	($CBIAdmin.checked) = $False
 	($CBWiFi.checked) = $False
 	($CBITPC.checked) = $False
+	($CBUF.checked) = $True
+	($CBUD.checked) = $False
+	
 	})
 	
 	$Repair.Text = "Repair OS"
@@ -1670,6 +1715,9 @@ $CBITPC.add_MouseHover($ShowHelp)
 	($CBIAdmin.checked) = $False
 	($CBWiFi.checked) = $False
 	($CBITPC.checked) = $False
+	($CBUF.checked) = $False
+	($CBUD.checked) = $False
+	
 	})
 	$Update.Text = "Update"
 	$Update.Location = New-Object System.Drawing.Point(330, 255)
@@ -1716,6 +1764,10 @@ $CBITPC.add_MouseHover($ShowHelp)
 	if ($CBIAdmin.checked) { InteractiveAdmin }
 	if ($CBWiFi.checked) { PullWiFiPWDs }
 	if ($CBITPC.checked) { NewITPC }
+	if ($CBUF.checked) { UpdateFeature }
+	if ($CBUD.checked) { UpdateDriver }
+	
+	
 	$Status.items.add("--------------")
 	$Status.items.add("Run Finished")
 	$StatusLog=$Folder + "\RunStatus.log"
