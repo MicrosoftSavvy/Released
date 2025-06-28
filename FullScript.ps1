@@ -903,16 +903,22 @@ function NewITPC {
 	$CurrentStatus = "Removing $Removal" 
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
+
+
+
 	$installed = Get-WinGetPackage -Source winget
 	$SoftwareRemove = $installed | Where-Object {$_.Name -like $Removal} | Select-Object -ExpandProperty Id
-		foreach($SR in $SoftwareRemove){
+	if ($installed -eq $null){$SoftwareRemove = (Get-AppxPackage | Where-Object { $_.Name -like $Removal }).PublisherId}
+	
+	foreach($SR in $SoftwareRemove){
 			if ($SR -like "MSIX*"){
 				$SRX=$SR.replace("MSIX\","")
 				Remove-AppXPackage -package $SRX
 			}else{
-	winget remove $SR
+	winget uninstall $SR
 			}
-		}	
+		}
+		
 	}
 }
 
