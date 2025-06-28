@@ -552,12 +552,6 @@ function FixTime {
 			$CurrentStatus = "Time if off - Setting up NTP sync"
 			if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 			if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
-			Set-ItemProperty -Path 'HKLM:\\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location' -Name Value -Value Allow
-			Set-ItemProperty -Path 'HKLM:\\SYSTEM\CurrentControlSet\Services\tzautoupdate' -Name Start -Value 3
-			Set-Service -Name "tzautoupdate" -StartupType Automatic
-			Set-Service -Name "W32Time" -StartupType Automatic
-			Start-Service -Name "tzautoupdate"
-			Start-Service -Name "W32Time"
 			w32tm /config /syncfromflags:manual /manualpeerlist:"time-a-g.nist.gov time-b-g.nist.gov time-c-g.nist.gov"
 			w32tm /resync
 		} else {
@@ -565,6 +559,14 @@ function FixTime {
 			if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 			if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
 		}
+
+		Set-ItemProperty -Path 'HKLM:\\SYSTEM\CurrentControlSet\Services\tzautoupdate' -Name Start -Value 3
+		Set-ItemProperty -Path 'HKLM:\\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location' -Name Value -Value Allow
+		Set-Service -Name "tzautoupdate" -StartupType Automatic
+		Set-Service -Name "W32Time" -StartupType Automatic
+		Start-Service -Name "tzautoupdate"
+		Start-Service -Name "W32Time"
+				
 	}
 }
 
