@@ -179,6 +179,11 @@ MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\DisableIPSourceRoutin
 MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters\DisableIpSourceRouting=4,2
 MACHINE\SYSTEM\CurrentControlSet\Policies\EarlyLaunch\DriverLoadPolicy=4,8
 MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest\UseLogonCredential=4,0
+MACHINE\SOFTWARE\Classes\batfile\shell\runasuser\SuppressionPolicy=4,4096
+MACHINE\SOFTWARE\Classes\cmdfile\shell\runasuser\SuppressionPolicy=4,4096
+MACHINE\SOFTWARE\Classes\exefile\shell\runasuser\SuppressionPolicy=4,4096
+MACHINE\SOFTWARE\Classes\mscfile\shell\runasuser\SuppressionPolicy=4,4096
+MACHINE\SYSTEM\CurrentControlSet\Services\Netbt\Parameters\NoNameReleaseOnDemand,4,1
 MACHINE\SOFTWARE\Policies\Microsoft\Windows\Windows Search\AllowIndexingEncryptedStoresOrItems=4,0
 MACHINE\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service\DisableRunAs=4,1
 MACHINE\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service\DisableRunAs=4,1
