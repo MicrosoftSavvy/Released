@@ -303,7 +303,7 @@ function Runtimes {
 	$n=5
 	do {
 		$DNR="Microsoft DotNet Runtime " + $n
-		$CurrentNetRuntime=winget install --id=Microsoft.DotNet.Runtime.$n  -e --silent --accept-source-agreements --disable-interactivity --include-unknown --verbose
+		$CurrentNetRuntime=winget install --id=Microsoft.DotNet.Runtime.$n  -e --silent --accept-source-agreements --include-unknown --verbose
 		$NetRuntime=$NetRuntime + $DNR + $CurrentNetRuntime
 		$n+=1
 	} until ($n -gt 9)
@@ -324,7 +324,7 @@ function Update {
 	Install-WindowsUpdate -MicrosoftUpdate -NotCategory 'feature pack','driver' -AcceptAll -Install -IgnoreReboot -Verbose
 	$Winget = ((gci "C:\Program Files\WindowsApps" -Recurse -File | Where-Object { ($_.fullname -match 'C:\\Program Files\\WindowsApps\\Microsoft.DesktopAppInstaller_' -and $_.name -match 'winget.exe') } | sort fullname -descending | %{$_.FullName}) -Split [Environment]::NewLine)[0]
 	&"$Winget" source update
-	$WinGet=&"$Winget" upgrade --all --silent --accept-source-agreements  --disable-interactivity --include-unknown --verbose
+	$WinGet=&"$Winget" upgrade --all --silent --accept-source-agreements  --include-unknown --verbose
 	$Global:WinGet=switch ($WinGet) {{ $_.length -ge 9 } { $_ }}
 	if (!($Global:WinGet -eq $null)){Out-File -FilePath $WinGetLog -InputObject $Global:WinGet}
 }
