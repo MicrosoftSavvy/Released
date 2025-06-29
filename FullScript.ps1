@@ -1649,7 +1649,7 @@ $CBUD.add_MouseHover($ShowHelp)
 	$form.BackColor = [System.Drawing.Color]::LightGray
 	})
 
-	$Secure.Text = "Secure"
+	$Secure.Text = "Secure PC"
 	$Secure.Location = New-Object System.Drawing.Point(90, 255)
 	$Secure.Add_Click({
 	($CBNetwork.Checked) = $false
