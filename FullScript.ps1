@@ -27,6 +27,21 @@ function PendingReboot {
 	if (($status -ne $null) -and $status.RebootPending) {return $true; $Status.items.add("Restart is pending")}} catch { }; return $false
 } 
 
+function UpdateModules {
+	
+	Install-PackageProvider -Name NuGet -Force | Out-Null
+	Install-Module -Name Microsoft.WinGet.Client -Force -Repository PSGallery | Out-Null
+	Repair-WinGetPackageManager
+	Install-Module PSWindowsUpdate -Force -Repository PSGallery | Out-Null
+	Import-Module PSWindowsUpdate
+	$Winget = ((gci "C:\Program Files\WindowsApps" -Recurse -File | Where-Object { ($_.fullname -match 'C:\\Program Files\\WindowsApps\\Microsoft.DesktopAppInstaller_' -and $_.name -match 'winget.exe') } | sort fullname -descending | %{$_.FullName}) -Split [Environment]::NewLine)[0]
+	&"$Winget" source update
+			
+	
+	
+}
+
+
 function Pull-Logs {
 	if ($TXTMIN.Text -ne $null) {$MinutesBack=$TXTMIN.Text}else {$MinutesBack=180}
 	$SystemLog=$Folder+"\System.log"
@@ -293,6 +308,8 @@ function Runtimes {
 	$NRTLog=$Folder+"\Runtime.log"
 	#$RTLinks='https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170'
 	$Runtimes='https://aka.ms/vs/17/release/vc_redist.x86.exe','https://aka.ms/vs/17/release/vc_redist.x64.exe','https://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/VSU_4/vcredist_x86.exe','https://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/VSU_4/vcredist_x64.exe'
+	UpdateModules
+
 
 	foreach($Rt in $Runtimes){
 		$RtFN = ($Folder + '\' + (($Rt.replace('/',' ')).split() | Where-Object {$_ -like "*.exe"}))
@@ -315,15 +332,9 @@ function Update {
 	$CurrentStatus = "Running Updates on Windows and Microsoft Store Apps" 
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
+	UpdateModules
 	$WinGetLog=$Folder+"\AppUpdate.log"
-	Install-PackageProvider -Name NuGet -Force | Out-Null
-	Install-Module -Name Microsoft.WinGet.Client -Force -Repository PSGallery | Out-Null
-	Repair-WinGetPackageManager
-	Install-Module PSWindowsUpdate -Force -Repository PSGallery | Out-Null
-	Import-Module PSWindowsUpdate
 	Install-WindowsUpdate -MicrosoftUpdate -NotCategory 'feature pack','driver' -AcceptAll -Install -IgnoreReboot -Verbose
-	$Winget = ((gci "C:\Program Files\WindowsApps" -Recurse -File | Where-Object { ($_.fullname -match 'C:\\Program Files\\WindowsApps\\Microsoft.DesktopAppInstaller_' -and $_.name -match 'winget.exe') } | sort fullname -descending | %{$_.FullName}) -Split [Environment]::NewLine)[0]
-	&"$Winget" source update
 	$WinGet=&"$Winget" upgrade --all --silent --accept-source-agreements  --include-unknown --verbose
 	$Global:WinGet=switch ($WinGet) {{ $_.length -ge 9 } { $_ }}
 	if (!($Global:WinGet -eq $null)){Out-File -FilePath $WinGetLog -InputObject $Global:WinGet}
@@ -893,6 +904,7 @@ function NewITPC {
 	$SLCount=(($SoftwareList | Select-String -Pattern "Remove" -AllMatches).linenumber - 1)
 	$Installs=($SoftwareList | Select -first $SLCount) | select -skip 1 | select -skiplast 1
 	$Removals=($SoftwareList | Select -skip $SLCount) | select -skip 1 | select -skiplast 1
+	UpdateModules
 	foreach($Install in $Installs){
 	$CurrentStatus = "Installing $Install" 
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
