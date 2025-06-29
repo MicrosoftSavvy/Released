@@ -54,7 +54,7 @@ Nirsoft.WhatIsHang
 Nirsoft.WhoisThisDomain
 Nirsoft.WifiInfoView
 NirSoft.WirelessNetworkWatcher
-
+GitHub
 
 [Remove]
 *xbox*
