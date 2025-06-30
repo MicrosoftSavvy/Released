@@ -114,7 +114,6 @@ function VSS {
 }
 }
 	if (!($Global:VSSChangeLog -eq $null)){Out-File -FilePath $VSSLog -InputObject $Global:VSSChangeLog}
-
 }
 
 function RunDISM {
@@ -513,7 +512,6 @@ function EnablePowerOptions {
 		Remove-Item $tempFile
 		$headerLinesBlock = $Matches[1]
 		$valueLinesBlock = $Matches[2]
-#		if ($valueLinesBlock -notmatch "(?sm)^`"$valueName`"=.+?(?=(\r\n\S|\z))") { throw "Value name not found: $valueName"}
 	$valueDataPair = $Matches[0]
 	$headerLinesBlock, $valueDataPair | out-file -Encoding Unicode $outFile -append
 	Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Power\PowerSettings\$groupguid\$guid" -Name "Attributes" -Value 00000002 -Type DWORD
@@ -668,7 +666,6 @@ function ServiceOwner {
 	Write-Host $ResultsS -foregroundcolor Green
 	$ExistingPermissions=$null
 	if ($null -ne $ResultsD){
-		# This is the first element in the array
 		$ExistingPermissions=$ExistingPermissions + "D:"
 		for ($i=0; $i -lt $ResultsD.count; $i++) {
 			$ExistingPermissions=$ExistingPermissions + "(" + $ResultsD[$i] + ")"
@@ -680,8 +677,7 @@ function ServiceOwner {
 			$ExistingPermissions=$ExistingPermissions + "(" + $ResultsS[$i] + ")"
 		}
 	}
-#	write-output "`nParsed permissions:"
-Write-Host "`nParsed permissions:" -foregroundcolor Green
+	Write-Host "`nParsed permissions:" -foregroundcolor Green
 	Write-Host $ExistingPermissions -foregroundcolor Green
 
 	
@@ -690,8 +686,6 @@ Write-Host "`nOriginal permissions:" -foregroundcolor Green
 
 	
 	if ($ExistingPermissions -eq $RawResults.trim()) {
-#		Write-Output "`nCorrectly identified existing permissions."
-#		write-output "`nBuilding new permissions string..."
 	$CurrentStatus = "`nCorrectly identified existing permissions."
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 
@@ -701,7 +695,6 @@ Write-Host "`nOriginal permissions:" -foregroundcolor Green
 	
 	$NewPermissions=$null
 			if ($null -ne $ResultsD){
-				# This is the first element in the array
 				$NewPermissions=$NewPermissions + "D:"
 				for ($i=0; $i -lt $ResultsD.count; $i++) {
 					$NewPermissions=$NewPermissions + "(" + $ResultsD[$i] + ")"
@@ -760,7 +753,6 @@ if ($ExistingPermissions -eq $RawResults.trim()) {
         write-output "`nBuilding new permissions string..."
         $NewPermissions=$null
         if ($null -ne $ResultsD){
-            # This is the first element in the array
             $NewPermissions=$NewPermissions + "D:"
             for ($i=0; $i -lt $ResultsD.count; $i++) {
                 $NewPermissions=$NewPermissions + "(" + $ResultsD[$i] + ")"
@@ -840,7 +832,6 @@ Try {
 		if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
 		Try {
 		foreach ($PDNS in $PublicDNS) {
-#		write-host "`nUsing $PDNS"		
 		$Results=((Resolve-DnsName $PingDomain -Server $PDNS -Type A -nohostsfile) | ft -autosize)	
 		$CurrentStatus = $Results 
 		if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
@@ -930,7 +921,6 @@ function SecurePC {
 write-host $null | out-file $Folder\BitKeys-$date.txt
 foreach ($DriveLetter in $Drives){
 	$drive=$DriveLetter.replace("\","")
-	#if (((manage-bde -protectors -get $drive) | select-string -pattern 'ERROR:*') -eq $null){
 	$Protectors=(manage-bde -protectors -get $drive).split()
 	$LCount=($Protectors | Select-String -Pattern "ID:" -AllMatches).linenumber
 	$IDs=$Protectors[$LCount]
@@ -954,22 +944,18 @@ foreach ($DriveLetter in $Drives){
 	$SCDownload="https://raw.githubusercontent.com/MicrosoftSavvy/Released/refs/heads/main/SecuritySettings.inf"
 	$SCR=Invoke-WebRequest -uri $SCDownload
 	$SCRaw=($SCR.rawcontent).split("`n") | Select-Object -skip 26
-	#$SCRaw=(($SCR.rawcontent).split("`n") | Select-Object -skip 26).replace('`r','`r`n')
 	$SetSecurityLog=$Folder + "\SetSecurityLog.log"
 	$SetSecurity=$Folder + "\SetSecurity.inf"
 	$SCRaw  | Out-File -FilePath $SetSecurity -force -encoding Unicode
 	$content = Get-Content -Raw -Path $SetSecurity
 	$updatedContent = $content -replace "`r`r`n", "`r`n"
-	#$updatedContent = $updatedContent.substring(1)
 	$SetSecurityLog=$Folder + "\SetSecurityLog.log"
 	Set-Content -encoding Unicode -Path $SetSecurity -Value $updatedContent
 	secedit /validate $SetSecurity
 	secedit /generaterollback /cfg $SetSecurity /rbk $Folder\OriginalSecuritySettings.inf /quiet
-	#secedit.exe /export /cfg $Folder\OriginalSecuritySettings.inf
 	secedit /db secedit.sdb /import /cfg $SetSecurity /overwrite /log $SetSecurityLog /verbose /quiet
 	secedit /db secedit.sdb /configure /cfg $SetSecurity /overwrite /log $SetSecurityLog /verbose /quiet
 	BCDEDIT /set nx OptOut
-#	Set-SmbClientConfiguration -EnableInsecureGuestLogons $false -Force
 	Disable-WindowsOptionalFeature -Online -FeatureName MicrosoftWindowsPowerShellV2Root
 
 	$PolicyCats="Account Management","Policy Change"
@@ -1226,8 +1212,6 @@ function GUI {
 	$CBUD.Name="CBUD"
 
 	$ShowHelp={
-    #display popup help
-    #each value is the name of a control on the form.
      Switch ($this.name) {
 		"Run" {$tip = "Runs Checked options"}
 		"Repair" {$tip = "Checks options that would be best for running repairs"}
