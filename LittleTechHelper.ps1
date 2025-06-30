@@ -287,12 +287,10 @@ function ScheduleRestart {
 	$CurrentStatus = "Task: ScheduledRestart scheduled for " + $Date + " " + $Time
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)} else {Write-Host $CurrentStatus -foregroundcolor Green}
 	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
-
 	} else {
 	$CurrentStatus = "No Restart Needed"
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)} else {Write-Host $CurrentStatus -foregroundcolor Green}
 	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
-
 	if ($CBCleanUp.Checked) { CleanUp }
 	}
 }
@@ -437,7 +435,6 @@ function PC-Rename {
 		Rename-Computer -ComputerName (Get-WmiObject win32_COMPUTERSYSTEM).Name -NewName (Get-WmiObject Win32_BIOS).serialnumber -force
 	} else {
 		Rename-Computer -ComputerName (Get-WmiObject win32_COMPUTERSYSTEM).Name -NewName $TXTPCR.text -Force
-
 }
 }
 
@@ -583,7 +580,6 @@ function Spooler {
 		if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
 	$Spool="C:\Windows\System32\Spool"
 	$Spooler="C:\Windows\System32\Spool\Printers"
-
 	$NewOwner = New-Object System.Security.Principal.NTAccount("BUILTIN\Administrators")
 	$NewUser = New-Object System.Security.AccessControl.FileSystemAccessRule("BUILTIN\Administrators","FullControl", "ContainerInherit, ObjectInherit", "None", "Allow")
 	$ACLSpool=get-acl $Spool
@@ -597,7 +593,6 @@ function Spooler {
 	stop-service Spooler
 	remove-item -path $Spooler\*.* -force
 	start-service Spooler
-
 }
 
 function AfterStartUp {
@@ -608,7 +603,6 @@ function AfterStartUp {
 }
 
 function ServiceOwner {
-
 	$ServiceToChange=$ServiceList.text
 	$CurrentStatus = "Setting permissions for service $ServiceToChange." 
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
@@ -663,16 +657,11 @@ function ServiceOwner {
 	}
 	Write-Host "`nParsed permissions:" -foregroundcolor Green
 	Write-Host $ExistingPermissions -foregroundcolor Green
-
-	
-Write-Host "`nOriginal permissions:" -foregroundcolor Green
+	Write-Host "`nOriginal permissions:" -foregroundcolor Green
 	Write-Host $RawResults.trim() -foregroundcolor Green
-
-	
 	if ($ExistingPermissions -eq $RawResults.trim()) {
 	$CurrentStatus = "`nCorrectly identified existing permissions."
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
-
 	$CurrentStatus = "`nBuilding new permissions string...(In Transcript)"
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
@@ -772,7 +761,6 @@ if ($ExistingPermissions -eq $RawResults.trim()) {
 }
 
 function NetworkCheck {
-
 $IPGate=((get-netipconfiguration).ipv4defaultgateway).nexthop
 $DNSList=(Get-DnsClientServerAddress -AddressFamily IPv4 | Select-Object -ExpandProperty ServerAddresses)
 $PublicDNS='1.1.1.1','8.8.8.8','208.67.222.222'
@@ -781,13 +769,11 @@ $PullDomain=Invoke-WebRequest $PingDomain
 	$CurrentStatus = "Testing Network Cards" 
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
-
 if ($PullDomain -ne $null) {
 	$CurrentStatus = "Able to connect to $PingDomain" 
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
 }
-
 Try {
 	if ((test-connection -computername $IPGate -count 1 -quiet) -eq $True) {
 	$CurrentStatus = "Able to ping $IPGate" 
@@ -1188,7 +1174,6 @@ function GUI {
 	$ServiceList.Name="ServiceList"
 	$CBUF.Name="CBUF"
 	$CBUD.Name="CBUD"
-
 	$ShowHelp={
      Switch ($this.name) {
 		"Run" {$tip = "Runs Checked options"}
@@ -1237,7 +1222,6 @@ function GUI {
 	  }
 $tooltip1.SetToolTip($this,$tip)
 }
-
 $Run.add_MouseHover($ShowHelp)
 $Repair.add_MouseHover($ShowHelp)
 $Secure.add_MouseHover($ShowHelp)
@@ -1287,7 +1271,6 @@ $CBUD.add_MouseHover($ShowHelp)
 	
 	$form.Text = "The Little Helper GUI $CurrentScriptVer"
 	$form.Autosize = $True
-
 	if ( -not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] 'Administrator')) {
 		$CurrentStatus = "Need to run with Administrator Rights" 
 		if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
@@ -1306,7 +1289,7 @@ $CBUD.add_MouseHover($ShowHelp)
 	$CBTime.Autosize = $True
 	$CBTime.checked = $False
 	$form.Controls.Add($CBTime)
-
+	
 	$CBSpaceCleanUp.Text = "Space Clean-Up"
 	$CBSpaceCleanUp.Location = New-Object System.Drawing.Point(10, 50)
 	$CBSpaceCleanUp.Autosize = $True
