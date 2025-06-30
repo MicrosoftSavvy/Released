@@ -1447,7 +1447,7 @@ $CBUD.add_MouseHover($ShowHelp)
 	$CBRecycle.checked = $False
 	$form.Controls.Add($CBRecycle)	
 
-	$CBSecureHOSTS.Text = "Download Secure HOSTS file"
+	$CBSecureHOSTS.Text = "Secure HOSTS file"
 	$CBSecureHOSTS.Location = New-Object System.Drawing.Point(340, 50)
 	$CBSecureHOSTS.Autosize = $True
 	$CBSecureHOSTS.checked = $False
