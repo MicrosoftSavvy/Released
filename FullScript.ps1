@@ -943,6 +943,10 @@ foreach ($DriveLetter in $Drives){
 		$Policy=auditpol /set /subcategory:$PolicySub /failure:enable /success:enable
 	}
 	auditpol /set /subcategory:"Security Group Management" /failure:disable /success:enable
+	$DisableSubs="Filtering Platform Packet Drop"
+	foreach ($DisableSub in $DisableSubs){
+		$Policy=auditpol /set /subcategory:$DisableSub /failure:disable /success:disable
+	}
 	$Policy=auditpol /get /category:*
 ###Running manually if import log is empty
 	if ((get-content $SetSecurityLog) -eq $null){
