@@ -1,15 +1,15 @@
 Set-ExecutionPolicy -executionpolicy bypass -scope Process -force
 $CurrentScriptVer="1.1.4"
-$host.UI.RawUI.WindowTitle = "The Little Helper Script $CurrentScriptVer"
+$host.UI.RawUI.WindowTitle = "The Little Tech Helper Script $CurrentScriptVer"
 
-$Folder='c:\LittleHelper'
+$Folder='c:\LTH'
 $Time="03:00"
 $CurrentDate=(Get-date).ToString('MM-dd-yyyy')
 $Date=(Get-date).AddDays(1).ToString('MM-dd-yyyy')
 $Transcript=$Folder + "\Transcript.log"
 $Users= get-childitem -directory -path "c:\users"; 
 $Global:VSSChangeLog 
-$Script=invoke-webrequest -uri https://raw.githubusercontent.com/MicrosoftSavvy/Released/refs/heads/main/FullScript.ps1
+$Script=invoke-webrequest -uri https://raw.githubusercontent.com/MicrosoftSavvy/Released/refs/heads/main/LittleTechHelper.ps1
 $ScriptRaw=(($Script.rawcontent).split("`n")).replace("`r",'') | Select-Object -skip 26
 $DownloadScriptVer=(($ScriptRaw | Where-Object { $_ -match "CurrentScriptVer" }) -replace "[^\d.]","")[0]
 $Drives=(get-psdrive -PSProvider 'FileSystem').root
@@ -1754,4 +1754,4 @@ GUI #
 Stop-Transcript
 
 #Written by MicrosoftSavvy
-#powershell -executionpolicy bypass -c $Link='https://raw.githubusercontent.com/MicrosoftSavvy/Released/refs/heads/main/FullScript.ps1'; $FileScript=$env:temp + '\temp.ps1'; invoke-webrequest $Link -outfile $FileScript; powershell -executionpolicy bypass -file $FileScript
+#powershell -executionpolicy bypass -c $Link='https://raw.githubusercontent.com/MicrosoftSavvy/Released/refs/heads/main/LittleTechHelper.ps1'; $FileScript=$env:temp + '\temp.ps1'; invoke-webrequest $Link -outfile $FileScript; powershell -executionpolicy bypass -file $FileScript
