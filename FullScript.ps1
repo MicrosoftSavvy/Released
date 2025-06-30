@@ -1,6 +1,7 @@
 Set-ExecutionPolicy -executionpolicy bypass -scope Process -force
 $CurrentScriptVer="1.1.4"
 $host.UI.RawUI.WindowTitle = "The Little Helper Script $CurrentScriptVer"
+
 $Folder='c:\LittleHelper'
 $Time="03:00"
 $CurrentDate=(Get-date).ToString('MM-dd-yyyy')
@@ -45,8 +46,8 @@ function Pull-Logs {
 	$StartLogDate=(Get-date).addminutes(-$MinutesBack).tostring('yyyy-MM-dd HH:mm:ss')
 	$CBSLog=$Folder + "\CBSLog.log"
 	$DISMLog=$Folder + "\DISMLog.log"
-	$CurrentStatus = "Pulling errors from log files for the last $MinutesBack minutes" 
 	
+	$CurrentStatus = "Pulling errors from log files for the last $MinutesBack minutes" 
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 	if (Test-Path [System.Windows.Forms.Application]) {if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}}
 	
