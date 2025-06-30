@@ -39,7 +39,6 @@ function UpdateModules {
 
 }
 
-
 function Pull-Logs {
 	if ($TXTMIN.Text -ne $null) {$MinutesBack=$TXTMIN.Text}else {$MinutesBack=180}
 	$SystemLog=$Folder+"\System.log"
@@ -307,7 +306,6 @@ function Runtimes {
 	#$RTLinks='https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170'
 	$Runtimes='https://aka.ms/vs/17/release/vc_redist.x86.exe','https://aka.ms/vs/17/release/vc_redist.x64.exe','https://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/VSU_4/vcredist_x86.exe','https://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/VSU_4/vcredist_x64.exe'
 	UpdateModules
-
 
 	foreach($Rt in $Runtimes){
 		$RtFN = ($Folder + '\' + (($Rt.replace('/',' ')).split() | Where-Object {$_ -like "*.exe"}))
@@ -1124,17 +1122,13 @@ function InteractiveAdmin {
 }
 
 function UpdateFeature {
-	Install-PackageProvider -Name NuGet -Force | Out-Null
-	Install-Module PSWindowsUpdate -Force -Repository PSGallery | Out-Null
-	Import-Module PSWindowsUpdate
+	UpdateModules
 	Install-WindowsUpdate -MicrosoftUpdate -Category 'feature pack' -AcceptAll -Install -IgnoreReboot -Verbose
 	
 }
 
 function UpdateDriver {
-	Install-PackageProvider -Name NuGet -Force | Out-Null
-	Install-Module PSWindowsUpdate -Force -Repository PSGallery | Out-Null
-	Import-Module PSWindowsUpdate
+	UpdateModules
 	Install-WindowsUpdate -MicrosoftUpdate -Category 'driver' -AcceptAll -Install -IgnoreReboot -Verbose
 	}
 
@@ -1237,7 +1231,6 @@ function GUI {
     #display popup help
     #each value is the name of a control on the form.
      Switch ($this.name) {
-
 		"Run" {$tip = "Runs Checked options"}
 		"Repair" {$tip = "Checks options that would be best for running repairs"}
 		"Secure" {$tip = "Checks options that would be best to help secure PC"}
@@ -1281,10 +1274,8 @@ function GUI {
 		"CBITPC" {$tip = "Removes McAfee and Norton, Installs PDQ, Putty, IP Scanner"}
         "CBUF" {$tip = "Run Windows Updates from Feature Pack category only"}
 		"CBUD" {$tip = "Run Windows Updates from Driver category only"}
-	  
 	  }
 $tooltip1.SetToolTip($this,$tip)
-
 }
 
 $Run.add_MouseHover($ShowHelp)
@@ -1333,8 +1324,6 @@ $ServiceList.add_MouseHover($ShowHelp)
 $CBITPC.add_MouseHover($ShowHelp)
 $CBUF.add_MouseHover($ShowHelp)
 $CBUD.add_MouseHover($ShowHelp)
-
-	
 	
 	$form.Text = "The Little Helper GUI $CurrentScriptVer"
 	$form.Autosize = $True
@@ -1344,7 +1333,6 @@ $CBUD.add_MouseHover($ShowHelp)
 		if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 		if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
 	} 
-
 	
 	$CBCleanUp.Text = "Clean Up"
 	$CBCleanUp.Location = New-Object System.Drawing.Point(10, 10)
@@ -1547,7 +1535,6 @@ $CBUD.add_MouseHover($ShowHelp)
 	$CBUD.checked = $False
 	$form.Controls.Add($CBUD)
 	
-	
 	@((get-service).name) | ForEach-Object {[void] $ServiceList.Items.Add($_)}
 	$ServiceList.width=170
 	$ServiceList.autosize = $true
@@ -1720,8 +1707,8 @@ $CBUD.add_MouseHover($ShowHelp)
 	($CBITPC.checked) = $False
 	($CBUF.checked) = $False
 	($CBUD.checked) = $False
-	
 	})
+
 	$Update.Text = "Update"
 	$Update.Location = New-Object System.Drawing.Point(330, 255)
 	$Update.Add_Click({
