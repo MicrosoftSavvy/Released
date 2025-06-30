@@ -851,6 +851,7 @@ function PullWiFiPWDs {
 	if ($Status -ne $null) {
 		foreach ($Current in $CurrentStatus){
 		$Status.items.add($Current)
+		$Status.items.add("`n")
 		}
 		}else {
 			$CurrentStatus
