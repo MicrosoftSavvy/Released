@@ -916,7 +916,6 @@ foreach ($DriveLetter in $Drives){
 	}
 	}
 }
-	$Folder='c:\Repair'
 	$SCDownload="https://raw.githubusercontent.com/MicrosoftSavvy/Released/refs/heads/main/SecuritySettings.inf"
 	$SCR=Invoke-WebRequest -uri $SCDownload
 	$SCRaw=($SCR.rawcontent).split("`n") | Select-Object -skip 26
