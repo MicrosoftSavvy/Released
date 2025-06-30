@@ -1,7 +1,6 @@
 Set-ExecutionPolicy -executionpolicy bypass -scope Process -force
 $CurrentScriptVer="1.1.4"
 $host.UI.RawUI.WindowTitle = "The Little Helper Script $CurrentScriptVer"
-
 $Folder='c:\Repair'
 $Time="03:00"
 $CurrentDate=(Get-date).ToString('MM-dd-yyyy')
@@ -248,7 +247,6 @@ function ReRegDLLs($DLLLog) {
 		Write-Progress -Completed -Activity " "
 	}
 	if (!($Global:DLLLog -eq $null)){Out-File -FilePath $DLLRLog -InputObject $Global:DLLLog}
-	
 }
 
 function ShowVaribles {
@@ -303,7 +301,6 @@ function Runtimes {
 	#$RTLinks='https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170'
 	$Runtimes='https://aka.ms/vs/17/release/vc_redist.x86.exe','https://aka.ms/vs/17/release/vc_redist.x64.exe','https://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/VSU_4/vcredist_x86.exe','https://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/VSU_4/vcredist_x64.exe'
 	UpdateModules
-
 	foreach($Rt in $Runtimes){
 		$RtFN = ($Folder + '\' + (($Rt.replace('/',' ')).split() | Where-Object {$_ -like "*.exe"}))
 		[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
@@ -360,7 +357,6 @@ function FreeUpSpace {
 	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
 	$hardwaretype=(Get-WmiObject -Class Win32_ComputerSystem -Property PCSystemType).PCSystemType
 	$FUSFolders=@('c:\ESD','C:\Windows\SoftwareDistribution\Download','c:\ProgramData\Adobe\Temp','c:\$GetCurrent','c:\recovery','c:\windows10upgrade','C:\WINDOWS\SystemTemp\ScreenConnect') 
-
 	Repair-WindowsImage -Online -StartComponentCleanup -ResetBase
 		foreach ($CurrentFUSList in $FUSFolders){
 		if(Test-Path $CurrentFUSList) {
@@ -396,7 +392,6 @@ function ScheduledTasks {
 	$CurrentTime=(Get-date).tostring('yyyy-MM-dd HH:mm:ss')
 	$USTLog=$Folder+"\ScheduledTasks-User.log"
 	$TSTLog=$Folder+"\ScheduledTasks-Timed.log"
-
 	$UserScheduledTasks=(Get-ScheduledTask | Where-Object {$_.Principal.UserId -notlike "NT AUTHORITY*" -and $_.Principal.UserId -notlike "SYSTEM" -and $_.Principal.UserId -notlike "LOCAL SERVICE" -and $_.Principal.UserId -notlike "NETWORK SERVICE" -and $_.Principal.UserId -notlike $null} | Select-Object @{Name="Run As";Expression={ $_.principal.userid } }, TaskPath, TaskName)
 	$TimeScheduledTasks=(Get-ScheduledTask | ForEach-Object {
 		$task = $_
@@ -425,7 +420,6 @@ function PrivateNetwork {
 	$Global:NetworkOld = (Get-NetConnectionProfile)
 	$Global:NetworkNew = (Set-NetConnectionProfile -Name $Network -NetworkCategory Private)
 	$NetworkLog=$Folder+"\Network.log"
-
 	if (!($Network -eq $null)){Out-File -FilePath $NetworkLog -InputObject $Network}
 	if (!($Global:NetworkOld -eq $null)){Out-File -FilePath $NetworkLog -InputObject $Global:NetworkOld -append}
 	if (!($Global:NetworkNew -eq $null)){Out-File -FilePath $NetworkLog -InputObject $Global:NetworkNew -append}
@@ -435,7 +429,6 @@ function PC-Rename {
 	$CurrentStatus = "Renaming PC" 
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
-
 	if ($CBPCRST.checked -eq "True"){
 		Rename-Computer -ComputerName (Get-WmiObject win32_COMPUTERSYSTEM).Name -NewName (Get-WmiObject Win32_BIOS).serialnumber -force
 	} else {
@@ -445,11 +438,9 @@ function PC-Rename {
 }
 
 function RemoveDeviceGroup {
-
 	$CurrentStatus = "Removing All Drivers for " + $DDDevices.Text 
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
-	
 	$DeviceClass=$DDDevices.Text
 	$Directory=$Folder + "\DriverExport"
 	if(!(test-path $Directory)){New-Item -Path $Directory -ItemType "directory"}
@@ -463,30 +454,24 @@ function RemoveDeviceGroup {
 	write-output $MediaList > $MediaDevice
 	(Get-Content $MediaDevice | Select-Object -Skip 3) | Select-Object -SkipLast 2 | Set-Content $MediaDeviceList
 	(Get-Content -path $MediaDevice) -Replace(" ","") | out-file $MediaDeviceList
-
 	foreach($DEVID in [System.IO.File]::ReadLines($MediaDeviceList)){
 	PNPUTIL /disable-device "$DEVID"
 	pnputil /remove-device "$DEVID"
 	}
-
 	write-output $OEMList > $LISTFULL
 	(Get-Content $LISTFULL | Select-Object -Skip 3) | Select-Object -SkipLast 2 | Set-Content $LIST
 	(Get-Content -path $LIST) -Replace(" ","") | out-file $LIST  -force -encoding utf8
-
 	foreach($File in [System.IO.File]::ReadLines("$Folder\RemovedFiles.log")){
 	PNPUTIL /delete-driver $File
 	}
 }
 
 function EnablePowerOptions {
-
 	$CurrentStatus = "Enabling all options in Power Settings" 
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 	if (Test-Path [System.Windows.Forms.Application]) {if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}}
-
 	$powerSettingTable = Get-WmiObject -Namespace root\cimv2\power -Class Win32_PowerSetting
 	$powerSettingInSubgroubTable = Get-WmiObject -Namespace root\cimv2\power -Class Win32_PowerSettingInSubgroup
-
 	Get-WmiObject -Namespace root\cimv2\power -Class Win32_PowerSettingCapabilities | ForEach-Object {
 		$tmp = $_.ManagedElement
 		$tmp = $tmp.Remove(0, $tmp.LastIndexOf('{') + 1)
