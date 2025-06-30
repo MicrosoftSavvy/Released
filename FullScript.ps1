@@ -504,7 +504,6 @@ function EnablePowerOptions {
 }
 
 function FixTime {
-
 	[CmdletBinding()]
 	param (
 		[Parameter()]
@@ -514,7 +513,6 @@ function FixTime {
 		[string]
 		$NtpServer ="pool.ntp.org"
 	)
-
 	begin {}
 	process {
 		$CurrentStatus = "Using NTP Server($NtpServer) to get time." 
@@ -547,14 +545,12 @@ function FixTime {
 			if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 			if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
 		}
-
 		Set-ItemProperty -Path 'HKLM:\\SYSTEM\CurrentControlSet\Services\tzautoupdate' -Name Start -Value 3
 		Set-ItemProperty -Path 'HKLM:\\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location' -Name Value -Value Allow
 		Set-Service -Name "tzautoupdate" -StartupType Automatic
 		Set-Service -Name "W32Time" -StartupType Automatic
 		Start-Service -Name "tzautoupdate"
 		Start-Service -Name "W32Time"
-				
 	}
 }
 
@@ -575,7 +571,6 @@ function Run-Repairs {
 	RemoveBadDevices
 	Pull-Logs
 	ScheduleRestart
-
 }
 
 function Spooler {
@@ -826,7 +821,6 @@ Try {
 		$CurrentStatus = "$PingDomain not reachable using DNS server: $PDS" 
 		if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 		if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
-		
 	}}}}} catch {
 		$CurrentStatus = "Gateway not pingable"
 		if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Red}
@@ -840,17 +834,13 @@ function ClearBins {
 }
 
 function  SecureHost {
-	
 	$hostfile="C:\windows\system32\drivers\etc\hosts"
 	if ((Select-String -Path $hostfile -Pattern "###Secure Hosts File###" -AllMatches) -ne $null) {$LineCount=(Select-String -Path $hostfile -Pattern "###Secure Hosts File###" -AllMatches).linenumber - 1}
 	if ($LineCount -ne $null){$OriginalHost=Get-Content $hostfile | Select -first $LineCount} else {$OriginalHost=Get-Content $hostfile}
-	
-	
 	$WebHost = ((invoke-webrequest "https://raw.githubusercontent.com/MicrosoftSavvy/Released/refs/heads/main/SecureHost").rawcontent).split("`n") | select-object -skip 26
 	$NewHost=$OriginalHost + $WebHost
 	$NewHost | Out-File -FilePath $hostfile -force -encoding utf8
 	(gc $hostfile) | ? {$_.trim() -ne "" } | set-content $hostfile
-
 }
 
 function PullWiFiPWDs {
@@ -870,7 +860,6 @@ function PullWiFiPWDs {
 }
 
 function NewITPC {
-
 	$SoftwareList = (((invoke-webrequest "https://raw.githubusercontent.com/MicrosoftSavvy/Released/refs/heads/main/NewITSoftware.txt").rawcontent).split("`n") | select-object -skip 26) -replace("`r",'')
 	$SLCount=(($SoftwareList | Select-String -Pattern "Remove" -AllMatches).linenumber - 1)
 	$Installs=($SoftwareList | Select -first $SLCount) | select -skip 1 | select -skiplast 1
@@ -886,9 +875,7 @@ function NewITPC {
 	$CurrentStatus = "Removing $Removal" 
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
-
 	$SoftwareRemove = (Get-AppxPackage | Where-Object { $_.Name -like $Removal }).PublisherId
-	
 	foreach($SR in $SoftwareRemove){
 			if ($SR -like "MSIX*"){
 				$SRX=$SR.replace("MSIX\","")
@@ -902,14 +889,12 @@ function NewITPC {
 }
 
 function SecurePC {
-
 write-host $null | out-file $Folder\BitKeys-$date.txt
 foreach ($DriveLetter in $Drives){
 	$drive=$DriveLetter.replace("\","")
 	$Protectors=(manage-bde -protectors -get $drive).split()
 	$LCount=($Protectors | Select-String -Pattern "ID:" -AllMatches).linenumber
 	$IDs=$Protectors[$LCount]
-	
 	if (((manage-bde -protectors -get $drive | where-object { $_ -like "*TPM*" }) -eq $null)) {manage-bde -protectors -add -TPM $Drive}
 	if (((manage-bde -protectors -get $drive | where-object { $_ -like "*Numerical*" }) -eq $null)) {manage-bde -protectors -add $Drive -RecoveryPassword}
 	manage-bde -on $Drive -skiphardwaretest
@@ -942,7 +927,6 @@ foreach ($DriveLetter in $Drives){
 	secedit /db secedit.sdb /configure /cfg $SetSecurity /overwrite /log $SetSecurityLog /verbose /quiet
 	BCDEDIT /set nx OptOut
 	Disable-WindowsOptionalFeature -Online -FeatureName MicrosoftWindowsPowerShellV2Root
-
 	$PolicyCats="Account Management","Policy Change"
 	$PolicySubs='logon','logoff','File System','File Share','Plug and Play Events','Credential Validation','Security Group Management','Process Creation','Special Logon','Other Object Access Events','System Integrity','Security State Change','Sensitive Privilege Use','Other Logon/Logoff Events','Other System Events','Security System Extension'
 	$Policy=auditpol /set /category:* /failure:enable /success:disable
@@ -1093,13 +1077,12 @@ function InteractiveAdmin {
 function UpdateFeature {
 	UpdateModules
 	Install-WindowsUpdate -MicrosoftUpdate -Category 'feature pack' -AcceptAll -Install -IgnoreReboot -Verbose
-	
 }
 
 function UpdateDriver {
 	UpdateModules
 	Install-WindowsUpdate -MicrosoftUpdate -Category 'driver' -AcceptAll -Install -IgnoreReboot -Verbose
-	}
+}
 
 function GUI {
 	[reflection.assembly]::loadwithpartialname("System.Windows.Forms") | Out-Null
