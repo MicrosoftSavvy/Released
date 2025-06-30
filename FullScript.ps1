@@ -333,7 +333,7 @@ function Update {
 	UpdateModules
 	$WinGetLog=$Folder+"\AppUpdate.log"
 	Install-WindowsUpdate -MicrosoftUpdate -NotCategory 'feature pack','driver' -AcceptAll -Install -IgnoreReboot -Verbose
-	$WinGet=&"$Winget" upgrade --all --silent --accept-source-agreements  --include-unknown --verbose
+	Winget upgrade --all --silent --accept-source-agreements  --include-unknown --verbose
 	$Global:WinGet=switch ($WinGet) {{ $_.length -ge 9 } { $_ }}
 	if (!($Global:WinGet -eq $null)){Out-File -FilePath $WinGetLog -InputObject $Global:WinGet}
 }
@@ -870,9 +870,10 @@ function ClearBins {
 function  SecureHost {
 	
 	$hostfile="C:\windows\system32\drivers\etc\hosts"
-	Get-Content $hostfile | Select -first $LineCount
 	if ((Select-String -Path $hostfile -Pattern "###Secure Hosts File###" -AllMatches) -ne $null) {$LineCount=(Select-String -Path $hostfile -Pattern "###Secure Hosts File###" -AllMatches).linenumber - 1}
 	if ($LineCount -ne $null){$OriginalHost=Get-Content $hostfile | Select -first $LineCount} else {$OriginalHost=Get-Content $hostfile}
+	
+	
 	$WebHost = ((invoke-webrequest "https://raw.githubusercontent.com/MicrosoftSavvy/Released/refs/heads/main/SecureHost").rawcontent).split("`n") | select-object -skip 26
 	$NewHost=$OriginalHost + $WebHost
 	$NewHost | Out-File -FilePath $hostfile -force -encoding utf8
