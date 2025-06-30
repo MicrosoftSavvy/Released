@@ -37,6 +37,7 @@ function UpdateModules {
 }
 
 function Pull-Logs {
+	
 	if ($TXTMIN.Text -ne $null) {$MinutesBack=$TXTMIN.Text}else {$MinutesBack=180}
 	$SystemLog=$Folder+"\System.log"
 	$ApplicationLog=$Folder+"\Application.log"
@@ -45,8 +46,10 @@ function Pull-Logs {
 	$CBSLog=$Folder + "\CBSLog.log"
 	$DISMLog=$Folder + "\DISMLog.log"
 	$CurrentStatus = "Pulling errors from log files for the last $MinutesBack minutes" 
+	
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 	if (Test-Path [System.Windows.Forms.Application]) {if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}}
+	
 	$System = ((Get-EventLog -LogName System -After (Get-Date).AddMinutes(-$MinutesBack) -entrytype "Error" -ErrorAction SilentlyContinue) | Format-Table -AutoSize -Wrap)
 	$Application = ((Get-EventLog -LogName Application -After (Get-Date).AddMinutes(-$MinutesBack) -entrytype "Error" -ErrorAction SilentlyContinue) | Format-Table -AutoSize -Wrap)
 	$Security = ((Get-EventLog -LogName Security -After (Get-Date).AddMinutes(-$MinutesBack) -entrytype "FailureAudit"  -ErrorAction SilentlyContinue) | Format-Table -AutoSize -Wrap)
@@ -1518,7 +1521,7 @@ $CBUD.add_MouseHover($ShowHelp)
 	$TXTMIN.AcceptsReturn = $false
 	$form.Controls.Add($TXTMIN)        
 	$TXTMIN.Text=180
-	$TXTMIN.Enabled=$True
+	$TXTMIN.Enabled=$False
 
 	$CBLogs.Add_CheckedChanged({
     if ($CBLogs.Checked) {
