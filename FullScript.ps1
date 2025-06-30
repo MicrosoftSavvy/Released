@@ -1,7 +1,7 @@
 Set-ExecutionPolicy -executionpolicy bypass -scope Process -force
 $CurrentScriptVer="1.1.4"
 $host.UI.RawUI.WindowTitle = "The Little Helper Script $CurrentScriptVer"
-$Folder='c:\Repair'
+$Folder='c:\LittleHelper'
 $Time="03:00"
 $CurrentDate=(Get-date).ToString('MM-dd-yyyy')
 $Date=(Get-date).AddDays(1).ToString('MM-dd-yyyy')
