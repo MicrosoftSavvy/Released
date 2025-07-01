@@ -309,7 +309,7 @@ function Runtimes {
 		((New-Object System.Net.WebClient).DownloadFile($Rt,$RtFN))
 		start-process -filepath $RtFN -ArgumentList "-quiet","-norestart"
 	}
-	$n=5
+	$n=6
 	do {
 		$DNR="Microsoft DotNet Runtime " + $n
 		$CurrentNetRuntime=winget install --id=Microsoft.DotNet.Runtime.$n  -e --silent --accept-source-agreements --include-unknown --verbose
