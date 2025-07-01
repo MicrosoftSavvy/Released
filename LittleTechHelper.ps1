@@ -326,7 +326,7 @@ function Update {
 	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
 	UpdateModules
 	$WinGetLog=$Folder+"\AppUpdate.log"
-	Install-WindowsUpdate -MicrosoftUpdate -NotCategory 'feature pack','driver' -AcceptAll -Install -IgnoreReboot -Verbose
+	Install-WindowsUpdate -MicrosoftUpdate -NotCategory 'feature pack','driver','upgrades' -AcceptAll -Install -IgnoreReboot -Verbose
 	Winget upgrade --all --silent --accept-source-agreements  --include-unknown --verbose
 	$Global:WinGet=switch ($WinGet) {{ $_.length -ge 9 } { $_ }}
 	if (!($Global:WinGet -eq $null)){Out-File -FilePath $WinGetLog -InputObject $Global:WinGet}
@@ -1072,7 +1072,7 @@ function InteractiveAdmin {
 
 function UpdateFeature {
 	UpdateModules
-	Install-WindowsUpdate -MicrosoftUpdate -Category 'feature pack' -AcceptAll -Install -IgnoreReboot -Verbose
+	Install-WindowsUpdate -MicrosoftUpdate -Category 'feature pack','upgrades' -AcceptAll -Install -IgnoreReboot -Verbose
 }
 
 function UpdateDriver {
