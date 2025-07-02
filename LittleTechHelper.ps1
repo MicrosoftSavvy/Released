@@ -1085,10 +1085,9 @@ function ListSIDs {
 ForEach-Object {
     $profilePath = $_.GetValue("ProfileImagePath")
     $sid = ($_.Name -replace "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\ProfileList\\", "")
-    if ($profilePath) { "$sid`t$profilePath" }
+    if ($profilePath) { "$sid`t`t$profilePath" }
 }	
 	$SIDs | Out-File -file $SIDList -force -encoding utf8
-	$CurrentStatus = ((Get-Content $SIDList).replace("`n","`n`n")).replace("`t","`n")
 	foreach ($SD in $SIDs){
 	if ($Status -ne $null) {$Status.items.add($SD)}else {Write-Host $SD -foregroundcolor Green}
 	}	
