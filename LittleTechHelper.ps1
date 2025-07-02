@@ -1085,7 +1085,7 @@ function ListSIDs {
 ForEach-Object {
     $profilePath = $_.GetValue("ProfileImagePath")
     $sid = ($_.Name -replace "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\ProfileList\\", "")
-    if ($profilePath) { "$sid`t`t$profilePath" }
+    if ($profilePath) { "$sid`t$profilePath" }
 }	
 	$SIDs | Out-File -file $SIDList -force -encoding utf8
 	foreach ($SD in $SIDs){
