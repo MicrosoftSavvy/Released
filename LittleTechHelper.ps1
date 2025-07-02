@@ -1104,8 +1104,8 @@ function OfficeReports {
 	if ($CBOUnLicensedUsers.checked -eq $True){
 	$CBOUnLicensed=$Folder + "\CBOUnLicensed.log"
 	Import-Module Microsoft.Graph.Reports
-	Out-File -FilePath $CBOUnLicensed -InputObject (Get-MgAuditLogSignIn -Filter "Status/Errorcode ne 0" | Select-Object CreatedDateTime, UserPrincipalName, AppDisplayName, ClientAppUsed, ConditionalAccessStatus, ResourceDisplayName)
-	Get-MgAuditLogSignIn | out-gridview
+	Out-File -FilePath $CBOUnLicensed -InputObject (Get-MgUser -Filter "assignedLicenses/`$count eq 0 and userType eq 'Member'" -ConsistencyLevel eventual -CountVariable unlicensedUserCount -All)
+	Get-MgUser | out-gridview
 	}
 
 
@@ -1566,9 +1566,8 @@ $CBOUnLicensedUsers.add_MouseHover($ShowHelp)
 	$CBOLicense.Autosize = $True
 	$CBOLicense.checked = $False
 	
-	
 	$CBOUnLicensedUsers.Text = "List of Unlicensed Users"
-	$CBOUnLicensedUsers.Location = New-Object System.Drawing.Point(490, 30)
+	$CBOUnLicensedUsers.Location = New-Object System.Drawing.Point(490, 50)
 	$CBOUnLicensedUsers.Autosize = $True
 	$CBOUnLicensedUsers.checked = $False
 	
