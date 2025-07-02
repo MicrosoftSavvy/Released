@@ -1579,9 +1579,11 @@ $CBOLicense.add_MouseHover($ShowHelp)
 	$form.Controls.Add($CBOLicense)
 	$form.Autosize = $True	
     } else {
+	$form.Autosize = $False
 	$form.Controls.Remove($CBOLogins)
 	$form.Controls.Remove($CBOLicense)
 	$form.Autosize = $True
+	
 	}
 	})
 
