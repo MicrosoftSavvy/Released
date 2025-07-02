@@ -1083,7 +1083,9 @@ function OfficeReports {
 	if ((get-installedmodule Microsoft.Graph).name -ne "Microsoft.Graph"){
 	Install-Module Microsoft.Graph -Scope AllUsers -Repository PSGallery -Force
 	}
-	Microsoft.Graph.Authentication
+	Import-Module Microsoft.Graph.Authentication
+	Import-Module Microsoft.Graph.Reports
+	
 	Connect-Graph -Scopes User.ReadWrite.All, Organization.Read.All, Directory.Read.All, DeviceManagementConfiguration.Read.All, DeviceManagementManagedDevices.Read.All, DeviceManagementServiceConfig.Read.All
 	$CBOffice.checked = $False
 	$form.Controls.Add($CBOffice)
@@ -1096,19 +1098,23 @@ function OfficeReports {
 	
 	if ($CBOLogins.checked -eq $True){
 	$OfficeLogin=$Folder + "\OfficeLogins.log"
-	Import-Module Microsoft.Graph.Reports
 	Out-File -FilePath $OfficeLicense -InputObject (Get-MgAuditLogSignIn -Filter "Status/Errorcode ne 0" | Select-Object CreatedDateTime, UserPrincipalName, AppDisplayName, ClientAppUsed, ConditionalAccessStatus, ResourceDisplayName)
 	Get-MgAuditLogSignIn | out-gridview
 	}
 
 	if ($CBOUnLicensedUsers.checked -eq $True){
 	$CBOUnLicensed=$Folder + "\CBOUnLicensed.log"
-	Import-Module Microsoft.Graph.Reports
-	Out-File -FilePath $CBOUnLicensed -InputObject (Get-MgUser -Filter "assignedLicenses/`$count eq 0 and userType eq 'Member'" -ConsistencyLevel eventual -CountVariable unlicensedUserCount -All)
-	Get-MgUser | out-gridview
+	$sharedMailboxes = Get-Mailbox -RecipientTypeDetails SharedMailbox | Select-Object -ExpandProperty UserPrincipalName
+	# Get all unlicensed member users (enabled accounts)
+	$unlicensedUsers = Get-MgUser -Filter "assignedLicenses/`$count eq 0 and userType eq 'Member' and accountEnabled eq true" `
+		-ConsistencyLevel eventual `
+		-All
+	# Exclude shared mailboxes
+	$filteredUsers = $unlicensedUsers | Where-Object { $sharedMailboxes -notcontains $_.UserPrincipalName }
+	# Export to CSV
+	$filteredUsers | Select-Object DisplayName, UserPrincipalName | Out-File -FilePath $CBOUnLicensed
+	$filteredUsers | out-gridview
 	}
-
-
 }
 
 
