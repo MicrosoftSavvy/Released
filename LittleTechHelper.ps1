@@ -1509,15 +1509,14 @@ $CBOLicense.add_MouseHover($ShowHelp)
 	$CBUD.Autosize = $True
 	$CBUD.checked = $False
 	$form.Controls.Add($CBUD)
-	
-	
+		
 	$CBSIDs.Text = "Pull SIDs"
 	$CBSIDs.Location = New-Object System.Drawing.Point(340, 210)
 	$CBSIDs.Autosize = $True
 	$CBSIDs.checked = $False
 	$form.Controls.Add($CBSIDs)
 	
-	$CBOffice.Text = "Office 365"
+	$CBOffice.Text = "Office 365 Reports"
 	$CBOffice.Location = New-Object System.Drawing.Point(340, 230)
 	$CBOffice.Autosize = $True
 	$CBOffice.checked = $False
@@ -1528,8 +1527,8 @@ $CBOLicense.add_MouseHover($ShowHelp)
 	$CBOLogins.Autosize = $True
 	$CBOLogins.checked = $False
 
-	$CBOLicense.Text = "Pull SIDs"
-	$CBOLicense.Location = New-Object System.Drawing.Point(340, 210)
+	$CBOLicense.Text = "Pull Licenses"
+	$CBOLicense.Location = New-Object System.Drawing.Point(4900, 30)
 	$CBOLicense.Autosize = $True
 	$CBOLicense.checked = $False
 	
@@ -1577,10 +1576,13 @@ $CBOLicense.add_MouseHover($ShowHelp)
 	$CBOffice.Add_CheckedChanged({
     if ($CBOffice.Checked) {
 	
+	$form.Controls.Add($CBOLogins)
 	$form.Controls.Add($CBOLicense)
-	
+	$form.Autosize = $True	
     } else {
-	$TXTMIN.Enabled=$False
+	$form.Controls.Delete($CBOLogins)
+	$form.Controls.Delete($CBOLicense)
+	$form.Autosize = $True
 	}
 	})
 
