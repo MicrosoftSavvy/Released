@@ -1612,7 +1612,6 @@ $CBOUnLicensedUsers.add_MouseHover($ShowHelp)
 	$CBOUnLicensedUsers.Autosize = $True
 	$CBOUnLicensedUsers.checked = $False
 	
-	
 	@((get-service).name) | ForEach-Object {[void] $ServiceList.Items.Add($_)}
 	$ServiceList.width=170
 	$ServiceList.autosize = $true
@@ -1668,10 +1667,6 @@ $CBOUnLicensedUsers.add_MouseHover($ShowHelp)
 	}
 	})
 
-
-
-
-	
 	$CBServices.Add_CheckedChanged({
     if ($CBServices.Checked) {
 	$ServiceList.Enabled=$True
@@ -1721,6 +1716,7 @@ $CBOUnLicensedUsers.add_MouseHover($ShowHelp)
 	$Repair.Text = "Repair OS"
 	$Repair.Location = New-Object System.Drawing.Point(170, 255)
 	$Repair.Add_Click({
+	ClearCheckBoxes
 	($CBNetwork.Checked) = $true
 	($CBLogs.Checked) = $true
 	($CBDLLs.Checked) = $true
@@ -1728,32 +1724,8 @@ $CBOUnLicensedUsers.add_MouseHover($ShowHelp)
 	($CBCHK.Checked) = $true
 	($CBDISM.Checked) = $true
 	($CBSFC.Checked) = $true
-	($CBRT.Checked) = $false
-	($CBSR.Checked) = $false
-	($CBST.Checked) = $false
-	($CBSV.Checked) = $false
-	($CBUpdate.Checked) = $false
-	($CBCleanUp.Checked) = $false
 	($CBTime.Checked) = $true
-	($CBSpaceCleanUp.Checked) = $false
-	($CBPCR.Checked) = $false
 	($CBVSS.Checked) = $true
-	($CBSpool.checked) = $false
-	($CBDevices.Checked) = $false
-	($CBEPO.Checked) = $false
-	($CBServices.checked) = $false
-	($CBDS.checked) = $false
-	($CBNetCheck.checked) = $false
-	($CBRecycle.checked) = $False
-	($CBSecureHOSTS.checked) = $false
-	($CBSecurePC.checked) = $false
-	($CBIAdmin.checked) = $False
-	($CBWiFi.checked) = $False
-	($CBITPC.checked) = $False
-	($CBUF.checked) = $False
-	($CBUD.checked) = $False
-	($CBSIDs.checked) = $False
-	($CBOffice.checked) = $False
 	})
 
 	$Update.Text = "Update"
