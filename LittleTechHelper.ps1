@@ -1535,8 +1535,7 @@ $CBOLicense.add_MouseHover($ShowHelp)
 	$CBOLicense.Location = New-Object System.Drawing.Point(340, 210)
 	$CBOLicense.Autosize = $True
 	$CBOLicense.checked = $False
-	$form.Controls.Add($CBOLicense)
-
+	
 	
 	@((get-service).name) | ForEach-Object {[void] $ServiceList.Items.Add($_)}
 	$ServiceList.width=170
@@ -1577,6 +1576,20 @@ $CBOLicense.add_MouseHover($ShowHelp)
 	$TXTMIN.Enabled=$False
 	}
 	})
+
+	$CBOffice.Add_CheckedChanged({
+    if ($CBOffice.Checked) {
+	
+	$form.Controls.Add($CBOLicense)
+	$CBOLicense.enable=$True
+	
+    } else {
+	$TXTMIN.Enabled=$False
+	}
+	})
+
+
+
 
 	
 	$CBServices.Add_CheckedChanged({
