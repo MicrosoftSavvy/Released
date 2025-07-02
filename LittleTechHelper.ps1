@@ -1085,7 +1085,7 @@ function OfficeReports {
 	}
 	Import-Module Microsoft.Graph.Authentication
 	Import-Module Microsoft.Graph.Reports
-	Import-Module Microsoft.Graph
+	Import-Module Microsoft.Graph.Users
 	Connect-Graph -Scopes User.ReadWrite.All, Organization.Read.All, Directory.Read.All, DeviceManagementConfiguration.Read.All, DeviceManagementManagedDevices.Read.All, DeviceManagementServiceConfig.Read.All
 	$CBOffice.checked = $False
 	$form.Controls.Add($CBOffice)
