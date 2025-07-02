@@ -1603,6 +1603,7 @@ $CBSIDs.add_MouseHover($ShowHelp)
 	($CBITPC.checked) = $False
 	($CBUF.checked) = $False
 	($CBUD.checked) = $False
+	($CBSIDs.checked) = $False
 	$form.BackColor = [System.Drawing.Color]::LightGray
 	})
 
@@ -1640,6 +1641,7 @@ $CBSIDs.add_MouseHover($ShowHelp)
 	($CBITPC.checked) = $False
 	($CBUF.checked) = $True
 	($CBUD.checked) = $False
+	($CBSIDs.checked) = $False
 	})
 	
 	$Repair.Text = "Repair OS"
@@ -1676,6 +1678,7 @@ $CBSIDs.add_MouseHover($ShowHelp)
 	($CBITPC.checked) = $False
 	($CBUF.checked) = $False
 	($CBUD.checked) = $False
+	($CBSIDs.checked) = $False
 	})
 
 	$Update.Text = "Update"
@@ -1725,7 +1728,7 @@ $CBSIDs.add_MouseHover($ShowHelp)
 	if ($CBITPC.checked) { NewITPC }
 	if ($CBUF.checked) { UpdateFeature }
 	if ($CBUD.checked) { UpdateDriver }
-		
+	if ($CBSIDs.checked) { ListSIDs }
 	$Status.items.add("--------------")
 	$Status.items.add("Run Finished")
 	$StatusLog=$Folder + "\RunStatus.log"
