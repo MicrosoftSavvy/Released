@@ -1089,7 +1089,9 @@ ForEach-Object {
 }	
 	$SIDs | Out-File -file $SIDList -force -encoding utf8
 	$CurrentStatus = ((Get-Content $SIDList).replace("`n","`n`n")).replace("`t","`n")
-	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
+	foreach ($SD in $SIDs){
+	if ($Status -ne $null) {$Status.items.add($SD)}else {Write-Host $SD -foregroundcolor Green}
+	}	
 	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
 }
 
