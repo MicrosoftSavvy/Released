@@ -1117,7 +1117,6 @@ function OfficeReports {
 	}
 }
 
-
 function ListSIDs {
 	$SIDList=$Folder + "\SIDList.log"
 [array]$SIDs = Get-ChildItem -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\" -ErrorAction SilentlyContinue |
@@ -1131,6 +1130,42 @@ ForEach-Object {
 	if ($Status -ne $null) {$Status.items.add($SD)}else {Write-Host $SD -foregroundcolor Green}
 	}	
 	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
+}
+
+function ClearCheckBoxes {
+	($CBNetwork.Checked) = $false
+	($CBLogs.Checked) = $false
+	($CBDLLs.Checked) = $false
+	($CBBadDevices.Checked) = $false
+	($CBCHK.Checked) = $false
+	($CBDISM.Checked) = $false
+	($CBSFC.Checked) = $false
+	($CBRT.Checked) = $false
+	($CBSR.Checked) = $false
+	($CBST.Checked) = $false
+	($CBSV.Checked) = $false
+	($CBUpdate.Checked) = $false
+	($CBCleanUp.Checked) = $false
+	($CBTime.Checked) = $false
+	($CBSpaceCleanUp.Checked) = $false
+	($CBPCR.Checked) = $false
+	($CBVSS.Checked) = $false
+	($CBSpool.checked) = $false
+	($CBDevices.Checked) = $false
+	($CBEPO.Checked) = $false
+	($CBServices.checked) = $false
+	($CBDS.checked) = $false
+	($CBNetCheck.checked) = $false
+	($CBRecycle.checked) = $False
+	($CBSecureHOSTS.checked) = $False
+	($CBSecurePC.checked) = $False
+	($CBIAdmin.checked) = $False
+	($CBWiFi.checked) = $False
+	($CBITPC.checked) = $False
+	($CBUF.checked) = $False
+	($CBUD.checked) = $False
+	($CBSIDs.checked) = $False
+	($CBOffice.checked) = $False
 }
 
 function GUI {
@@ -1664,39 +1699,7 @@ $CBOUnLicensedUsers.add_MouseHover($ShowHelp)
 	$Clear.Text = "Clear"
 	$Clear.Location = New-Object System.Drawing.Point(250, 255)
 	$Clear.Add_Click({
-	($CBNetwork.Checked) = $false
-	($CBLogs.Checked) = $false
-	($CBDLLs.Checked) = $false
-	($CBBadDevices.Checked) = $false
-	($CBCHK.Checked) = $false
-	($CBDISM.Checked) = $false
-	($CBSFC.Checked) = $false
-	($CBRT.Checked) = $false
-	($CBSR.Checked) = $false
-	($CBST.Checked) = $false
-	($CBSV.Checked) = $false
-	($CBUpdate.Checked) = $false
-	($CBCleanUp.Checked) = $false
-	($CBTime.Checked) = $false
-	($CBSpaceCleanUp.Checked) = $false
-	($CBPCR.Checked) = $false
-	($CBVSS.Checked) = $false
-	($CBSpool.checked) = $false
-	($CBDevices.Checked) = $false
-	($CBEPO.Checked) = $false
-	($CBServices.checked) = $false
-	($CBDS.checked) = $false
-	($CBNetCheck.checked) = $false
-	($CBRecycle.checked) = $False
-	($CBSecureHOSTS.checked) = $False
-	($CBSecurePC.checked) = $False
-	($CBIAdmin.checked) = $False
-	($CBWiFi.checked) = $False
-	($CBITPC.checked) = $False
-	($CBUF.checked) = $False
-	($CBUD.checked) = $False
-	($CBSIDs.checked) = $False
-	($CBOffice.checked) = $False
+	ClearCheckBoxes
 	$form.BackColor = [System.Drawing.Color]::LightGray
 	})
 
