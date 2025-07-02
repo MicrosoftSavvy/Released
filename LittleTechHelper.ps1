@@ -1085,11 +1085,11 @@ function ListSIDs {
 ForEach-Object {
     $profilePath = $_.GetValue("ProfileImagePath")
     $sid = ($_.Name -replace "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\ProfileList\\", "")
-    if ($profilePath) { "$profilePath`t$sid`n" }
+    if ($profilePath) { "$sid`t$profilePath" }
 }	
 	$SIDs | Out-File -file $SIDList -force -encoding utf8
-	$CurrentStatus = (Get-Content $SIDList)
-	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus.replace("`t","`n") -foregroundcolor Green}
+	$CurrentStatus = ((Get-Content $SIDList).replace("`n","`n`n")).replace("`t","`n")
+	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
 }
 
