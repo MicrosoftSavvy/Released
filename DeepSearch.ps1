@@ -7,7 +7,7 @@ $Path="c:\SearchResults"
 if(!(test-path $Path)){New-Item -Path $Path -ItemType "directory"}
 $Log=($filename.split(".")[0]) + '.log'
 $SearchFile=$Path + "\" + $Log.replace('*','') 
-	
+
 Add-Type -TypeDefinition @'
 using Microsoft.Win32.SafeHandles;
 using System;
@@ -305,6 +305,7 @@ $CidrList = (Get-NetIPAddress -AddressFamily IPv4 | Select-Object IPAddress,Pref
         New-Object -TypeName PSObject -Property $CidrObject
     }
 })
+
 $FullList=$CidrList | %{"$($_.ipaddress)/$($_.prefixlength)"}
 $IPList = foreach ($CurrentList in $FullList){Get-IpRange -Subnets $CurrentList}
 
