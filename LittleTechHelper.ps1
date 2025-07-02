@@ -5,7 +5,7 @@ $host.UI.RawUI.WindowTitle = "The Little Tech Helper Script $CurrentScriptVer"
 $Folder='c:\LTH'
 $Time="03:00"
 $CurrentDate=(Get-date).ToString('MM-dd-yyyy')
-$Date=(Get-date).AddDays(1).ToString('MM-dd-yyyy')
+$FutureDate=(Get-date).AddDays(1).ToString('MM-dd-yyyy')
 $Transcript=$Folder + "\Transcript.log"
 $Users= get-childitem -directory -path "c:\users"; 
 $Global:VSSChangeLog 
@@ -267,7 +267,7 @@ function ScheduleRestart {
 	if (Test-Path [System.Windows.Forms.Application]) {if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}}
 	$RunAfter=$Folder+"\Repair.ps1"
 	if (PendingReboot -eq "True") {
-		$RestartSchedule=(schtasks /Create /SC ONCE /TN "ScheduledRestart" /TR "shutdown /r /f /t 0" /SD $Date /ST $time /F /Z /rl HIGHEST /ru System /V1)
+		$RestartSchedule=(schtasks /Create /SC ONCE /TN "ScheduledRestart" /TR "shutdown /r /f /t 0" /SD $FutureDate /ST $time /F /Z /rl HIGHEST /ru System /V1)
 		if (!(Get-ScheduledTask | Where-Object { $_.TaskName -like '*ScheduledRestart*' } | Select-Object TaskName, State)){$RestartSchedule}
 		(((get-content $PSCommandPath) | select-object -skiplast 1).replace('GUI #','AfterStartUp'),'').replace('[void]$form.ShowDialog()','') | Out-File -FilePath $RunAfter
 		if (!(Get-ScheduledTask | Where-Object { $_.TaskName -match 'RepairAfterRestart' } | Select-Object TaskName, State)){
@@ -284,7 +284,7 @@ function ScheduleRestart {
 		)
 	)
 		}
-	$CurrentStatus = "Task: ScheduledRestart scheduled for " + $Date + " " + $Time
+	$CurrentStatus = "Task: ScheduledRestart scheduled for " + $FutureDate + " " + $Time
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)} else {Write-Host $CurrentStatus -foregroundcolor Green}
 	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
 	} else {
@@ -849,7 +849,6 @@ function PullWiFiPWDs {
 		$Status.items.add("`n")
 	}
 	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
-	
 }
 
 function NewITPC {
@@ -858,6 +857,7 @@ function NewITPC {
 	$Installs=($SoftwareList | Select -first $SLCount) | select -skip 1 | select -skiplast 1
 	$Removals=($SoftwareList | Select -skip $SLCount) | select -skip 1 | select -skiplast 1
 	UpdateModules
+	Get-WindowsCapability -Name RSAT* -Online | Add-WindowsCapability -Online
 	foreach($Install in $Installs){
 	$CurrentStatus = "Installing $Install" 
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
@@ -876,13 +876,12 @@ function NewITPC {
 			}else{
 	winget uninstall $SR
 			}
-		}
-		
+		}	
 	}
 }
 
 function SecurePC {
-write-host $null | out-file $Folder\BitKeys-$date.txt
+write-host $null | out-file $Folder\BitKeys-$CurrentDate.txt
 foreach ($DriveLetter in $Drives){
 	$drive=$DriveLetter.replace("\","")
 	$Protectors=(manage-bde -protectors -get $drive).split()
@@ -895,10 +894,10 @@ foreach ($DriveLetter in $Drives){
 	if (((manage-bde -protectors -get $drive | where-object { $_ -like "*External*" }) -eq $null)) {manage-bde -protectors -add $Drive -RecoveryKey $Folder -id $ID}
 	manage-bde -protectors -adbackup $Drive -id $ID
 	manage-bde -protectors -aadbackup $Drive -id $ID
-	$DocumentedKey=((Get-Content $Folder\BitKeys-$date.txt | where-object { $_ -like "*$ID*" }))
+	$DocumentedKey=((Get-Content $Folder\BitKeys-$CurrentDate.txt | where-object { $_ -like "*$ID*" }))
 	if ($DocumentedKey -eq $null){
 	if (((manage-bde -protectors -get $drive -t recoverypassword).split() | where-object { $_ -like "ERROR:" }).length -lt 1) {
-	(manage-bde -protectors -get $drive -t recoverypassword) | select -skip 3 | out-file $Folder\BitKeys-$date.txt
+	(manage-bde -protectors -get $drive -t recoverypassword) | select -skip 3 | out-file $Folder\BitKeys-$CurrentDate.txt
 	}
 	}
 	}
@@ -1080,6 +1079,20 @@ function UpdateDriver {
 	Install-WindowsUpdate -MicrosoftUpdate -Category 'driver' -AcceptAll -Install -IgnoreReboot -Verbose
 }
 
+function ListSIDs {
+	$SIDList=$Folder + "\SIDList.log"
+$SIDs = Get-ChildItem -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\" -ErrorAction SilentlyContinue |
+ForEach-Object {
+    $profilePath = $_.GetValue("ProfileImagePath")
+    $sid = ($_.Name -replace "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\ProfileList\\", "")
+    if ($profilePath) { "$profilePath`t$sid" }
+}	
+	$SIDs | Out-File -file $SIDList -force -encoding utf8
+	$CurrentStatus = $SIDs 
+	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
+	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
+}
+
 function GUI {
 	[reflection.assembly]::loadwithpartialname("System.Windows.Forms") | Out-Null
 	[reflection.assembly]::loadwithpartialname("System.Drawing") | Out-Null
@@ -1124,6 +1137,8 @@ function GUI {
 	$CBITPC = New-Object System.Windows.Forms.CheckBox
 	$CBUF = New-Object System.Windows.Forms.CheckBox
 	$CBUD = New-Object System.Windows.Forms.CheckBox
+	$CBSIDs = New-Object System.Windows.Forms.CheckBox
+
 	$TXTMIN = New-Object System.Windows.Forms.TextBox
 	$Status = New-Object System.Windows.Forms.ListBox
 	$TXTPCR = New-Object System.Windows.Forms.TextBox
@@ -1174,6 +1189,7 @@ function GUI {
 	$ServiceList.Name="ServiceList"
 	$CBUF.Name="CBUF"
 	$CBUD.Name="CBUD"
+	$CBSIDs.Name="CBSIDs"
 	$ShowHelp={
      Switch ($this.name) {
 		"Run" {$tip = "Runs Checked options"}
@@ -1219,6 +1235,7 @@ function GUI {
 		"CBITPC" {$tip = "Removes McAfee and Norton, Installs PDQ, Putty, IP Scanner"}
         "CBUF" {$tip = "Run Windows Updates from Feature Pack category only"}
 		"CBUD" {$tip = "Run Windows Updates from Driver category only"}
+		"CBSIDs" {$tip = "List local SIDs"}
 	  }
 $tooltip1.SetToolTip($this,$tip)
 }
@@ -1268,7 +1285,7 @@ $ServiceList.add_MouseHover($ShowHelp)
 $CBITPC.add_MouseHover($ShowHelp)
 $CBUF.add_MouseHover($ShowHelp)
 $CBUD.add_MouseHover($ShowHelp)
-	
+$CBSIDs.add_MouseHover($ShowHelp)
 	$form.Text = "The Little Helper GUI $CurrentScriptVer"
 	$form.Autosize = $True
 	if ( -not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] 'Administrator')) {
@@ -1477,6 +1494,15 @@ $CBUD.add_MouseHover($ShowHelp)
 	$CBUD.Autosize = $True
 	$CBUD.checked = $False
 	$form.Controls.Add($CBUD)
+	
+	
+	$CBSIDs.Text = "Pull SIDs"
+	$CBSIDs.Location = New-Object System.Drawing.Point(340, 210)
+	$CBSIDs.Autosize = $True
+	$CBSIDs.checked = $False
+	$form.Controls.Add($CBSIDs)
+	
+	
 	
 	@((get-service).name) | ForEach-Object {[void] $ServiceList.Items.Add($_)}
 	$ServiceList.width=170
