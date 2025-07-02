@@ -1085,7 +1085,7 @@ function OfficeReports {
 	}
 	Import-Module Microsoft.Graph.Authentication
 	Import-Module Microsoft.Graph.Reports
-	
+	Import-Module Microsoft.Graph
 	Connect-Graph -Scopes User.ReadWrite.All, Organization.Read.All, Directory.Read.All, DeviceManagementConfiguration.Read.All, DeviceManagementManagedDevices.Read.All, DeviceManagementServiceConfig.Read.All
 	$CBOffice.checked = $False
 	$form.Controls.Add($CBOffice)
@@ -1573,7 +1573,7 @@ $CBOUnLicensedUsers.add_MouseHover($ShowHelp)
 	$CBOLicense.checked = $False
 	
 	$CBOUnLicensedUsers.Text = "List of Unlicensed Users"
-	$CBOUnLicensedUsers.Location = New-Object System.Drawing.Point(490, 70)
+	$CBOUnLicensedUsers.Location = New-Object System.Drawing.Point(490, 50)
 	$CBOUnLicensedUsers.Autosize = $True
 	$CBOUnLicensedUsers.checked = $False
 	
