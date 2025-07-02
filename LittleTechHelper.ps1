@@ -1175,7 +1175,7 @@ function GUI {
 	$CBOffice = New-Object System.Windows.Forms.CheckBox
 	$CBOLogins = New-Object System.Windows.Forms.CheckBox
 	$CBOLicense = New-Object System.Windows.Forms.CheckBox
-
+	$CBOUnLicensedUsers = New-Object System.Windows.Forms.CheckBox
 	$TXTMIN = New-Object System.Windows.Forms.TextBox
 	$Status = New-Object System.Windows.Forms.ListBox
 	$TXTPCR = New-Object System.Windows.Forms.TextBox
@@ -1230,6 +1230,7 @@ function GUI {
 	$CBOffice.Name="CBOffice"
 	$CBOLogins.Name="CBOLogins"
 	$CBOLicense.Name="CBOLicense"
+	$CBOUnLicensedUsers.Name="CBOUnLicensedUsers"
 	$ShowHelp={
      Switch ($this.name) {
 		"Run" {$tip = "Runs Checked options"}
@@ -1279,7 +1280,7 @@ function GUI {
 		"CBOffice" {$tip = "List local SIDs"}
 		"CBOLogins" {$tip = "List local SIDs"}
 		"CBOLicense" {$tip = "List local SIDs"}
-
+		"CBOUnLicensedUsers" {$tip = "List local SIDs"}
 	  }
 $tooltip1.SetToolTip($this,$tip)
 }
@@ -1333,7 +1334,7 @@ $CBSIDs.add_MouseHover($ShowHelp)
 $CBOffice.add_MouseHover($ShowHelp)
 $CBOLogins.add_MouseHover($ShowHelp)
 $CBOLicense.add_MouseHover($ShowHelp)
-
+$CBOUnLicensedUsers.add_MouseHover($ShowHelp)
 	$form.Text = "The Little Helper GUI $CurrentScriptVer"
 	$form.Autosize = $True
 	if ( -not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] 'Administrator')) {
