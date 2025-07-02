@@ -1706,39 +1706,16 @@ $CBOUnLicensedUsers.add_MouseHover($ShowHelp)
 	$Secure.Text = "Secure PC"
 	$Secure.Location = New-Object System.Drawing.Point(90, 255)
 	$Secure.Add_Click({
-	($CBNetwork.Checked) = $false
-	($CBLogs.Checked) = $false
-	($CBDLLs.Checked) = $false
-	($CBBadDevices.Checked) = $false
-	($CBCHK.Checked) = $false
-	($CBDISM.Checked) = $false
-	($CBSFC.Checked) = $false
-	($CBRT.Checked) = $false
-	($CBSR.Checked) = $false
+	ClearCheckBoxes
 	($CBST.Checked) = $true
-	($CBSV.Checked) = $false
 	($CBUpdate.Checked) = $true
-	($CBCleanUp.Checked) = $false
 	($CBTime.Checked) = $true
-	($CBSpaceCleanUp.Checked) = $false
-	($CBPCR.Checked) = $false
 	($CBVSS.Checked) = $true
-	($CBSpool.checked) = $false
-	($CBDevices.Checked) = $false
 	($CBEPO.Checked) = $true
-	($CBServices.checked) = $false
-	($CBDS.checked) = $false
 	($CBNetCheck.checked) = $true
-	($CBRecycle.checked) = $False
 	($CBSecureHOSTS.checked) = $True
 	($CBSecurePC.checked) = $True
-	($CBIAdmin.checked) = $False
-	($CBWiFi.checked) = $False
-	($CBITPC.checked) = $False
 	($CBUF.checked) = $True
-	($CBUD.checked) = $False
-	($CBSIDs.checked) = $False
-	($CBOffice.checked) = $False
 	})
 	
 	$Repair.Text = "Repair OS"
