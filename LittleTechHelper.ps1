@@ -1528,10 +1528,10 @@ $CBOLicense.add_MouseHover($ShowHelp)
 	$CBOLogins.checked = $False
 
 	$CBOLicense.Text = "Pull Licenses"
-	$CBOLicense.Location = New-Object System.Drawing.Point(4900, 30)
+	$CBOLicense.Location = New-Object System.Drawing.Point(490, 30)
 	$CBOLicense.Autosize = $True
 	$CBOLicense.checked = $False
-	
+	$form.Controls.Add($CBOLicense)
 	
 	@((get-service).name) | ForEach-Object {[void] $ServiceList.Items.Add($_)}
 	$ServiceList.width=170
@@ -1573,11 +1573,6 @@ $CBOLicense.add_MouseHover($ShowHelp)
 	}
 	})
 
-	$form.Controls.Add($CBOLogins)
-	$form.Controls.Add($CBOLicense)
-	$form.Autosize = $True	
-    
-	
 	
 	$CBOffice.Add_CheckedChanged({
     if ($CBOffice.Checked) {
