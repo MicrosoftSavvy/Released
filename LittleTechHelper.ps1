@@ -1079,6 +1079,31 @@ function UpdateDriver {
 	Install-WindowsUpdate -MicrosoftUpdate -Category 'driver' -AcceptAll -Install -IgnoreReboot -Verbose
 }
 
+function OfficeReports {
+	Install-Module Microsoft.Graph -Scope AllUsers -Repository PSGallery -Force
+	
+	Connect-Graph -Scopes User.ReadWrite.All, Organization.Read.All,Directory.Read.All 
+
+
+	$CBOffice.checked = $False
+	$form.Controls.Add($CBOffice)
+
+	if ($CBOLogins.checked -eq $True){
+	$OfficeLicense=$Folder + "\LicensingInfo.log"
+	Out-File -FilePath $OfficeLicense -InputObject (Get-MgSubscribedSku | format-table AccountName, ConsumedUnits, SkuPartNumber, SkuID)
+	Get-MgSubscribedSku | out-gridview
+	
+	}
+	
+	if ($CBOLicense.checked -eq $True){
+	$OfficeLogin=$Folder + "\OfficeLogins.log"
+	Import-Module Microsoft.Graph.Reports
+	Out-File -FilePath $OfficeLicense -InputObject (Get-MgAuditLogSignIn -Filter "Status/Errorcode ne 0" | Select-Object CreatedDateTime, UserPrincipalName, AppDisplayName, ClientAppUsed, ConditionalAccessStatus, ResourceDisplayName)
+	Get-MgAuditLogSignIn | out-gridview
+	}
+}
+
+
 function ListSIDs {
 	$SIDList=$Folder + "\SIDList.log"
 [array]$SIDs = Get-ChildItem -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\" -ErrorAction SilentlyContinue |
@@ -1571,7 +1596,6 @@ $CBOLicense.add_MouseHover($ShowHelp)
 	$TXTMIN.Enabled=$False
 	}
 	})
-
 	
 	$CBOffice.Add_CheckedChanged({
     if ($CBOffice.Checked) {
@@ -1650,6 +1674,7 @@ $CBOLicense.add_MouseHover($ShowHelp)
 	($CBUF.checked) = $False
 	($CBUD.checked) = $False
 	($CBSIDs.checked) = $False
+	($CBOffice.checked) = $False
 	$form.BackColor = [System.Drawing.Color]::LightGray
 	})
 
@@ -1688,6 +1713,7 @@ $CBOLicense.add_MouseHover($ShowHelp)
 	($CBUF.checked) = $True
 	($CBUD.checked) = $False
 	($CBSIDs.checked) = $False
+	($CBOffice.checked) = $False
 	})
 	
 	$Repair.Text = "Repair OS"
@@ -1725,6 +1751,7 @@ $CBOLicense.add_MouseHover($ShowHelp)
 	($CBUF.checked) = $False
 	($CBUD.checked) = $False
 	($CBSIDs.checked) = $False
+	($CBOffice.checked) = $False
 	})
 
 	$Update.Text = "Update"
@@ -1775,6 +1802,7 @@ $CBOLicense.add_MouseHover($ShowHelp)
 	if ($CBUF.checked) { UpdateFeature }
 	if ($CBUD.checked) { UpdateDriver }
 	if ($CBSIDs.checked) { ListSIDs }
+	if ($CBOffice.checked) { OfficeReports }
 	$Status.items.add("--------------")
 	$Status.items.add("Run Finished")
 	$StatusLog=$Folder + "\RunStatus.log"
