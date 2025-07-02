@@ -1,5 +1,5 @@
 Set-ExecutionPolicy -executionpolicy bypass -scope Process -force
-$CurrentScriptVer="1.1.4"
+$CurrentScriptVer="1.1.5"
 $host.UI.RawUI.WindowTitle = "The Little Tech Helper Script $CurrentScriptVer"
 
 $Folder='c:\LTH'
@@ -1197,7 +1197,6 @@ function GUI {
 	$CBOffice.Name="CBOffice"
 	$CBOLogins.Name="CBOLogins"
 	$CBOLicense.Name="CBOLicense"
-
 	$ShowHelp={
      Switch ($this.name) {
 		"Run" {$tip = "Runs Checked options"}
