@@ -1139,6 +1139,9 @@ function GUI {
 	$CBUF = New-Object System.Windows.Forms.CheckBox
 	$CBUD = New-Object System.Windows.Forms.CheckBox
 	$CBSIDs = New-Object System.Windows.Forms.CheckBox
+	$CBOffice = New-Object System.Windows.Forms.CheckBox
+	$CBOLogins = New-Object System.Windows.Forms.CheckBox
+	$CBOLicense = New-Object System.Windows.Forms.CheckBox
 
 	$TXTMIN = New-Object System.Windows.Forms.TextBox
 	$Status = New-Object System.Windows.Forms.ListBox
@@ -1191,6 +1194,10 @@ function GUI {
 	$CBUF.Name="CBUF"
 	$CBUD.Name="CBUD"
 	$CBSIDs.Name="CBSIDs"
+	$CBOffice.Name="CBOffice"
+	$CBOLogins.Name="CBOLogins"
+	$CBOLicense.Name="CBOLicense"
+
 	$ShowHelp={
      Switch ($this.name) {
 		"Run" {$tip = "Runs Checked options"}
@@ -1237,6 +1244,10 @@ function GUI {
         "CBUF" {$tip = "Run Windows Updates from Feature Pack category only"}
 		"CBUD" {$tip = "Run Windows Updates from Driver category only"}
 		"CBSIDs" {$tip = "List local SIDs"}
+		"CBOffice" {$tip = "List local SIDs"}
+		"CBOLogins" {$tip = "List local SIDs"}
+		"CBOLicense" {$tip = "List local SIDs"}
+
 	  }
 $tooltip1.SetToolTip($this,$tip)
 }
@@ -1287,6 +1298,10 @@ $CBITPC.add_MouseHover($ShowHelp)
 $CBUF.add_MouseHover($ShowHelp)
 $CBUD.add_MouseHover($ShowHelp)
 $CBSIDs.add_MouseHover($ShowHelp)
+$CBOffice.add_MouseHover($ShowHelp)
+$CBOLogins.add_MouseHover($ShowHelp)
+$CBOLicense.add_MouseHover($ShowHelp)
+
 	$form.Text = "The Little Helper GUI $CurrentScriptVer"
 	$form.Autosize = $True
 	if ( -not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] 'Administrator')) {
@@ -1503,7 +1518,25 @@ $CBSIDs.add_MouseHover($ShowHelp)
 	$CBSIDs.checked = $False
 	$form.Controls.Add($CBSIDs)
 	
-	
+	$CBOffice.Text = "Office 365"
+	$CBOffice.Location = New-Object System.Drawing.Point(340, 230)
+	$CBOffice.Autosize = $True
+	$CBOffice.checked = $False
+	$CBOffice.Enable = $True
+	$form.Controls.Add($CBOffice)
+
+	$CBOLogins.Text = "Pull SIDs"
+	$CBOLogins.Location = New-Object System.Drawing.Point(490, 10)
+	$CBOLogins.Autosize = $True
+	$CBOLogins.checked = $False
+	$form.Controls.Add($CBOLogins)
+
+	$CBOLicense.Text = "Pull SIDs"
+	$CBOLicense.Location = New-Object System.Drawing.Point(340, 210)
+	$CBOLicense.Autosize = $True
+	$CBOLicense.checked = $False
+	$form.Controls.Add($CBOLicense)
+
 	
 	@((get-service).name) | ForEach-Object {[void] $ServiceList.Items.Add($_)}
 	$ServiceList.width=170
