@@ -1521,14 +1521,12 @@ $CBOLicense.add_MouseHover($ShowHelp)
 	$CBOffice.Location = New-Object System.Drawing.Point(340, 230)
 	$CBOffice.Autosize = $True
 	$CBOffice.checked = $False
-	$CBOffice.Enable = $True
 	$form.Controls.Add($CBOffice)
 
-	$CBOLogins.Text = "Pull SIDs"
+	$CBOLogins.Text = "Pull Office 365 Logins"
 	$CBOLogins.Location = New-Object System.Drawing.Point(490, 10)
 	$CBOLogins.Autosize = $True
 	$CBOLogins.checked = $False
-	$form.Controls.Add($CBOLogins)
 
 	$CBOLicense.Text = "Pull SIDs"
 	$CBOLicense.Location = New-Object System.Drawing.Point(340, 210)
@@ -1580,7 +1578,6 @@ $CBOLicense.add_MouseHover($ShowHelp)
     if ($CBOffice.Checked) {
 	
 	$form.Controls.Add($CBOLicense)
-	$CBOLicense.enable=$True
 	
     } else {
 	$TXTMIN.Enabled=$False
