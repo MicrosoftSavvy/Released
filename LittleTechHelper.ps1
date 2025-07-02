@@ -1277,10 +1277,10 @@ function GUI {
         "CBUF" {$tip = "Run Windows Updates from Feature Pack category only"}
 		"CBUD" {$tip = "Run Windows Updates from Driver category only"}
 		"CBSIDs" {$tip = "List local SIDs"}
-		"CBOffice" {$tip = "List local SIDs"}
-		"CBOLogins" {$tip = "List local SIDs"}
-		"CBOLicense" {$tip = "List local SIDs"}
-		"CBOUnLicensedUsers" {$tip = "List local SIDs"}
+		"CBOffice" {$tip = "Pull Reports from Office 365"}
+		"CBOLogins" {$tip = "Login Attempts"}
+		"CBOLicense" {$tip = "Pull licensing info"}
+		"CBOUnLicensedUsers" {$tip = "List all Unlicended users"}
 	  }
 $tooltip1.SetToolTip($this,$tip)
 }
@@ -1567,7 +1567,7 @@ $CBOUnLicensedUsers.add_MouseHover($ShowHelp)
 	$CBOLicense.checked = $False
 	
 	$CBOUnLicensedUsers.Text = "List of Unlicensed Users"
-	$CBOUnLicensedUsers.Location = New-Object System.Drawing.Point(490, 50)
+	$CBOUnLicensedUsers.Location = New-Object System.Drawing.Point(490, 70)
 	$CBOUnLicensedUsers.Autosize = $True
 	$CBOUnLicensedUsers.checked = $False
 	
