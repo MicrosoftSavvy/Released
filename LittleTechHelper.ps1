@@ -1531,7 +1531,6 @@ $CBOLicense.add_MouseHover($ShowHelp)
 	$CBOLicense.Location = New-Object System.Drawing.Point(490, 30)
 	$CBOLicense.Autosize = $True
 	$CBOLicense.checked = $False
-	$form.Controls.Add($CBOLicense)
 	
 	@((get-service).name) | ForEach-Object {[void] $ServiceList.Items.Add($_)}
 	$ServiceList.width=170
@@ -1580,8 +1579,8 @@ $CBOLicense.add_MouseHover($ShowHelp)
 	$form.Controls.Add($CBOLicense)
 	$form.Autosize = $True	
     } else {
-	$form.Controls.Delete($CBOLogins)
-	$form.Controls.Delete($CBOLicense)
+	$form.Controls.Remove($CBOLogins)
+	$form.Controls.Remove($CBOLicense)
 	$form.Autosize = $True
 	}
 	})
