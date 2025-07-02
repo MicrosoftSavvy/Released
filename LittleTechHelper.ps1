@@ -1081,15 +1081,15 @@ function UpdateDriver {
 
 function ListSIDs {
 	$SIDList=$Folder + "\SIDList.log"
-$SIDs = Get-ChildItem -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\" -ErrorAction SilentlyContinue |
+[array]$SIDs = Get-ChildItem -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\" -ErrorAction SilentlyContinue |
 ForEach-Object {
     $profilePath = $_.GetValue("ProfileImagePath")
     $sid = ($_.Name -replace "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\ProfileList\\", "")
-    if ($profilePath) { "$profilePath`t$sid" }
+    if ($profilePath) { "$profilePath`t$sid`n" }
 }	
 	$SIDs | Out-File -file $SIDList -force -encoding utf8
 	$CurrentStatus = (Get-Content $SIDList)
-	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
+	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus.replace("`t","`n") -foregroundcolor Green}
 	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
 }
 
