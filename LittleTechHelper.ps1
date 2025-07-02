@@ -1080,27 +1080,35 @@ function UpdateDriver {
 }
 
 function OfficeReports {
+	if ((get-installedmodule Microsoft.Graph).name -ne "Microsoft.Graph"){
 	Install-Module Microsoft.Graph -Scope AllUsers -Repository PSGallery -Force
-	
-	Connect-Graph -Scopes User.ReadWrite.All, Organization.Read.All,Directory.Read.All 
-
-
+	}
+	Microsoft.Graph.Authentication
+	Connect-Graph -Scopes User.ReadWrite.All, Organization.Read.All, Directory.Read.All, DeviceManagementConfiguration.Read.All, DeviceManagementManagedDevices.Read.All, DeviceManagementServiceConfig.Read.All
 	$CBOffice.checked = $False
 	$form.Controls.Add($CBOffice)
 
-	if ($CBOLogins.checked -eq $True){
+	if ($CBOLicense.checked -eq $True){
 	$OfficeLicense=$Folder + "\LicensingInfo.log"
 	Out-File -FilePath $OfficeLicense -InputObject (Get-MgSubscribedSku | format-table AccountName, ConsumedUnits, SkuPartNumber, SkuID)
 	Get-MgSubscribedSku | out-gridview
-	
 	}
 	
-	if ($CBOLicense.checked -eq $True){
+	if ($CBOLogins.checked -eq $True){
 	$OfficeLogin=$Folder + "\OfficeLogins.log"
 	Import-Module Microsoft.Graph.Reports
 	Out-File -FilePath $OfficeLicense -InputObject (Get-MgAuditLogSignIn -Filter "Status/Errorcode ne 0" | Select-Object CreatedDateTime, UserPrincipalName, AppDisplayName, ClientAppUsed, ConditionalAccessStatus, ResourceDisplayName)
 	Get-MgAuditLogSignIn | out-gridview
 	}
+
+	if ($CBOUnLicensedUsers.checked -eq $True){
+	$CBOUnLicensed=$Folder + "\CBOUnLicensed.log"
+	Import-Module Microsoft.Graph.Reports
+	Out-File -FilePath $CBOUnLicensed -InputObject (Get-MgAuditLogSignIn -Filter "Status/Errorcode ne 0" | Select-Object CreatedDateTime, UserPrincipalName, AppDisplayName, ClientAppUsed, ConditionalAccessStatus, ResourceDisplayName)
+	Get-MgAuditLogSignIn | out-gridview
+	}
+
+
 }
 
 
@@ -1557,6 +1565,13 @@ $CBOLicense.add_MouseHover($ShowHelp)
 	$CBOLicense.Autosize = $True
 	$CBOLicense.checked = $False
 	
+	
+	$CBOUnLicensedUsers.Text = "List of Unlicensed Users"
+	$CBOUnLicensedUsers.Location = New-Object System.Drawing.Point(490, 30)
+	$CBOUnLicensedUsers.Autosize = $True
+	$CBOUnLicensedUsers.checked = $False
+	
+	
 	@((get-service).name) | ForEach-Object {[void] $ServiceList.Items.Add($_)}
 	$ServiceList.width=170
 	$ServiceList.autosize = $true
@@ -1601,13 +1616,14 @@ $CBOLicense.add_MouseHover($ShowHelp)
     if ($CBOffice.Checked) {
 	$form.Controls.Add($CBOLogins)
 	$form.Controls.Add($CBOLicense)
+	$form.Controls.Add($CBOUnLicensedUsers)
 	$form.Autosize = $True	
-    } else {
+   	} else {
 	$form.Autosize = $False
 	$form.Controls.Remove($CBOLogins)
 	$form.Controls.Remove($CBOLicense)
+	$form.Controls.Remove($CBOUnLicensedUsers)
 	$form.Autosize = $True
-	
 	}
 	})
 
