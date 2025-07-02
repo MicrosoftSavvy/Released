@@ -1086,7 +1086,7 @@ function OfficeReports {
 	Import-Module Microsoft.Graph.Authentication
 	Import-Module Microsoft.Graph.Reports
 	Import-Module Microsoft.Graph.Users
-	Connect-Graph -Scopes User.ReadWrite.All, Organization.Read.All, Directory.Read.All, DeviceManagementConfiguration.Read.All, DeviceManagementManagedDevices.Read.All, DeviceManagementServiceConfig.Read.All
+	Connect-Graph -Scopes User.ReadWrite.All, Organization.ReadWrite.All, Directory.ReadWrite.All, DeviceManagementConfiguration.ReadWrite.All, DeviceManagementManagedDevices.ReadWrite.All, DeviceManagementServiceConfig.ReadWrite.All
 	$CBOffice.checked = $False
 	$form.Controls.Add($CBOffice)
 
@@ -1098,7 +1098,7 @@ function OfficeReports {
 	
 	if ($CBOLogins.checked -eq $True){
 	$OfficeLogin=$Folder + "\OfficeLogins.log"
-	Out-File -FilePath $OfficeLicense -InputObject (Get-MgAuditLogSignIn -Filter "Status/Errorcode ne 0" | Select-Object CreatedDateTime, UserPrincipalName, AppDisplayName, ClientAppUsed, ConditionalAccessStatus, ResourceDisplayName)
+	Out-File -FilePath $OfficeLogin -InputObject (Get-MgAuditLogSignIn -Filter "Status/Errorcode ne 0" | Select-Object CreatedDateTime, UserPrincipalName, AppDisplayName, ClientAppUsed, ConditionalAccessStatus, ResourceDisplayName)
 	Get-MgAuditLogSignIn | out-gridview
 	}
 
