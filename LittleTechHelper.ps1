@@ -1573,9 +1573,14 @@ $CBOLicense.add_MouseHover($ShowHelp)
 	}
 	})
 
+	$form.Controls.Add($CBOLogins)
+	$form.Controls.Add($CBOLicense)
+	$form.Autosize = $True	
+    
+	
+	
 	$CBOffice.Add_CheckedChanged({
     if ($CBOffice.Checked) {
-	
 	$form.Controls.Add($CBOLogins)
 	$form.Controls.Add($CBOLicense)
 	$form.Autosize = $True	
