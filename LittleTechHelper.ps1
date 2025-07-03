@@ -1777,7 +1777,7 @@ $CBOUnLicensedUsers.add_MouseHover($ShowHelp)
 	if ($CBUF.checked) { UpdateFeature }
 	if ($CBUD.checked) { UpdateDriver }
 	if ($CBSIDs.checked) { ListSIDs }
-	if ($CBOffice.checked) { OfficeReports }
+	if ($CBOffice.checked) { OfficeReports; $form.Autosize = $True }
 	$form.Autosize = $True
 	$Status.items.add("--------------")
 	$Status.items.add("Run Finished")
