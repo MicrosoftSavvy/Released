@@ -1166,7 +1166,6 @@ function ClearCheckBoxes {
 	($CBUD.checked) = $False
 	($CBSIDs.checked) = $False
 	($CBOffice.checked) = $False
-	$form.Autosize = $True
 }
 
 function GUI {
@@ -1696,6 +1695,7 @@ $CBOUnLicensedUsers.add_MouseHover($ShowHelp)
 	$Clear.Location = New-Object System.Drawing.Point(250, 255)
 	$Clear.Add_Click({
 	ClearCheckBoxes
+	$form.Autosize = $True
 	$form.BackColor = [System.Drawing.Color]::LightGray
 	})
 
@@ -1778,6 +1778,7 @@ $CBOUnLicensedUsers.add_MouseHover($ShowHelp)
 	if ($CBUD.checked) { UpdateDriver }
 	if ($CBSIDs.checked) { ListSIDs }
 	if ($CBOffice.checked) { OfficeReports }
+	$form.Autosize = $True
 	$Status.items.add("--------------")
 	$Status.items.add("Run Finished")
 	$StatusLog=$Folder + "\RunStatus.log"
