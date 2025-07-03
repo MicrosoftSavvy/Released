@@ -1166,6 +1166,7 @@ function ClearCheckBoxes {
 	($CBUD.checked) = $False
 	($CBSIDs.checked) = $False
 	($CBOffice.checked) = $False
+	$form.Autosize = $True
 }
 
 function GUI {
