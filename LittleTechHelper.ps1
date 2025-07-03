@@ -1091,6 +1091,7 @@ function OfficeReports {
 	Import-Module Microsoft.Graph
 
 	Connect-Graph -Scopes User.ReadWrite.All, Organization.ReadWrite.All, Directory.ReadWrite.All, DeviceManagementConfiguration.ReadWrite.All, DeviceManagementManagedDevices.ReadWrite.All, DeviceManagementServiceConfig.ReadWrite.All, Mail.Read, MailboxSettings.Read
+	Connect-ExchangeOnline
 	$CBOffice.checked = $False
 	$form.Controls.Add($CBOffice)
 

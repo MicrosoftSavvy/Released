@@ -274,3 +274,6 @@ Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force; Install-Mo
 
 #Show wifi passwords
 (netsh wlan show profiles) | Select-String "\:(.+)$" | %{$name=$_.Matches.Groups[1].Value.Trim(); $_} | %{(netsh wlan show profile name="$name" key=clear)} | Select-String "Key Content\W+\:(.+)$" | %{$pass=$_.Matches.Groups[1].Value.Trim(); $_} | %{[PSCustomObject]@{ PROFILE_NAME=$name;PASSWORD=$pass }} | Format-Table –AutoSize
+
+#Get Commands
+(Get-Module -Name Microsoft.Graph).ExportedCommands | ft key
