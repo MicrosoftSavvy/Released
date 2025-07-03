@@ -1083,10 +1083,14 @@ function OfficeReports {
 	if ((get-installedmodule Microsoft.Graph).name -ne "Microsoft.Graph"){
 	Install-Module Microsoft.Graph -Scope AllUsers -Repository PSGallery -Force
 	}
+	$maximumfunctioncount=32768
 	Import-Module Microsoft.Graph.Authentication
 	Import-Module Microsoft.Graph.Reports
 	Import-Module Microsoft.Graph.Users
-	Connect-Graph -Scopes User.ReadWrite.All, Organization.ReadWrite.All, Directory.ReadWrite.All, DeviceManagementConfiguration.ReadWrite.All, DeviceManagementManagedDevices.ReadWrite.All, DeviceManagementServiceConfig.ReadWrite.All
+	Import-Module Microsoft.Graph.Mail
+	Import-Module Microsoft.Graph
+
+	Connect-Graph -Scopes User.ReadWrite.All, Organization.ReadWrite.All, Directory.ReadWrite.All, DeviceManagementConfiguration.ReadWrite.All, DeviceManagementManagedDevices.ReadWrite.All, DeviceManagementServiceConfig.ReadWrite.All, Mail.Read, MailboxSettings.Read
 	$CBOffice.checked = $False
 	$form.Controls.Add($CBOffice)
 
@@ -1695,6 +1699,7 @@ $CBOUnLicensedUsers.add_MouseHover($ShowHelp)
 	$Clear.Location = New-Object System.Drawing.Point(250, 255)
 	$Clear.Add_Click({
 	ClearCheckBoxes
+	Disconnect-MgGraph
 	$form.Autosize = $True
 	$form.BackColor = [System.Drawing.Color]::LightGray
 	})
@@ -1738,6 +1743,7 @@ $CBOUnLicensedUsers.add_MouseHover($ShowHelp)
 	$Exit.Text = "Exit"
 	$Exit.Location = New-Object System.Drawing.Point(410, 255)
 	$Exit.Add_Click({
+		Disconnect-MgGraph
 		$form.Dispose()
     	$form.Close()
 	})
