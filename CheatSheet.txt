@@ -268,9 +268,7 @@ Get-WindowsUpdate -MicrosoftUpdate
 Get-WindowsUpdate -WindowsUpdate -Category 'Drivers', 'Updates', 'Security Updates', 'Critical Updates' -AcceptAll
 Install-WindowsUpdate -MicrosoftUpdate -Category 'Drivers', 'Updates', 'Security Updates', 'Critical Updates' -AcceptAll
 
-
 Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force; Install-Module PSWindowsUpdate -force; Import-Module PSWindowsUpdate -force; Install-WindowsUpdate -MicrosoftUpdate -Category 'Drivers' -AcceptAll
-
 
 #Show wifi passwords
 (netsh wlan show profiles) | Select-String "\:(.+)$" | %{$name=$_.Matches.Groups[1].Value.Trim(); $_} | %{(netsh wlan show profile name="$name" key=clear)} | Select-String "Key Content\W+\:(.+)$" | %{$pass=$_.Matches.Groups[1].Value.Trim(); $_} | %{[PSCustomObject]@{ PROFILE_NAME=$name;PASSWORD=$pass }} | Format-Table –AutoSize
