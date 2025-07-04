@@ -1108,7 +1108,19 @@ function OfficeReports {
 
 	if ($CBOUnLicensedUsers.checked -eq $True){
 	$CBOUnLicensed=$Folder + "\CBOUnLicensed.log"
-	$sharedMailboxes = Get-Mailbox -RecipientTypeDetails SharedMailbox | Select-Object -ExpandProperty UserPrincipalName
+$mailboxes = Get-Mailbox -RecipientTypeDetails UserMailbox -ResultSize Unlimited
+$unlicensedEnabledMailboxes = foreach ($mb in $mailboxes) {
+    $user = Get-MsolUser -UserPrincipalName $mb.UserPrincipalName
+    if ($user -and -not $user.IsLicensed -and $user.BlockCredential -eq $false) {
+        $mb
+    }
+}
+
+	$unlicensedEnabledMailboxes | Select-Object DisplayName,UserPrincipalName
+
+	$sharedMailboxes = get-mailbox | where-object { $_.IsShared -eq $true } | Select-Object -ExpandProperty UserPrincipalName
+#	Get-Mailbox -RecipientTypeDetails SharedMailbox | Select-Object -ExpandProperty UserPrincipalName
+
 	# Get all unlicensed member users (enabled accounts)
 	$unlicensedUsers = Get-MgUser -Filter "assignedLicenses/`$count eq 0 and userType eq 'Member' and accountEnabled eq true" `
 		-ConsistencyLevel eventual `
@@ -1660,7 +1672,7 @@ $CBOUnLicensedUsers.add_MouseHover($ShowHelp)
     if ($CBOffice.Checked) {
 	$form.Controls.Add($CBOLogins)
 	$form.Controls.Add($CBOLicense)
-	$form.Controls.Add($CBOUnLicensedUsers)
+#	$form.Controls.Add($CBOUnLicensedUsers)
 	$form.Autosize = $True	
    	} else {
 	$form.Autosize = $False
