@@ -823,6 +823,111 @@ function ClearBins {
 	Remove-item -path 'c:\$Recycle.Bin' -recurse -force
 }
 
+function Get-IpRange {
+    [CmdletBinding(ConfirmImpact = 'None')]
+    Param(
+        [Parameter(Mandatory, HelpMessage = 'Please enter a subnet in the form a.b.c.d/#', ValueFromPipeline, Position = 0)]
+        [string[]] $Subnets
+    )
+
+    begin {
+        Write-Verbose -Message "Starting [$($MyInvocation.Mycommand)]"
+    }
+
+    process {
+        foreach ($subnet in $subnets) {
+            if ($subnet -match '^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d{1,2}$') {
+                $IP = ($Subnet -split '\/')[0]
+                [int] $SubnetBits = ($Subnet -split '\/')[1]
+                if ($SubnetBits -lt 7 -or $SubnetBits -gt 30) {
+                    Write-Error -Message 'The number following the / must be between 7 and 30'
+                    break
+                }
+                $Octets = $IP -split '\.'
+                $IPInBinary = @()
+                foreach ($Octet in $Octets) {
+                    $OctetInBinary = [convert]::ToString($Octet, 2)
+                    $OctetInBinary = ('0' * (8 - ($OctetInBinary).Length) + $OctetInBinary)
+                    $IPInBinary = $IPInBinary + $OctetInBinary
+                }
+                $IPInBinary = $IPInBinary -join ''
+                $HostBits = 32 - $SubnetBits
+                $NetworkIDInBinary = $IPInBinary.Substring(0, $SubnetBits)
+                $HostIDInBinary = $IPInBinary.Substring($SubnetBits, $HostBits)
+                $HostIDInBinary = $HostIDInBinary -replace '1', '0'
+                $imax = [convert]::ToInt32(('1' * $HostBits), 2) - 1
+                $IPs = @()
+                For ($i = 1 ; $i -le $imax ; $i++) {
+                    $NextHostIDInDecimal = ([convert]::ToInt32($HostIDInBinary, 2) + $i)
+                    $NextHostIDInBinary = [convert]::ToString($NextHostIDInDecimal, 2)
+                    $NoOfZerosToAdd = $HostIDInBinary.Length - $NextHostIDInBinary.Length
+                    $NextHostIDInBinary = ('0' * $NoOfZerosToAdd) + $NextHostIDInBinary
+                    $NextIPInBinary = $NetworkIDInBinary + $NextHostIDInBinary
+                    $IP = @()
+                    For ($x = 1 ; $x -le 4 ; $x++) {
+                        $StartCharNumber = ($x - 1) * 8
+                        $IPOctetInBinary = $NextIPInBinary.Substring($StartCharNumber, 8)
+                        $IPOctetInDecimal = [convert]::ToInt32($IPOctetInBinary, 2)
+                        $IP += $IPOctetInDecimal
+                    }
+                    $IP = $IP -join '.'
+                    $IPs += $IP
+                }
+                Write-Output -InputObject $IPs
+            } else {
+                Write-Error -Message "Subnet [$subnet] is not in a valid format"
+            }
+        }
+    }
+
+    end {
+        Write-Verbose -Message "Ending [$($MyInvocation.Mycommand)]"
+    }
+}
+
+function NetworkRun {
+	
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+#Install-Module -Name PoshFunctions -Repository PSGallery -Force
+#Import-Module -Name PoshFunctions
+[string[]]$IPs=Get-NetIPAddress -AddressFamily IPv4 | Select-Object -ExpandProperty IPAddress
+[string[]]$Subnet=Get-NetIPAddress -AddressFamily IPv4 | Select-Object -ExpandProperty PrefixLength 
+[string[]]$Network=(Get-NetIPAddress -AddressFamily IPv4 | Select-Object IPAddress,PrefixLength) | % { "$($_.IpAddress)/$($_.PrefixLength)" }
+$CidrList = (Get-NetIPAddress -AddressFamily IPv4 | Select-Object IPAddress,PrefixLength | % { 
+    $currentItem = $_
+    if ($currentItem.IPAddress -notmatch "^169|^127") {
+		$CidrObject = [ordered]@{
+			IPAddress = "$($CurrentItem.IpAddress)";
+			PreFixLength = "$($CurrentItem.PrefixLength)";
+		}
+        New-Object -TypeName PSObject -Property $CidrObject
+    }
+})
+
+	$FullList=$CidrList | %{"$($_.ipaddress)/$($_.prefixlength)"}
+	$IPList = foreach ($CurrentList in $FullList){Get-IpRange -Subnets $CurrentList}
+	foreach ($CurrentIP in $IPList) {
+		if (Test-Connection $CurrentIP -count 1 -quiet){
+			$IPPath="\\$($CurrentIP)"
+			$Shares=(net view \\$CurrentIP /all 2>&1 | select-object -Skip 7 |  ?{$_ -match 'disk*'} | %{$_ -match '^(.+?)\s+Disk*'|out-null;$matches[1]})  #get-WmiObject -class Win32_Share -computer $CurrentIP -ErrorAction "SilentlyContinue").name 
+			if ($Shares -ne $null){
+				foreach ($Share in $Shares) {
+				$NSearch=$IPPath + "\" + $Share + "\" + $FileName
+				$NetworkPath=$IPPath + "\" + $Share
+				#$NSearch
+				write-host Searching and Sorting $NetworkPath
+				if (test-path $NetworkPath -ErrorAction "SilentlyContinue"){
+					$List=get-childitem -path $NSearch -recurse -ErrorAction "SilentlyContinue"
+					$FullList = $List | Select-Object LastWriteTime, Length, FullName  | Sort-Object -Property LastWriteTime -Descending | format-table -autosize -wrap
+					$FullList | out-file $SearchFile -Append -force -encoding utf8
+				}
+			}
+		} else {write-host $CurrentIP has no connectable shares}
+		} else {write-host $CurrentIP is not pingable}
+	}
+}
+
+
 function  SecureHost {
 	$hostfile="C:\windows\system32\drivers\etc\hosts"
 	if ((Select-String -Path $hostfile -Pattern "###Secure Hosts File###" -AllMatches) -ne $null) {$LineCount=(Select-String -Path $hostfile -Pattern "###Secure Hosts File###" -AllMatches).linenumber - 1}
@@ -1091,8 +1196,8 @@ function OfficeReports {
 	Import-Module ExchangeOnlineManagement
 	Connect-Graph -Scopes User.ReadWrite.All, Organization.ReadWrite.All, Directory.ReadWrite.All, DeviceManagementConfiguration.ReadWrite.All, DeviceManagementManagedDevices.ReadWrite.All, DeviceManagementServiceConfig.ReadWrite.All, Mail.Read, MailboxSettings.Read
 	Connect-ExchangeOnline
-	$CBOffice.checked = $False
-	$form.Controls.Add($CBOffice)
+	$CBNetworkAdmin.checked = $False
+	$form.Controls.Add($CBNetworkAdmin)
 
 	if ($CBOLicense.checked -eq $True){
 	$OfficeLicense=$Folder + "\LicensingInfo.log"
@@ -1181,7 +1286,7 @@ function ClearCheckBoxes {
 	($CBUF.checked) = $False
 	($CBUD.checked) = $False
 	($CBSIDs.checked) = $False
-	($CBOffice.checked) = $False
+	($CBNetworkAdmin.checked) = $False
 }
 
 function GUI {
@@ -1229,7 +1334,7 @@ function GUI {
 	$CBUF = New-Object System.Windows.Forms.CheckBox
 	$CBUD = New-Object System.Windows.Forms.CheckBox
 	$CBSIDs = New-Object System.Windows.Forms.CheckBox
-	$CBOffice = New-Object System.Windows.Forms.CheckBox
+	$CBNetworkAdmin = New-Object System.Windows.Forms.CheckBox
 	$CBOLogins = New-Object System.Windows.Forms.CheckBox
 	$CBOLicense = New-Object System.Windows.Forms.CheckBox
 	$CBOUnLicensedUsers = New-Object System.Windows.Forms.CheckBox
@@ -1284,7 +1389,7 @@ function GUI {
 	$CBUF.Name="CBUF"
 	$CBUD.Name="CBUD"
 	$CBSIDs.Name="CBSIDs"
-	$CBOffice.Name="CBOffice"
+	$CBNetworkAdmin.Name="CBOffice"
 	$CBOLogins.Name="CBOLogins"
 	$CBOLicense.Name="CBOLicense"
 	$CBOUnLicensedUsers.Name="CBOUnLicensedUsers"
@@ -1388,7 +1493,7 @@ $CBITPC.add_MouseHover($ShowHelp)
 $CBUF.add_MouseHover($ShowHelp)
 $CBUD.add_MouseHover($ShowHelp)
 $CBSIDs.add_MouseHover($ShowHelp)
-$CBOffice.add_MouseHover($ShowHelp)
+$CBNetworkAdmin.add_MouseHover($ShowHelp)
 $CBOLogins.add_MouseHover($ShowHelp)
 $CBOLicense.add_MouseHover($ShowHelp)
 $CBOUnLicensedUsers.add_MouseHover($ShowHelp)
@@ -1607,11 +1712,11 @@ $CBOUnLicensedUsers.add_MouseHover($ShowHelp)
 	$CBSIDs.checked = $False
 	$form.Controls.Add($CBSIDs)
 	
-	$CBOffice.Text = "Office 365 Reports"
-	$CBOffice.Location = New-Object System.Drawing.Point(340, 230)
-	$CBOffice.Autosize = $True
-	$CBOffice.checked = $False
-	$form.Controls.Add($CBOffice)
+	$CBNetworkAdmin.Text = "Network-Wide"
+	$CBNetworkAdmin.Location = New-Object System.Drawing.Point(340, 230)
+	$CBNetworkAdmin.Autosize = $True
+	$CBNetworkAdmin.checked = $False
+	$form.Controls.Add($CBNetworkAdmin)
 
 	$CBOLogins.Text = "Pull Office 365 Logins"
 	$CBOLogins.Location = New-Object System.Drawing.Point(490, 10)
@@ -1668,8 +1773,8 @@ $CBOUnLicensedUsers.add_MouseHover($ShowHelp)
 	}
 	})
 	
-	$CBOffice.Add_CheckedChanged({
-    if ($CBOffice.Checked) {
+	$CBNetworkAdmin.Add_CheckedChanged({
+    if ($CBNetworkAdmin.Checked) {
 	$form.Controls.Add($CBOLogins)
 	$form.Controls.Add($CBOLicense)
 #	$form.Controls.Add($CBOUnLicensedUsers)
@@ -1711,7 +1816,7 @@ $CBOUnLicensedUsers.add_MouseHover($ShowHelp)
 	$Clear.Location = New-Object System.Drawing.Point(250, 255)
 	$Clear.Add_Click({
 	ClearCheckBoxes
-	Disconnect-MgGraph
+	if (Disconnect-MgGraph -eq $true){Disconnect-MgGraph}
 	$form.Autosize = $True
 	$form.BackColor = [System.Drawing.Color]::LightGray
 	})
@@ -1795,7 +1900,7 @@ $CBOUnLicensedUsers.add_MouseHover($ShowHelp)
 	if ($CBUF.checked) { UpdateFeature }
 	if ($CBUD.checked) { UpdateDriver }
 	if ($CBSIDs.checked) { ListSIDs }
-	if ($CBOffice.checked) { OfficeReports; $form.Autosize = $True }
+	if ($CBNetworkAdmin.checked) { OfficeReports; $form.Autosize = $True }
 	$form.Autosize = $True
 	$Status.items.add("--------------")
 	$Status.items.add("Run Finished")
