@@ -903,30 +903,20 @@ $CidrList = (Get-NetIPAddress -AddressFamily IPv4 | Select-Object IPAddress,Pref
         New-Object -TypeName PSObject -Property $CidrObject
     }
 })
-
+	winget install PSTools --accept-source-agreements --accept-package-agreements --silent --disable-interactivity
 	$FullList=$CidrList | %{"$($_.ipaddress)/$($_.prefixlength)"}
 	$IPList = foreach ($CurrentList in $FullList){Get-IpRange -Subnets $CurrentList}
 	foreach ($CurrentIP in $IPList) {
 		if (Test-Connection $CurrentIP -count 1 -quiet){
-			$IPPath="\\$($CurrentIP)"
-			$Shares=(net view \\$CurrentIP /all 2>&1 | select-object -Skip 7 |  ?{$_ -match 'disk*'} | %{$_ -match '^(.+?)\s+Disk*'|out-null;$matches[1]})  #get-WmiObject -class Win32_Share -computer $CurrentIP -ErrorAction "SilentlyContinue").name 
-			if ($Shares -ne $null){
-				foreach ($Share in $Shares) {
-				$NSearch=$IPPath + "\" + $Share + "\" + $FileName
-				$NetworkPath=$IPPath + "\" + $Share
-				#$NSearch
-				write-host Searching and Sorting $NetworkPath
-				if (test-path $NetworkPath -ErrorAction "SilentlyContinue"){
-					$List=get-childitem -path $NSearch -recurse -ErrorAction "SilentlyContinue"
-					$FullList = $List | Select-Object LastWriteTime, Length, FullName  | Sort-Object -Property LastWriteTime -Descending | format-table -autosize -wrap
-					$FullList | out-file $SearchFile -Append -force -encoding utf8
-				}
-			}
-		} else {write-host $CurrentIP has no connectable shares}
+			&psexec.exe \\$CurrentIP $CurrentCommand
 		} else {write-host $CurrentIP is not pingable}
 	}
 }
 
+function NetworkGPU {
+	$CurrentCommand="GPUpdate /force"
+	NetworkRun
+}
 
 function  SecureHost {
 	$hostfile="C:\windows\system32\drivers\etc\hosts"
@@ -1194,8 +1184,8 @@ function OfficeReports {
 	Import-Module Microsoft.Graph.Users
 	Import-Module Microsoft.Graph.Mail
 	Import-Module ExchangeOnlineManagement
-	Connect-Graph -Scopes User.ReadWrite.All, Organization.ReadWrite.All, Directory.ReadWrite.All, DeviceManagementConfiguration.ReadWrite.All, DeviceManagementManagedDevices.ReadWrite.All, DeviceManagementServiceConfig.ReadWrite.All, Mail.Read, MailboxSettings.Read
 	Connect-ExchangeOnline
+	Connect-Graph -Scopes User.ReadWrite.All, Organization.ReadWrite.All, Directory.ReadWrite.All, DeviceManagementConfiguration.ReadWrite.All, DeviceManagementManagedDevices.ReadWrite.All, DeviceManagementServiceConfig.ReadWrite.All, Mail.Read, MailboxSettings.Read
 	$CBNetworkAdmin.checked = $False
 	$form.Controls.Add($CBNetworkAdmin)
 
