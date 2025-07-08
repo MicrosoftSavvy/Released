@@ -886,7 +886,8 @@ function Get-IpRange {
 }
 
 function NetworkRun {
-	
+
+winget install PSTools --accept-source-agreements --accept-package-agreements --silent --disable-interactivity	
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 #Install-Module -Name PoshFunctions -Repository PSGallery -Force
 #Import-Module -Name PoshFunctions
@@ -903,20 +904,54 @@ $CidrList = (Get-NetIPAddress -AddressFamily IPv4 | Select-Object IPAddress,Pref
         New-Object -TypeName PSObject -Property $CidrObject
     }
 })
-	winget install PSTools --accept-source-agreements --accept-package-agreements --silent --disable-interactivity
 	$FullList=$CidrList | %{"$($_.ipaddress)/$($_.prefixlength)"}
 	$IPList = foreach ($CurrentList in $FullList){Get-IpRange -Subnets $CurrentList}
 	foreach ($CurrentIP in $IPList) {
 		if (Test-Connection $CurrentIP -count 1 -quiet){
-			&psexec.exe \\$CurrentIP $CurrentCommand
+		$SlashedIP="\\" + $CurrentIP
+
+If ($NWC3 -ne $null) {
+	
+} else {
+	If ($NWC2 -ne $null) {
+
+	} else {
+		If ($NWC1 -ne $null) {
+
+		} else {
+			If ($NWP2 -ne $null) {
+						start-process -filepath $NWP1 -ArgumentList $NWP2 -NoNewWindow
+						} else {
+							If ($NWP1 -ne $null) {
+								&$NWP1
+								}
+		}}}}
+#			&psexec.exe -nobanner -accepteula \\$CurrentIP $CurrentCommand | Out-String | ForEach-Object { $_.Trim() }
 		} else {write-host $CurrentIP is not pingable}
 	}
 }
 
-function NetworkGPU {
-	$CurrentCommand="GPUpdate /force"
+function NetworkGPUpdate {
+	$NWC1 = $Null
+	$NWC2 = $Null
+	$NWC3 = $Null
+	$NWP1 = "psexec.exe"
+	$NWP2 = @("-nobanner", "-accepteula", $SlashedIP, "gpupdate /force")
+	$NWP3 = $Null
 	NetworkRun
 }
+
+function NetworkUptime {
+
+	$NWC1 = $Null
+	$NWC2 = $Null
+	$NWC3 = $Null
+	$NWP1 = "psexec.exe"
+	$NWP2 = @("-nobanner", "-accepteula", $SlashedIP, "powershell.exe", "-c", "(get-uptime).days -gt 3")
+	$NWP3 = $Null
+	NetworkRun
+}
+
 
 function  SecureHost {
 	$hostfile="C:\windows\system32\drivers\etc\hosts"
