@@ -911,13 +911,15 @@ $CidrList = (Get-NetIPAddress -AddressFamily IPv4 | Select-Object IPAddress,Pref
 		$SlashedIP="\\" + $CurrentIP
 
 If ($NWC3 -ne $null) {
-	
+	$NWC1 
+	$NWC2 
+	$NWC3
 } else {
 	If ($NWC2 -ne $null) {
-
+		&$NWC1 $NWC2
 	} else {
 		If ($NWC1 -ne $null) {
-
+			&$NWC1
 		} else {
 			If ($NWP2 -ne $null) {
 						start-process -filepath $NWP1 -ArgumentList $NWP2 -NoNewWindow
@@ -926,7 +928,6 @@ If ($NWC3 -ne $null) {
 								&$NWP1
 								}
 		}}}}
-#			&psexec.exe -nobanner -accepteula \\$CurrentIP $CurrentCommand | Out-String | ForEach-Object { $_.Trim() }
 		} else {write-host $CurrentIP is not pingable}
 	}
 }
@@ -947,10 +948,40 @@ function NetworkUptime {
 	$NWC2 = $Null
 	$NWC3 = $Null
 	$NWP1 = "psexec.exe"
-	$NWP2 = @("-nobanner", "-accepteula", $SlashedIP, "powershell.exe", "-c", "(get-uptime).days -gt 3")
+	$NWP2 = @("-nobanner", "-accepteula", $SlashedIP, "powershell.exe", "-c", "(get-uptime).days -gt 30")
 	$NWP3 = $Null
 	NetworkRun
 }
+
+function NetworkDNSFlush {
+	
+	$NWC1 = $Null
+	$NWC2 = $Null
+	$NWC3 = $Null
+	$NWP1 = "psexec.exe"
+	$NWP2 = @("-nobanner", "-accepteula", $SlashedIP, "ipconfig /flushdns")
+	$NWP3 = $Null
+	NetworkRun
+	
+}
+
+function NetworkStaticPCs {
+	
+	$NWC1 = $session = New-CimSession -ComputerName $CurrentIP
+	$NWC2 = ((get-NetIPInterface -CimSession $session) | where-object {$_.DHCP -match "Disabled"}).InterfaceAlias
+	$NWC3 = Remove-CimSession $session
+	$NWP1 = $Null
+	$NWP2 = $Null
+	$NWP3 = $Null
+	NetworkRun
+	
+
+
+
+
+
+}
+
 
 
 function  SecureHost {
