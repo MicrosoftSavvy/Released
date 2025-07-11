@@ -1910,7 +1910,6 @@ $CBOUnLicensedUsers.add_MouseHover($ShowHelp)
 	$Exit.Text = "Exit"
 	$Exit.Location = New-Object System.Drawing.Point(410, 255)
 	$Exit.Add_Click({
-		Disconnect-MgGraph
 		$form.Dispose()
     	$form.Close()
 	})
@@ -1950,7 +1949,7 @@ $CBOUnLicensedUsers.add_MouseHover($ShowHelp)
 	if ($CBUF.checked) { UpdateFeature }
 	if ($CBUD.checked) { UpdateDriver }
 	if ($CBSIDs.checked) { ListSIDs }
-	if ($CBNetworkAdmin.checked) { OfficeReports; $form.Autosize = $True }
+	if ($CBNetworkAdmin.checked) { OfficeReports; $form.Autosize = $True; Disconnect-MgGraph}
 	$form.Autosize = $True
 	$Status.items.add("--------------")
 	$Status.items.add("Run Finished")
