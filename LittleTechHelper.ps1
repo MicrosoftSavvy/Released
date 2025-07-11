@@ -974,12 +974,6 @@ function NetworkStaticPCs {
 	$NWP2 = $Null
 	$NWP3 = $Null
 	NetworkRun
-	
-
-
-
-
-
 }
 
 
@@ -1833,7 +1827,7 @@ $CBOUnLicensedUsers.add_MouseHover($ShowHelp)
     if ($CBNetworkAdmin.Checked) {
 	$form.Controls.Add($CBOLogins)
 	$form.Controls.Add($CBOLicense)
-#	$form.Controls.Add($CBOUnLicensedUsers)
+	$form.Controls.Add($CBOUnLicensedUsers)
 	$form.Autosize = $True	
    	} else {
 	$form.Autosize = $False
