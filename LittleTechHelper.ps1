@@ -1239,15 +1239,17 @@ function OfficeReports {
 	Install-Module Microsoft.Graph -Scope AllUsers -Repository PSGallery -Force
 	}
 	$maximumfunctioncount=32768
+	Install-Module Microsoft.Identity.Client -force
 	Import-Module Microsoft.Graph.Authentication
 	Import-Module Microsoft.Graph.Reports
 	Import-Module Microsoft.Graph.Users
 	Import-Module Microsoft.Graph.Mail
+	Import-Module Microsoft.Identity.Client
 	Import-Module ExchangeOnlineManagement
 	Connect-ExchangeOnline
 	Connect-Graph -Scopes User.ReadWrite.All, Organization.ReadWrite.All, Directory.ReadWrite.All, DeviceManagementConfiguration.ReadWrite.All, DeviceManagementManagedDevices.ReadWrite.All, DeviceManagementServiceConfig.ReadWrite.All, Mail.Read, MailboxSettings.Read
-	$CBNetworkAdmin.checked = $False
-	$form.Controls.Add($CBNetworkAdmin)
+#	$CBNetworkAdmin.checked = $False
+#	$form.Controls.Add($CBNetworkAdmin)
 
 	if ($CBOLicense.checked -eq $True){
 	$OfficeLicense=$Folder + "\LicensingInfo.log"
