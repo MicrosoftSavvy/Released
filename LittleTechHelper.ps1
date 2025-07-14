@@ -1395,6 +1395,7 @@ function GUI {
 	$CBUF = New-Object System.Windows.Forms.CheckBox
 	$CBUD = New-Object System.Windows.Forms.CheckBox
 	$CBSIDs = New-Object System.Windows.Forms.CheckBox
+
 	$CBNetworkAdmin = New-Object System.Windows.Forms.CheckBox
 	$CBOLogins = New-Object System.Windows.Forms.CheckBox
 	$CBOLicense = New-Object System.Windows.Forms.CheckBox
@@ -1461,7 +1462,12 @@ function GUI {
 	$CBOLogins.Name="CBOLogins"
 	$CBOLicense.Name="CBOLicense"
 	$CBOUnLicensedUsers.Name="CBOUnLicensedUsers"
-
+	$CBNGPUpdate
+	$CBNUptime
+	$CBNDNSFlush
+	$CBNStatic
+	$CBN
+	
 	$ShowHelp={
      Switch ($this.name) {
 		"Run" {$tip = "Runs Checked options"}
@@ -1803,6 +1809,30 @@ $CBOUnLicensedUsers.add_MouseHover($ShowHelp)
 	$CBOUnLicensedUsers.Autosize = $True
 	$CBOUnLicensedUsers.checked = $False
 	
+	$CBNGPUpdate.Text = "Run GPUpdate"
+	$CBNGPUpdate.Location = New-Object System.Drawing.Point(490, 70)
+	$CBNGPUpdate.Autosize = $True
+	$CBNGPUpdate.checked = $False
+	
+
+	$CBNUptime.Text = "High Uptimes"
+	$CBNUptime.Location = New-Object System.Drawing.Point(490, 90)
+	$CBNUptime.Autosize = $True
+	$CBNUptime.checked = $False
+
+	$CBNDNSFlush.Text = "DNS Flush"
+	$CBNDNSFlush.Location = New-Object System.Drawing.Point(490, 110)
+	$CBNDNSFlush.Autosize = $True
+	$CBNDNSFlush.checked = $False
+
+	$CBNStatic.Text = "Find Static PCs"
+	$CBNStatic.Location = New-Object System.Drawing.Point(490, 130)
+	$CBNStatic.Autosize = $True
+	$CBNStatic.checked = $False
+
+
+	
+	
 	@((get-service).name) | ForEach-Object {[void] $ServiceList.Items.Add($_)}
 	$ServiceList.width=170
 	$ServiceList.autosize = $true
@@ -1848,12 +1878,21 @@ $CBOUnLicensedUsers.add_MouseHover($ShowHelp)
 	$form.Controls.Add($CBOLogins)
 	$form.Controls.Add($CBOLicense)
 	$form.Controls.Add($CBOUnLicensedUsers)
+	$form.Controls.Add($CBNGPUpdate)
+	$form.Controls.Add($CBNUptime)
+	$form.Controls.Add($CBNDNSFlush)
+	$form.Controls.Add($CBNStatic)
+
 	$form.Autosize = $True	
    	} else {
 	$form.Autosize = $False
 	$form.Controls.Remove($CBOLogins)
 	$form.Controls.Remove($CBOLicense)
 	$form.Controls.Remove($CBOUnLicensedUsers)
+	$form.Controls.Remove($CBNGPUpdate)
+	$form.Controls.Remove($CBNUptime)
+	$form.Controls.Remove($CBNDNSFlush)
+	$form.Controls.Remove($CBNStatic)
 	$form.Autosize = $True
 	}
 	})
