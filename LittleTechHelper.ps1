@@ -916,10 +916,10 @@ If ($NWC3 -ne $null) {
 	$NWC3
 } else {
 	If ($NWC2 -ne $null) {
-		&$NWC1 $NWC2
+		$NWC1 $NWC2
 	} else {
 		If ($NWC1 -ne $null) {
-			&$NWC1
+			$NWC1
 		} else {
 			If ($NWP2 -ne $null) {
 						start-process -filepath $NWP1 -ArgumentList $NWP2 -NoNewWindow
@@ -944,11 +944,11 @@ function NetworkGPUpdate {
 
 function NetworkUptime {
 
-	$NWC1 = $Null
+	$NWC1 = Get-uptime -Computername (resolve-dnsname $CurrentIP -type ptr).namehost -ea silentlycontinue
 	$NWC2 = $Null
 	$NWC3 = $Null
-	$NWP1 = "psexec.exe"
-	$NWP2 = @("-nobanner", "-accepteula", $SlashedIP, "powershell.exe", "-c", "(get-uptime).days -gt 30")
+	$NWP1 = $Null
+	$NWP2 = $Null
 	$NWP3 = $Null
 	NetworkRun
 }
@@ -1389,6 +1389,11 @@ function GUI {
 	$CBNetworkAdmin = New-Object System.Windows.Forms.CheckBox
 	$CBOLogins = New-Object System.Windows.Forms.CheckBox
 	$CBOLicense = New-Object System.Windows.Forms.CheckBox
+	$CBNGPUpdate = New-Object System.Windows.Forms.CheckBox
+	$CBNUptime = New-Object System.Windows.Forms.CheckBox
+	$CBNDNSFlush = New-Object System.Windows.Forms.CheckBox
+	$CBN = New-Object System.Windows.Forms.CheckBox
+	
 	$CBOUnLicensedUsers = New-Object System.Windows.Forms.CheckBox
 	$TXTMIN = New-Object System.Windows.Forms.TextBox
 	$Status = New-Object System.Windows.Forms.ListBox
@@ -1445,6 +1450,7 @@ function GUI {
 	$CBOLogins.Name="CBOLogins"
 	$CBOLicense.Name="CBOLicense"
 	$CBOUnLicensedUsers.Name="CBOUnLicensedUsers"
+
 	$ShowHelp={
      Switch ($this.name) {
 		"Run" {$tip = "Runs Checked options"}
@@ -1549,6 +1555,7 @@ $CBNetworkAdmin.add_MouseHover($ShowHelp)
 $CBOLogins.add_MouseHover($ShowHelp)
 $CBOLicense.add_MouseHover($ShowHelp)
 $CBOUnLicensedUsers.add_MouseHover($ShowHelp)
+
 	$form.Text = "The Little Helper GUI $CurrentScriptVer"
 	$form.Autosize = $True
 	if ( -not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] 'Administrator')) {
