@@ -978,8 +978,6 @@ function NetworkStaticPCs {
 	NetworkRun
 }
 
-
-
 function  SecureHost {
 	$hostfile="C:\windows\system32\drivers\etc\hosts"
 	if ((Select-String -Path $hostfile -Pattern "###Secure Hosts File###" -AllMatches) -ne $null) {$LineCount=(Select-String -Path $hostfile -Pattern "###Secure Hosts File###" -AllMatches).linenumber - 1}
