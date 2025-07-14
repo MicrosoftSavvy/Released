@@ -1801,38 +1801,38 @@ $CBNStatic.add_MouseHover($ShowHelp)
 	$form.Controls.Add($CBNetworkAdmin)
 
 	$CBOLogins.Text = "Pull Office 365 Logins"
-	$CBOLogins.Location = New-Object System.Drawing.Point(490, 10)
+	$CBOLogins.Location = New-Object System.Drawing.Point(510, 10)
 	$CBOLogins.Autosize = $True
 	$CBOLogins.checked = $False
 
 	$CBOLicense.Text = "Pull Licenses"
-	$CBOLicense.Location = New-Object System.Drawing.Point(490, 30)
+	$CBOLicense.Location = New-Object System.Drawing.Point(510, 30)
 	$CBOLicense.Autosize = $True
 	$CBOLicense.checked = $False
 	
 	$CBOUnLicensedUsers.Text = "List of Unlicensed Users"
-	$CBOUnLicensedUsers.Location = New-Object System.Drawing.Point(490, 50)
+	$CBOUnLicensedUsers.Location = New-Object System.Drawing.Point(510, 50)
 	$CBOUnLicensedUsers.Autosize = $True
 	$CBOUnLicensedUsers.checked = $False
 	
 	$CBNGPUpdate.Text = "Run GPUpdate"
-	$CBNGPUpdate.Location = New-Object System.Drawing.Point(490, 70)
+	$CBNGPUpdate.Location = New-Object System.Drawing.Point(510, 70)
 	$CBNGPUpdate.Autosize = $True
 	$CBNGPUpdate.checked = $False
 	
 
 	$CBNUptime.Text = "High Uptimes"
-	$CBNUptime.Location = New-Object System.Drawing.Point(490, 90)
+	$CBNUptime.Location = New-Object System.Drawing.Point(510, 90)
 	$CBNUptime.Autosize = $True
 	$CBNUptime.checked = $False
 
 	$CBNDNSFlush.Text = "DNS Flush"
-	$CBNDNSFlush.Location = New-Object System.Drawing.Point(490, 110)
+	$CBNDNSFlush.Location = New-Object System.Drawing.Point(510, 110)
 	$CBNDNSFlush.Autosize = $True
 	$CBNDNSFlush.checked = $False
 
 	$CBNStatic.Text = "Find Static PCs"
-	$CBNStatic.Location = New-Object System.Drawing.Point(490, 130)
+	$CBNStatic.Location = New-Object System.Drawing.Point(510, 130)
 	$CBNStatic.Autosize = $True
 	$CBNStatic.checked = $False
 	
