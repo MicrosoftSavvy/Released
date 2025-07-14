@@ -5,7 +5,6 @@ $host.UI.RawUI.WindowTitle = "The Little Tech Helper Script $CurrentScriptVer"
 $Folder='c:\LTH'
 $CurrentDate=(Get-date).ToString('MM-dd-yyyy')
 $Transcript=$Folder + "\Transcript.log"
-$Global:VSSChangeLog 
 $Script=invoke-webrequest -uri https://raw.githubusercontent.com/MicrosoftSavvy/Released/refs/heads/main/LittleTechHelper.ps1
 $ScriptRaw=(($Script.rawcontent).split("`n")).replace("`r",'') | Select-Object -skip 26
 $DownloadScriptVer=(($ScriptRaw | Where-Object { $_ -match "CurrentScriptVer" }) -replace "[^\d.]","")[0]
@@ -82,22 +81,23 @@ function VSS {
 	$CurrentStatus = "Checking to see if VSS is enabledl enabling and scheduling" 
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 	if (Test-Path [System.Windows.Forms.Application]) {if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}}
+#	$VSSChangeLog 
 	$VSSLog=$Folder+"\VSS.log"
 	foreach ($DriveLetter in $Drives){
 	$drive=$DriveLetter.replace(":\","")
 	if (!(Get-ScheduledTask | Where-Object { $_.TaskName -like '*Shadow*' } | Select-Object TaskName, State)){
-		$Global:VSSChangeLog = @()
+		$VSSChangeLog = @()
 		$vssService = Get-WmiObject -Class Win32_Service -Filter "Name='VSS'"
 		if ($vssService.StartMode -ne 'Auto') {
 			$vssService.ChangeStartMode('Automatic')
-			$Global:VSSChangeLog = $Global:VSSChangeLog + "Changed VSS service to Automatic start.`n"
+			$VSSChangeLog = $VSSChangeLog + "Changed VSS service to Automatic start.`n"
 			} else {
-			$Global:VSSChangeLog = $Global:VSSChangeLog + "VSS service set to Automatic start.`n"			
+			$VSSChangeLog = $VSSChangeLog + "VSS service set to Automatic start.`n"			
 		}
 		Start-Service -Name VSS
-		$Global:VSSChangeLog = $Global:VSSChangeLog +  "Started VSS service."
+		$VSSChangeLog = $VSSChangeLog +  "Started VSS service."
 		(Get-WmiObject -List Win32_ShadowCopy).Create($driveLetter, "ClientAccessible")
-		$Global:VSSChangeLog = $Global:VSSChangeLog +  "Enabled Shadow Copy for $driveLetter."
+		$VSSChangeLog = $VSSChangeLog +  "Enabled Shadow Copy for $driveLetter."
 		$action = New-ScheduledTaskAction -Execute 'Powershell.exe' `
 		-Argument " -windowstyle hidden -command (Get-WmiObject -List Win32_ShadowCopy).Create(`'$driveLetter`', `'ClientAccessible`')"
 		$trigger1 = New-ScheduledTaskTrigger -Daily -At 7AM
@@ -107,13 +107,13 @@ function VSS {
 		-TaskName "ShadowCopy Creation for Drive $drive" `
 		-Description "Task for creating Shadow Copies" `
 		-RunLevel Highest
-		$Global:VSSChangeLog = $Global:VSSChangeLog + "Scheduled Task for creating Shadow Copies at 7AM and 12PM for drive $driveLetter is set."
-		if ($Status -ne $null) {$Status.items.add($Global:VSSChangeLog)}else {Write-Host $Global:VSSChangeLog -foregroundcolor Green}
+		$VSSChangeLog = $VSSChangeLog + "Scheduled Task for creating Shadow Copies at 7AM and 12PM for drive $driveLetter is set."
+		if ($Status -ne $null) {$Status.items.add($Global:VSSChangeLog)}else {Write-Host $VSSChangeLog -foregroundcolor Green}
 		if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
-} else {$Global:VSSChangeLog = "VSS Already Enabled on $Drive.`n"; if ($Status -ne $null) {$Status.items.add($Global:VSSChangeLog)}else {Write-Host $Global:VSSChangeLog -foregroundcolor Green}
+} else {$VSSChangeLog = "VSS Already Enabled on $Drive.`n"; if ($Status -ne $null) {$Status.items.add($Global:VSSChangeLog)}else {Write-Host $VSSChangeLog -foregroundcolor Green}
 }
 }
-	if (!($Global:VSSChangeLog -eq $null)){Out-File -FilePath $VSSLog -InputObject $Global:VSSChangeLog}
+	if (!($VSSChangeLog -eq $null)){Out-File -FilePath $VSSLog -InputObject $Global:VSSChangeLog}
 }
 
 function RunDISM {
