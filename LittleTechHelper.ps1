@@ -2017,11 +2017,6 @@ $CBNStatic.add_MouseHover($ShowHelp)
 	if ($CBNDNSFlush.checked) { NetworkDNSFlush }
 	if ($CBNStatic.checked) { NetworkStaticPCs }
 
-	$form.Controls.Remove($)
-	$form.Controls.Remove($)
-	$form.Controls.Remove($)
-	$form.Controls.Remove($)
-
 
 	$form.Autosize = $True
 	$Status.items.add("--------------")
