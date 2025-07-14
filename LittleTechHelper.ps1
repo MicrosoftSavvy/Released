@@ -261,7 +261,6 @@ function ShowVaribles {
 function ScheduleRestart {
 	$Time="03:00"
 	$FutureDate=(Get-date).AddDays(1).ToString('MM-dd-yyyy')
-
 	$CurrentStatus = "Checking if restart is pending and scheduling for $Time" 
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 	if (Test-Path [System.Windows.Forms.Application]) {if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}}
@@ -941,7 +940,6 @@ function NetworkGPUpdate {
 	$NWC3 = $Null
 	$NWP1 = "psexec.exe"
 	$NWP2 = @("-nobanner", "-accepteula", $SlashedIP, "gpupdate /force")
-	$NWP3 = $Null
 	NetworkRun
 }
 
@@ -952,7 +950,6 @@ function NetworkUptime {
 	$NWC3 = $Null
 	$NWP1 = $Null
 	$NWP2 = $Null
-	$NWP3 = $Null
 	NetworkRun
 }
 
@@ -963,7 +960,6 @@ function NetworkDNSFlush {
 	$NWC3 = $Null
 	$NWP1 = "psexec.exe"
 	$NWP2 = @("-nobanner", "-accepteula", $SlashedIP, "ipconfig /flushdns")
-	$NWP3 = $Null
 	NetworkRun
 	
 }
@@ -975,7 +971,6 @@ function NetworkStaticPCs {
 	$NWC3 = Remove-CimSession $session
 	$NWP1 = $Null
 	$NWP2 = $Null
-	$NWP3 = $Null
 	NetworkRun
 }
 
@@ -1289,6 +1284,16 @@ $unlicensedEnabledMailboxes = foreach ($mb in $mailboxes) {
 	$filteredUsers | Select-Object DisplayName, UserPrincipalName | Out-File -FilePath $CBOUnLicensed
 	$filteredUsers | out-gridview
 	}
+}
+
+function CreateShortCut {
+	
+$WshShell = New-Object -ComObject WScript.Shell
+$Shortcut = $WshShell.CreateShortcut("$env:USERPROFILE\Desktop\LittleTechHelper.lnk")
+$Shortcut.TargetPath = "powershell.exe"
+$Shortcut.Arguments = "-ExecutionPolicy Bypass -c `$Link='https://raw.githubusercontent.com/MicrosoftSavvy/Released/refs/heads/main/LittleTechHelper.ps1'; `$FileScript=`$env:temp + '\temp.ps1'; invoke-webrequest `$Link -outfile `$FileScript; powershell -executionpolicy bypass -file `$FileScript"
+$Shortcut.Save()
+
 }
 
 function ListSIDs {
@@ -1999,3 +2004,5 @@ Stop-Transcript
 
 #Written by MicrosoftSavvy
 #powershell -executionpolicy bypass -c $Link='https://raw.githubusercontent.com/MicrosoftSavvy/Released/refs/heads/main/LittleTechHelper.ps1'; $FileScript=$env:temp + '\temp.ps1'; invoke-webrequest $Link -outfile $FileScript; powershell -executionpolicy bypass -file $FileScript
+
+
