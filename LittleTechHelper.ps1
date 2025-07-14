@@ -918,7 +918,8 @@ If ($NWC3 -ne $null) {
 	$NWC3
 } else {
 	If ($NWC2 -ne $null) {
-		$NWC1 $NWC2
+		$NWC1 
+		$NWC2
 	} else {
 		If ($NWC1 -ne $null) {
 			$NWC1
