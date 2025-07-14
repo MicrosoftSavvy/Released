@@ -3,11 +3,8 @@ $CurrentScriptVer="1.1.5"
 $host.UI.RawUI.WindowTitle = "The Little Tech Helper Script $CurrentScriptVer"
 
 $Folder='c:\LTH'
-$Time="03:00"
 $CurrentDate=(Get-date).ToString('MM-dd-yyyy')
-$FutureDate=(Get-date).AddDays(1).ToString('MM-dd-yyyy')
 $Transcript=$Folder + "\Transcript.log"
-$Users= get-childitem -directory -path "c:\users"; 
 $Global:VSSChangeLog 
 $Script=invoke-webrequest -uri https://raw.githubusercontent.com/MicrosoftSavvy/Released/refs/heads/main/LittleTechHelper.ps1
 $ScriptRaw=(($Script.rawcontent).split("`n")).replace("`r",'') | Select-Object -skip 26
@@ -262,6 +259,9 @@ function ShowVaribles {
 }
 
 function ScheduleRestart {
+	$Time="03:00"
+	$FutureDate=(Get-date).AddDays(1).ToString('MM-dd-yyyy')
+
 	$CurrentStatus = "Checking if restart is pending and scheduling for $Time" 
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 	if (Test-Path [System.Windows.Forms.Application]) {if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}}
@@ -357,6 +357,8 @@ function FreeUpSpace {
 	$CurrentStatus = "Freeing up disk space" 
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
 	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
+	$Users= get-childitem -directory -path "c:\users"; 
+
 	$hardwaretype=(Get-WmiObject -Class Win32_ComputerSystem -Property PCSystemType).PCSystemType
 	$FUSFolders=@('c:\ESD','C:\Windows\SoftwareDistribution\Download','c:\ProgramData\Adobe\Temp','c:\$GetCurrent','c:\recovery','c:\windows10upgrade','C:\WINDOWS\SystemTemp\ScreenConnect') 
 	Repair-WindowsImage -Online -StartComponentCleanup -ResetBase
