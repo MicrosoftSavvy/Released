@@ -1293,6 +1293,9 @@ $Shortcut = $WshShell.CreateShortcut("$env:USERPROFILE\Desktop\LittleTechHelper.
 $Shortcut.TargetPath = "powershell.exe"
 $Shortcut.Arguments = "-ExecutionPolicy Bypass -c `$Link='https://raw.githubusercontent.com/MicrosoftSavvy/Released/refs/heads/main/LittleTechHelper.ps1'; `$FileScript=`$env:temp + '\temp.ps1'; invoke-webrequest `$Link -outfile `$FileScript; powershell -executionpolicy bypass -file `$FileScript"
 $Shortcut.Save()
+$bytes = [System.IO.File]::ReadAllBytes("$env:USERPROFILE\Desktop\LittleTechHelper.lnk")
+$bytes[0x15] = $bytes[0x15] -bor 0x20 #set byte 21 (0x15) bit 6 (0x20) ON
+[System.IO.File]::WriteAllBytes("$env:USERPROFILE\Desktop\LittleTechHelper.lnk", $bytes)
 
 }
 
@@ -1398,7 +1401,9 @@ function GUI {
 	$CBNGPUpdate = New-Object System.Windows.Forms.CheckBox
 	$CBNUptime = New-Object System.Windows.Forms.CheckBox
 	$CBNDNSFlush = New-Object System.Windows.Forms.CheckBox
+	$CBNStatic = New-Object System.Windows.Forms.CheckBox
 	$CBN = New-Object System.Windows.Forms.CheckBox
+	
 	
 	$CBOUnLicensedUsers = New-Object System.Windows.Forms.CheckBox
 	$TXTMIN = New-Object System.Windows.Forms.TextBox
