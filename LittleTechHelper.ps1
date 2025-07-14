@@ -2012,6 +2012,17 @@ $CBNStatic.add_MouseHover($ShowHelp)
 	if ($CBUD.checked) { UpdateDriver }
 	if ($CBSIDs.checked) { ListSIDs }
 	if ($CBNetworkAdmin.checked) { OfficeReports; $form.Autosize = $True; Disconnect-MgGraph}
+	if ($CBNGPUpdate.checked) { NetworkGPUpdate }
+	if ($CBNUptime.checked) { NetworkUptime }
+	if ($CBNDNSFlush.checked) { NetworkDNSFlush }
+	if ($CBNStatic.checked) { NetworkStaticPCs }
+
+	$form.Controls.Remove($)
+	$form.Controls.Remove($)
+	$form.Controls.Remove($)
+	$form.Controls.Remove($)
+
+
 	$form.Autosize = $True
 	$Status.items.add("--------------")
 	$Status.items.add("Run Finished")
