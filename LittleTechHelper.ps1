@@ -1405,7 +1405,6 @@ function GUI {
 	$CBNStatic = New-Object System.Windows.Forms.CheckBox
 	$CBN = New-Object System.Windows.Forms.CheckBox
 	
-	
 	$CBOUnLicensedUsers = New-Object System.Windows.Forms.CheckBox
 	$TXTMIN = New-Object System.Windows.Forms.TextBox
 	$Status = New-Object System.Windows.Forms.ListBox
@@ -1462,11 +1461,10 @@ function GUI {
 	$CBOLogins.Name="CBOLogins"
 	$CBOLicense.Name="CBOLicense"
 	$CBOUnLicensedUsers.Name="CBOUnLicensedUsers"
-	$CBNGPUpdate
-	$CBNUptime
-	$CBNDNSFlush
-	$CBNStatic
-	$CBN
+	$CBNGPUpdate.Name="CBNGPUpdate"
+	$CBNUptime.Name="CBNUptime"
+	$CBNDNSFlush.Name="CBNDNSFlush"
+	$CBNStatic.Name="CBNStatic"
 	
 	$ShowHelp={
      Switch ($this.name) {
@@ -1518,6 +1516,10 @@ function GUI {
 		"CBOLogins" {$tip = "Login Attempts"}
 		"CBOLicense" {$tip = "Pull licensing info"}
 		"CBOUnLicensedUsers" {$tip = "List all Unlicended users"}
+		"CBNGPUpdate" {$tip = "Run GPUpdate on all PCs in subnet"}
+		"CBNUptime" {$tip = "List all PCs with a high uptime"}
+		"CBNDNSFlush" {$tip = "Flush DNS on all PCs in subnet"}
+		"CBNStatic" {$tip = "List all PCs in subnet set to static"}
 	  }
 $tooltip1.SetToolTip($this,$tip)
 }
@@ -1572,6 +1574,10 @@ $CBNetworkAdmin.add_MouseHover($ShowHelp)
 $CBOLogins.add_MouseHover($ShowHelp)
 $CBOLicense.add_MouseHover($ShowHelp)
 $CBOUnLicensedUsers.add_MouseHover($ShowHelp)
+$CBNGPUpdate.add_MouseHover($ShowHelp)
+$CBNUptime.add_MouseHover($ShowHelp)
+$CBNDNSFlush.add_MouseHover($ShowHelp)
+$CBNStatic.add_MouseHover($ShowHelp)
 
 	$form.Text = "The Little Helper GUI $CurrentScriptVer"
 	$form.Autosize = $True
@@ -1829,9 +1835,6 @@ $CBOUnLicensedUsers.add_MouseHover($ShowHelp)
 	$CBNStatic.Location = New-Object System.Drawing.Point(490, 130)
 	$CBNStatic.Autosize = $True
 	$CBNStatic.checked = $False
-
-
-	
 	
 	@((get-service).name) | ForEach-Object {[void] $ServiceList.Items.Add($_)}
 	$ServiceList.width=170
