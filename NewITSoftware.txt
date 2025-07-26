@@ -35,6 +35,9 @@ Microsoft.WingetCreate
 Grammarly.Grammarly.Office
 Babble.babblevoiceDesktop
 ((Get-CimInstance -ClassName Win32_ComputerSystem).manufacturer).split()[0]
+SiberSystems.RoboForm
+hluk.CopyQ
+9NPXBVRGRDH3
 Nirsoft.AdvancedRun
 Nirsoft.AlternateStreamView
 Nirsoft.AppCrashView
