@@ -34,7 +34,7 @@ Microsoft.WindowsPCHealthCheck
 Microsoft.WingetCreate
 Grammarly.Grammarly.Office
 Babble.babblevoiceDesktop
-
+((Get-CimInstance -ClassName Win32_ComputerSystem).manufacturer).split()[0]
 Nirsoft.AdvancedRun
 Nirsoft.AlternateStreamView
 Nirsoft.AppCrashView
