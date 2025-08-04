@@ -1498,7 +1498,7 @@ function GUI {
 		"CBServices" {$tip = "Reset Permissions on service"}
 		"CBDS" {$tip = "Download source files regards if needed"}
 		"CBNetCheck" {$tip = "Checks DNS and if pingable"}
-		"CBRecycle" {$tip = "Clear everyone's recycle bin"}
+		"CBRecycle" {$tip = "Empties everyone's recycle bin"}
 		"CBSecureHOSTS" {$tip = "Downloads a secure HOSTS file to assist in safer internet"}
 		"CBSecurePC" {$tip = "Settings to assist in securing PC"}
 		"CBIAdmin" {$tip = "Sets INTERACTIVE as admin giving all users admin rights to only this computer and only while signed in"}
@@ -1734,7 +1734,7 @@ $CBNStatic.add_MouseHover($ShowHelp)
 	$CBServices.checked = $False
 	$form.Controls.Add($CBServices)	
 	
-	$CBRecycle.Text = "Clear All Recycle Bins"
+	$CBRecycle.Text = "Empty All Recycle Bins"
 	$CBRecycle.Location = New-Object System.Drawing.Point(340, 30)
 	$CBRecycle.Autosize = $True
 	$CBRecycle.checked = $False
