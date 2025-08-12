@@ -79,9 +79,11 @@ Nirsoft.WhoisThisDomain
 Nirsoft.WifiInfoView
 NirSoft.WirelessNetworkWatcher
 GitHub
+WiresharkFoundation.Wireshark
 
 [Remove]
 *xbox*
 *news*
 norton*
 mcafee
+
