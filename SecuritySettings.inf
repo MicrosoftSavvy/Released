@@ -85,6 +85,7 @@ AuditLogRetentionPeriod = 0
 RestrictGuestAccess = 1
 [Registry Values]
 USERS\S-1-5-20\Software\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config\DownloadMode=4,0
+USERS\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\ShowRunasDifferentuserinStart=4,1
 MACHINE\System\CurrentControlSet\Services\Netlogon\Parameters\SignSecureChannel=4,1
 MACHINE\System\CurrentControlSet\Services\Netlogon\Parameters\SealSecureChannel=4,1
 MACHINE\System\CurrentControlSet\Services\Netlogon\Parameters\RequireStrongKey=4,1
