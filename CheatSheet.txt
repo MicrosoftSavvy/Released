@@ -253,7 +253,7 @@ Get-ScheduledTask -TaskPath "\" | Select-Object @{Name="Run As";Expression={ $_.
 Get-ScheduledTask | Where-Object {$_.Principal.UserId -notlike "NT AUTHORITY*" -and $_.Principal.UserId -notlike "SYSTEM" -and $_.Principal.UserId -notlike "LOCAL SERVICE" -and $_.Principal.UserId -notlike "NETWORK SERVICE" -and $_.Principal.UserId -notlike $null} | Select-Object @{Name="Run As";Expression={ $_.principal.userid } }, TaskPath, TaskName
 
 #Check and Install Windows Updates
-#Different Categories - 'Drivers', 'Updates', 'Security Updates', 'Critical Updates'
+#Different Categories - 'Drivers', 'Updates', 'Security Updates', 'Critical Updates', 'Upgrades'
 powershell -c Set-ExecutionPolicy -ExecutionPolicy Bypass -Force; Install-Module -Name PSWindowsUpdate -force; import-module -Name PSWindowsUpdate; Get-WindowsUpdate -MicrosoftUpdate -Category 'Drivers' -AcceptAll -Install
 
 #Windows Update
@@ -268,9 +268,10 @@ Get-WindowsUpdate -MicrosoftUpdate
 Get-WindowsUpdate -WindowsUpdate -Category 'Drivers', 'Updates', 'Security Updates', 'Critical Updates' -AcceptAll
 Install-WindowsUpdate -MicrosoftUpdate -Category 'Drivers', 'Updates', 'Security Updates', 'Critical Updates' -AcceptAll
 
-
 Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force; Install-Module PSWindowsUpdate -force; Import-Module PSWindowsUpdate -force; Install-WindowsUpdate -MicrosoftUpdate -Category 'Drivers' -AcceptAll
-
 
 #Show wifi passwords
 (netsh wlan show profiles) | Select-String "\:(.+)$" | %{$name=$_.Matches.Groups[1].Value.Trim(); $_} | %{(netsh wlan show profile name="$name" key=clear)} | Select-String "Key Content\W+\:(.+)$" | %{$pass=$_.Matches.Groups[1].Value.Trim(); $_} | %{[PSCustomObject]@{ PROFILE_NAME=$name;PASSWORD=$pass }} | Format-Table –AutoSize
+
+#Get Commands
+(Get-Module -Name Microsoft.Graph).ExportedCommands | ft key

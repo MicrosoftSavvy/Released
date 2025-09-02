@@ -14,6 +14,30 @@ Notepad++.Notepad++
 VideoLAN.VLC
 WinDirStat.WinDirStat
 7zip.7zip
+Microsoft.OneDrive
+9PM860492SZD
+XP89DCGQ3K6VLD
+9P6PMZTM93LR
+Microsoft.MouseandKeyboardCenter
+9NBLGGH4QGHW
+Microsoft.OfficeDeploymentTool
+Microsoft.Office
+Microsoft.AIShell
+Microsoft.AppInstaller
+Microsoft.DataMigrationAssistant
+Microsoft.DeploymentToolkit
+Microsoft.MaliciousSoftwareRemovalTool
+Microsoft.PCManager
+Microsoft.RemoteDesktopClient
+Microsoft.RemoteDesktopMMRService
+Microsoft.WindowsPCHealthCheck
+Microsoft.WingetCreate
+Grammarly.Grammarly.Office
+Babble.babblevoiceDesktop
+((Get-CimInstance -ClassName Win32_ComputerSystem).manufacturer).split()[0]
+SiberSystems.RoboForm
+hluk.CopyQ
+9NPXBVRGRDH3
 Nirsoft.AdvancedRun
 Nirsoft.AlternateStreamView
 Nirsoft.AppCrashView
@@ -55,9 +79,11 @@ Nirsoft.WhoisThisDomain
 Nirsoft.WifiInfoView
 NirSoft.WirelessNetworkWatcher
 GitHub
+WiresharkFoundation.Wireshark
 
 [Remove]
 *xbox*
 *news*
 norton*
 mcafee
+
