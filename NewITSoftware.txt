@@ -78,12 +78,14 @@ Nirsoft.WhatIsHang
 Nirsoft.WhoisThisDomain
 Nirsoft.WifiInfoView
 NirSoft.WirelessNetworkWatcher
-GitHub
+GitHubDesktop
 WiresharkFoundation.Wireshark
+Microsoft .NET SDK 8.0
 
 [Remove]
 *xbox*
 *news*
 norton*
 mcafee
+
 
