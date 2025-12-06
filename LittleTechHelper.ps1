@@ -1,5 +1,5 @@
 Set-ExecutionPolicy -executionpolicy bypass -scope Process -force
-$CurrentScriptVer="1.1.5"
+$CurrentScriptVer="1.1.6"
 $host.UI.RawUI.WindowTitle = "The Little Tech Helper Script $CurrentScriptVer"
 
 $Folder='c:\LTH'
@@ -174,6 +174,13 @@ function DISMRepairSource {
 	}
 }
 
+function PullWiFiProfiles {
+	$WiFiProfiles = (netsh.exe wlan show profiles) | Select-String -Pattern "All User Profile\s+:\s+(.*)" | ForEach-Object {$_.Matches.Groups[1].Value}
+	foreach($WiFiProfile in $WiFiProfiles){
+			netsh wlan export profile $WiFiProfile key=clear folder="$Folder\wifi"
+			}
+}
+
 function ConvertSource {
 	$CurrentStatus = "Extracting index and Converting to Install.WIM" 
 	if ($Status -ne $null) {$Status.items.add($CurrentStatus)}else {Write-Host $CurrentStatus -foregroundcolor Green}
@@ -308,7 +315,7 @@ function Runtimes {
 		((New-Object System.Net.WebClient).DownloadFile($Rt,$RtFN))
 		start-process -filepath $RtFN -ArgumentList "-quiet","-norestart"
 	}
-	$n=6
+	$n=5
 	do {
 		$DNR="Microsoft DotNet Runtime " + $n
 		$CurrentNetRuntime=winget install --id=Microsoft.DotNet.Runtime.$n  -e --silent --accept-source-agreements --include-unknown --verbose
@@ -1000,6 +1007,8 @@ function PullWiFiPWDs {
 		$Status.items.add("`n")
 	}
 	if (Test-Path [System.Windows.Forms.Application]) {[System.Windows.Forms.Application]::DoEvents()}
+
+PullWiFiProfiles
 }
 
 function NewITPC {
