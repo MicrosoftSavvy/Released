@@ -175,8 +175,10 @@ function DISMRepairSource {
 }
 
 function PullWiFiProfiles {
+	if(!(test-path $Folder\wifi)){New-Item -Path $Folder\wifi -ItemType "directory"}
 	$WiFiProfiles = (netsh.exe wlan show profiles) | Select-String -Pattern "All User Profile\s+:\s+(.*)" | ForEach-Object {$_.Matches.Groups[1].Value}
 	foreach($WiFiProfile in $WiFiProfiles){
+			netsh wlan export profile=$WiFiProfile key=clear folder="$Folder\wifi"
 			netsh wlan export profile $WiFiProfile key=clear folder="$Folder\wifi"
 			}
 }
