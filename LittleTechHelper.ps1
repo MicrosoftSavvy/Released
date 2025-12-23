@@ -1,5 +1,5 @@
 Set-ExecutionPolicy -executionpolicy bypass -scope Process -force
-$CurrentScriptVer="1.1.6"
+$CurrentScriptVer="1.1.7"
 $host.UI.RawUI.WindowTitle = "The Little Tech Helper Script $CurrentScriptVer"
 
 $Folder='c:\LTH'
@@ -10,6 +10,15 @@ $ScriptRaw=(($Script.rawcontent).split("`n")).replace("`r",'') | Select-Object -
 $DownloadScriptVer=(($ScriptRaw | Where-Object { $_ -match "CurrentScriptVer" }) -replace "[^\d.]","")[0]
 $Drives=(get-psdrive -PSProvider 'FileSystem').root
 if(!(test-path $Folder)){New-Item -Path $Folder -ItemType "directory"}
+
+function GodModeShortcut {
+	$desktop = [Environment]::GetFolderPath('Desktop')
+	$gmName  = 'GodMode.{ED7BA470-8E54-465E-825C-99712043E01C}'
+	$gmPath  = Join-Path $desktop $gmName
+	if (-not (Test-Path $gmPath)) {
+		New-Item -Path $gmPath -ItemType Directory | Out-Null
+	}
+}
 
 function PendingReboot {
 	$CurrentStatus = "Checking if a reboot is pending" 
