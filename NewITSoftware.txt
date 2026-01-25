@@ -79,6 +79,7 @@ Nirsoft.WhoisThisDomain
 Nirsoft.WifiInfoView
 NirSoft.WirelessNetworkWatcher
 GitHubDesktop
+GitHub.GitHubDesktop
 WiresharkFoundation.Wireshark
 Microsoft .NET SDK 8.0
 
@@ -87,5 +88,6 @@ Microsoft .NET SDK 8.0
 *news*
 norton*
 mcafee
+
 
 
