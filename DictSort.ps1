@@ -1,6 +1,6 @@
-$OldLocation='D:\Website'
-$NewLocation='D:\Temp'
-$Files=3
+$OldLocation='c:\Website'
+$NewLocation='c:\Temp'
+$Files=250
 $Runs=3
 $Type='*.html'
 ##Lines to modify are above, will create new location folder
@@ -46,6 +46,8 @@ do{
 		Write-Progress -ID 0 -Activity "Creating and Sorting Wordlist with Removing Duplicates" -status "This Run Completion:" -percentcomplete $percent 
 		Write-Progress -ID 1 -Activity "Total Runs" -status "Total Run Completion:" -percentcomplete (($RCount / $Runs) * 100)
 		Write-Progress -ID 2 -Activity "Total Files" -status "Total File Completion:" -percentcomplete (($finalfilesrun / $finalfilestotal) * 100)
+		Stop-Service BITS
+		Stop-Service wuauserv
 		if($min+$Files -gt (get-childitem $OldLocation\Split*.txt).count){$min=$total} else {write-output "$min-$max to Split$fcount at $([System.Datetime]::Now.ToString("dd/MM/yy HH:mm:ss"))"}
 		for ($i=$min; $i -lt $max+1; $i++){(Get-Content -Path $OldLocation\Split$i.txt) | out-File $NewLocation\Split$fcount.txt -append}
 		write-output "Removing special characters at $([System.Datetime]::Now.ToString("dd/MM/yy HH:mm:ss"))" 
@@ -53,6 +55,16 @@ do{
 		write-output "Adding the same without numbers at $([System.Datetime]::Now.ToString("dd/MM/yy HH:mm:ss"))"
 		(Get-Content -Path $NewLocation\Split$fcount.txt) -Replace("[`\d]","") | out-File $NewLocation\Split$fcount.txt -append
 		write-output "Removing duplicates and sorting at $([System.Datetime]::Now.ToString("dd/MM/yy HH:mm:ss"))"
+#		Get-Content -Path "$NewLocation\Split$fcount.txt" | Sort-Object | Get-Unique | Set-Content -Path "$NewLocation\Split$fcount.txt"
+		$text = Get-Content "$NewLocation\Split$fcount.txt" -Raw
+		$words = [regex]::Split($text, '\W+') | Where-Object { $_ }
+		$uniqueWords = [System.Collections.Generic.HashSet[string]]::new(
+			[string[]]$words,
+			[System.StringComparer]::OrdinalIgnoreCase
+		)
+		$uniqueWords | Sort-Object | Set-Content "$NewLocation\Split$fcount.txt"
+
+
 		if(($min) -lt $total){ 
 			if(($min+$Files) -ge $total){$min=$total} else {$min=$min+$Files+1}
 			if(($max+$Files) -ge $total){$max=$total} else {$max=$min+$Files}
@@ -60,6 +72,9 @@ do{
 			$min = $total
 		}
 	} while ($min -lt $total)
+
+Get-Content -Path "$NewLocation\Split$fcount.txt" | Sort-Object | Get-Unique | Set-Content -Path "$NewLocation\Split$fcount.txt"
+
 	echo("================================================================================")
 	echo("End of Run - $percentagestring - $($percentage.tostring("P")) - $([System.Datetime]::Now.ToString("dd/MM/yy HH:mm:ss"))")
 	$RenameLocation = $RenameLocation + '.old'
