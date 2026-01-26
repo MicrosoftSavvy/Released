@@ -16,8 +16,8 @@ $originaltotal=(get-childitem $OldLocation\Split*.txt).count
 $tempruns=$Runs
 $tempfiles=$Files
 $finalfolderfiles=[math]::ceiling($originaltotal / [math]::pow($tempFiles, $Runs))
-New-Item -Path HKLM:\Software\Policies\Microsoft\Windows\WindowsUpdate\AU
-New-ItemProperty -Path HKLM:\Software\Policies\Microsoft\Windows\WindowsUpdate\AU -Name "NoAutoRebootWithLoggedOnUsers" -Value 1 -PropertyType DWORD -force
+New-Item -Path HKLM:\Software\Policies\Microsoft\Windows\WindowsUpdate\AU | Out-Null
+New-ItemProperty -Path HKLM:\Software\Policies\Microsoft\Windows\WindowsUpdate\AU -Name "NoAutoRebootWithLoggedOnUsers" -Value 1 -PropertyType DWORD -force | Out-Null
 #Set-ItemProperty -Path HKLM:\Software\Policies\Microsoft\Windows\WindowsUpdate\AU -Name "NoAutoRebootWithLoggedOnUsers" -Value 1 DWORD
 Restart-Service wuauserv | Out-Null
 do{
