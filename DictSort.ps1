@@ -8,6 +8,7 @@ $RenameLocation = $OldLocation
 $RCount=0
 $LogFileLocation=(split-path $NewLocation -parent)
 $LogFile="$LogFileLocation\WordListLog.log"
+New-Item -Path (split-path $NewLocation) -Name (split-path $NewLocation -leaf) -ItemType "directory"
 Start-Transcript -Path $LogFile
 write-output "Renaming $Type to Split*.txt at $([System.Datetime]::Now.ToString("dd/MM/yy HH:mm:ss"))"
 Get-ChildItem -Path "$OldLocation" -Recurse -Include $Type | ForEach-Object -Begin { $Counter = 1 } -Process { Rename-Item $_ -NewName "Split$Counter.txt"; $Counter++}
@@ -15,8 +16,10 @@ $originaltotal=(get-childitem $OldLocation\Split*.txt).count
 $tempruns=$Runs
 $tempfiles=$Files
 $finalfolderfiles=[math]::ceiling($originaltotal / [math]::pow($tempFiles, $Runs))
-Set-ItemProperty -Path HKLM:\Software\Policies\Microsoft\Windows\WindowsUpdate\AU -Name "NoAutoRebootWithLoggedOnUsers" -Value 1
-Restart-Service wuauserv
+New-Item -Path HKLM:\Software\Policies\Microsoft\Windows\WindowsUpdate\AU
+New-ItemProperty -Path HKLM:\Software\Policies\Microsoft\Windows\WindowsUpdate\AU -Name "NoAutoRebootWithLoggedOnUsers" -Value 1 -PropertyType DWORD -force
+#Set-ItemProperty -Path HKLM:\Software\Policies\Microsoft\Windows\WindowsUpdate\AU -Name "NoAutoRebootWithLoggedOnUsers" -Value 1 DWORD
+Restart-Service wuauserv | Out-Null
 do{
 	$finalfiles=[math]::ceiling($originaltotal / [math]::pow($tempFiles, $tempruns))
 	$finalfilestotal=$finalfilestotal+$finalfiles
