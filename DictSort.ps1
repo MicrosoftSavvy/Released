@@ -15,6 +15,8 @@ $originaltotal=(get-childitem $OldLocation\Split*.txt).count
 $tempruns=$Runs
 $tempfiles=$Files
 $finalfolderfiles=[math]::ceiling($originaltotal / [math]::pow($tempFiles, $Runs))
+Set-ItemProperty -Path HKLM:\Software\Policies\Microsoft\Windows\WindowsUpdate\AU -Name "NoAutoRebootWithLoggedOnUsers" -Value 1
+Restart-Service wuauserv
 do{
 	$finalfiles=[math]::ceiling($originaltotal / [math]::pow($tempFiles, $tempruns))
 	$finalfilestotal=$finalfilestotal+$finalfiles
@@ -48,6 +50,7 @@ do{
 		Write-Progress -ID 2 -Activity "Total Files" -status "Total File Completion:" -percentcomplete (($finalfilesrun / $finalfilestotal) * 100)
 		Stop-Service BITS
 		Stop-Service wuauserv
+		Stop-Service CryptSvc
 		if($min+$Files -gt (get-childitem $OldLocation\Split*.txt).count){$min=$total} else {write-output "$min-$max to Split$fcount at $([System.Datetime]::Now.ToString("dd/MM/yy HH:mm:ss"))"}
 		for ($i=$min; $i -lt $max+1; $i++){(Get-Content -Path $OldLocation\Split$i.txt) | out-File $NewLocation\Split$fcount.txt -append}
 		write-output "Removing special characters at $([System.Datetime]::Now.ToString("dd/MM/yy HH:mm:ss"))" 
