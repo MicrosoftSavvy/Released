@@ -48,9 +48,9 @@ do{
 		Write-Progress -ID 0 -Activity "Creating and Sorting Wordlist with Removing Duplicates" -status "This Run Completion:" -percentcomplete $percent 
 		Write-Progress -ID 1 -Activity "Total Runs" -status "Total Run Completion:" -percentcomplete (($RCount / $Runs) * 100)
 		Write-Progress -ID 2 -Activity "Total Files" -status "Total File Completion:" -percentcomplete (($finalfilesrun / $finalfilestotal) * 100)
-		Stop-Service BITS
-		Stop-Service wuauserv
-		Stop-Service CryptSvc
+		Stop-Service BITS | out-null
+		Stop-Service wuauserv | out-null
+		Stop-Service CryptSvc | out-null
 		if($min+$Files -gt (get-childitem $OldLocation\Split*.txt).count){$min=$total} else {write-output "$min-$max to Split$fcount at $([System.Datetime]::Now.ToString("dd/MM/yy HH:mm:ss"))"}
 		for ($i=$min; $i -lt $max+1; $i++){(Get-Content -Path $OldLocation\Split$i.txt) | out-File $NewLocation\Split$fcount.txt -append}
 		write-output "Removing special characters at $([System.Datetime]::Now.ToString("dd/MM/yy HH:mm:ss"))" 
