@@ -43,17 +43,27 @@ do{
 		$percentage=($min / $total) # .tostring("P")
 		$percent=$percentage * 100
 		$percentagestring=$percentage.tostring("P")
+		$pause = (Get-Date).AddDays(35)
+		$pause = $pause.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+		$pause_start = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+		
 		echo("________________________________________________________________________________")
 		echo("Current = Run-$RCount/$Runs, Min-$min, Max-$max, File Count-$sfcount, Current-$fcount, Total Run-$runfiles")
 		echo("File = Source-$OldLocation, Destination-$NewLocation, Total To Sort-$total") 
 		echo("Total = Total Files-$finalfilesrun, Total Files-$finalfilestotal, Final Folder Files-$finalfolderfiles")
 		echo("Run - $percentagestring, Total - $($($finalfilesrun / $finalfilestotal).tostring("P")) - $([System.Datetime]::Now.ToString("dd/MM/yy HH:mm:ss"))")
+		echo("Disabling and postponing Windows Update until $pause")
+		
 		Write-Progress -ID 0 -Activity "Creating and Sorting Wordlist with Removing Duplicates" -status "This Run Completion:" -percentcomplete $percent 
 		Write-Progress -ID 1 -Activity "Total Runs" -status "Total Run Completion:" -percentcomplete (($RCount / $Runs) * 100)
 		Write-Progress -ID 2 -Activity "Total Files" -status "Total File Completion:" -percentcomplete (($finalfilesrun / $finalfilestotal) * 100)
+		
 		Stop-Service BITS | out-null
 		Stop-Service wuauserv | out-null
 		Stop-Service CryptSvc | out-null
+		Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings' -Name 'PauseUpdatesExpiryTime' -Value $pause
+		Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings' -Name 'PauseUpdatesStartTime' -Value $pause_start
+
 		if($min+$Files -gt (get-childitem $OldLocation\Split*.txt).count){$min=$total} else {write-output "$min-$max to Split$fcount at $([System.Datetime]::Now.ToString("dd/MM/yy HH:mm:ss"))"}
 		for ($i=$min; $i -lt $max+1; $i++){(Get-Content -Path $OldLocation\Split$i.txt) | out-File $NewLocation\Split$fcount.txt -append}
 		write-output "Removing special characters at $([System.Datetime]::Now.ToString("dd/MM/yy HH:mm:ss"))" 
